@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.config;
+package fptu.fcharity.config.authentication;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

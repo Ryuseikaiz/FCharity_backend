@@ -1,6 +1,6 @@
-package fptu.fcharity.authentication.repository;
+package fptu.fcharity.repository;
 
-import fptu.fcharity.authentication.entity.User;
+import fptu.fcharity.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

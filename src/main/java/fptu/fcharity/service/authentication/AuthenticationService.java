@@ -1,11 +1,12 @@
-package fptu.fcharity.authentication.service;
+package fptu.fcharity.service.authentication;
 
 
-import fptu.fcharity.authentication.dto.LoginUserDto;
-import fptu.fcharity.authentication.dto.RegisterUserDto;
-import fptu.fcharity.authentication.dto.VerifyUserDto;
-import fptu.fcharity.authentication.entity.User;
-import fptu.fcharity.authentication.repository.UserRepository;
+import fptu.fcharity.dto.authentication.LoginUserDto;
+import fptu.fcharity.dto.authentication.RegisterUserDto;
+import fptu.fcharity.dto.authentication.VerifyUserDto;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.service.helpers.EmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

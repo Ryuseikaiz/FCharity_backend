@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.entity;
+package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
