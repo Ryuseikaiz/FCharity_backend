@@ -14,26 +14,49 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Configuration
 public class ApplicationConfiguration {
     private final UserRepository userRepository;
+
     public ApplicationConfiguration(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Bean for UserDetailsService, used by Spring Security for authentication.
+     *
+     * @return the UserDetailsService that loads user details by email
+     */
     @Bean
     UserDetailsService userDetailsService() {
         return username -> userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }
 
+    /**
+     * Bean for BCryptPasswordEncoder, used to encode passwords.
+     *
+     * @return the BCryptPasswordEncoder bean
+     */
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Bean for AuthenticationManager, used for managing authentication.
+     *
+     * @param config the AuthenticationConfiguration used to build the manager
+     * @return the AuthenticationManager bean
+     * @throws Exception in case of any configuration issues
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Bean for AuthenticationProvider, used to authenticate users using DaoAuthenticationProvider.
+     *
+     * @return the AuthenticationProvider bean
+     */
     @Bean
     AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

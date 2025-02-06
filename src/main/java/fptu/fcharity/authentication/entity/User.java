@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -17,7 +18,7 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @Column(name = "user_id", columnDefinition = "CHAR(36)")
-    private String userId;
+    private UUID userId;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
@@ -37,8 +38,9 @@ public class User implements UserDetails {
     @Column
     private String avatar;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
-    private String userRole;
+    private UserRole userRole;
 
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
@@ -47,14 +49,15 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-    @Column(name = "verification_code")
+    @Transient
     private String verificationCode;
 
-    @Column(name = "verification_code_expires_at")
+    @Transient
     private LocalDateTime verificationCodeExpiresAt;
 
     // Constructor for creating an unverified user
-    public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, String userRole, LocalDateTime createdDate, UserStatus userStatus) {
+    public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, UserRole userRole, LocalDateTime createdDate, UserStatus userStatus) {
+        this.userId = UUID.randomUUID();
         this.fullName = fullName;
         this.email = email;
         this.password = password;
@@ -68,15 +71,18 @@ public class User implements UserDetails {
 
     // Constructor for creating a user with username, email, and password
     public User(String username, String email, String password) {
+        this.userId = UUID.randomUUID();
         this.fullName = username;
         this.email = email;
         this.password = password;
         this.createdDate = LocalDateTime.now();
         this.userStatus = UserStatus.Unverified;
+        this.userRole = UserRole.User;
     }
 
     // Default constructor
     public User() {
+        this.userId = UUID.randomUUID();
     }
 
     @Override
@@ -111,6 +117,15 @@ public class User implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public enum UserRole {
+        Admin, User
     }
 
     public enum UserStatus {
