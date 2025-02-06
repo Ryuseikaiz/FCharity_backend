@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -16,8 +17,8 @@ import java.util.List;
 @Setter
 public class User implements UserDetails {
     @Id
-    @Column(name = "user_id", columnDefinition = "CHAR(36)")
-    private String userId;
+    @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER")
+    private UUID userId;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
@@ -38,7 +39,7 @@ public class User implements UserDetails {
     private String avatar;
 
     @Column(name = "user_role", nullable = false)
-    private String userRole;
+    private UserRole userRole;
 
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
@@ -61,7 +62,7 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.avatar = avatar;
-        this.userRole = userRole;
+        this.userRole = UserRole.USER;
         this.createdDate = createdDate;
         this.userStatus = userStatus;
     }
@@ -73,6 +74,7 @@ public class User implements UserDetails {
         this.password = password;
         this.createdDate = LocalDateTime.now();
         this.userStatus = UserStatus.Unverified;
+        this.userRole = UserRole.USER;
     }
 
     // Default constructor
@@ -82,6 +84,11 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
@@ -117,5 +124,9 @@ public class User implements UserDetails {
         Unverified,
         Verified,
         Banned
+    }
+    public enum UserRole {
+        ADMIN,
+        USER,
     }
 }

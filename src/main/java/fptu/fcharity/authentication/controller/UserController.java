@@ -26,9 +26,12 @@ public class UserController {
         return ResponseEntity.ok(currentUser);
     }
 
-    @GetMapping("/")
+    @GetMapping("/all-user")
     public ResponseEntity<List<User>> allUsers() {
-        List <User> users = userService.allUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.allUsers());
+    }
+    @GetMapping
+    public ResponseEntity<String> hello() {
+        return ResponseEntity.ok("hello it's me");
     }
 }
