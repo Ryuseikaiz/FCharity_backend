@@ -1,12 +1,12 @@
-package fptu.fcharity.authentication.controller;
+package fptu.fcharity.controller.authentication;
 
-import fptu.fcharity.authentication.dto.LoginUserDto;
-import fptu.fcharity.authentication.dto.RegisterUserDto;
-import fptu.fcharity.authentication.dto.VerifyUserDto;
-import fptu.fcharity.authentication.entity.User;
-import fptu.fcharity.authentication.service.AuthenticationService;
-import fptu.fcharity.authentication.service.JwtService;
-import fptu.fcharity.authentication.response.LoginResponse;
+import fptu.fcharity.dto.authentication.LoginUserDto;
+import fptu.fcharity.dto.authentication.RegisterUserDto;
+import fptu.fcharity.dto.authentication.VerifyUserDto;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.service.authentication.AuthenticationService;
+import fptu.fcharity.service.authentication.JwtService;
+import fptu.fcharity.response.authentication.LoginResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

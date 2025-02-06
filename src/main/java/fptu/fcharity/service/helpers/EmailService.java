@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.service;
+package fptu.fcharity.service.helpers;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

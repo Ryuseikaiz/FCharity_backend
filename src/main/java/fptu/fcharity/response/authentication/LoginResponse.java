@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.response;
+package fptu.fcharity.response.authentication;
 
 import lombok.Getter;
 import lombok.Setter;

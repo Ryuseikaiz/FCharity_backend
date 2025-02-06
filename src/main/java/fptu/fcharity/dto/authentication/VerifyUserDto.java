@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.dto;
+package fptu.fcharity.dto.authentication;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
-package fptu.fcharity.authentication.controller;
+package fptu.fcharity.controller;
 
-import fptu.fcharity.authentication.service.UserService;
-import fptu.fcharity.authentication.entity.User;
+import fptu.fcharity.service.UserService;
+import fptu.fcharity.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

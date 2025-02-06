@@ -1,4 +1,4 @@
-package fptu.fcharity.authentication.service;
+package fptu.fcharity.service.authentication;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

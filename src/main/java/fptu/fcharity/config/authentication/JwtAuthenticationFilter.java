@@ -1,6 +1,6 @@
-package fptu.fcharity.authentication.config;
+package fptu.fcharity.config.authentication;
 
-import fptu.fcharity.authentication.service.JwtService;
+import fptu.fcharity.service.authentication.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

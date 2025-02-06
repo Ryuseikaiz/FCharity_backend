@@ -1,6 +1,6 @@
-package fptu.fcharity.authentication.config;
+package fptu.fcharity.config;
 
-import fptu.fcharity.authentication.repository.UserRepository;
+import fptu.fcharity.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,7 +1,7 @@
-package fptu.fcharity.authentication.service;
+package fptu.fcharity.service;
 
-import fptu.fcharity.authentication.entity.User;
-import fptu.fcharity.authentication.repository.UserRepository;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
