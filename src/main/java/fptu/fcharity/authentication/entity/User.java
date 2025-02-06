@@ -49,10 +49,10 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
-    @Transient
+    @Column(name = "verification_code", nullable = true)
     private String verificationCode;
 
-    @Transient
+    @Column(name = "verification_code_expires_at", nullable = true)
     private LocalDateTime verificationCodeExpiresAt;
 
     // Constructor for creating an unverified user
