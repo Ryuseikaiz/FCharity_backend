@@ -1,13 +1,12 @@
 package fptu.fcharity.controller;
 
+import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.service.UserService;
 import fptu.fcharity.entity.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +32,9 @@ public class UserController {
     @GetMapping
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok("hello it's me");
+    }
+    @PostMapping("/change-password")
+    public ResponseEntity<User> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+        return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
 }
