@@ -17,7 +17,7 @@ import java.util.UUID;
 @Setter
 public class User implements UserDetails {
     @Id
-    @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID userId;
 
     @Column(name = "full_name", nullable = false)
@@ -38,8 +38,10 @@ public class User implements UserDetails {
     @Column
     private String avatar;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
     private UserRole userRole;
+
 
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
@@ -54,6 +56,13 @@ public class User implements UserDetails {
     @Column(name = "verification_code_expires_at")
     private LocalDateTime verificationCodeExpiresAt;
 
+    @PrePersist
+    public void generateUUID() {
+        if (userId == null) {
+            userId = UUID.randomUUID();
+        }
+    }
+
     // Constructor for creating an unverified user
     public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, String userRole, LocalDateTime createdDate, UserStatus userStatus) {
         this.fullName = fullName;
@@ -62,7 +71,7 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.avatar = avatar;
-        this.userRole = UserRole.USER;
+        this.userRole = UserRole.User;
         this.createdDate = createdDate;
         this.userStatus = userStatus;
     }
@@ -74,7 +83,7 @@ public class User implements UserDetails {
         this.password = password;
         this.createdDate = LocalDateTime.now();
         this.userStatus = UserStatus.Unverified;
-        this.userRole = UserRole.USER;
+        this.userRole = UserRole.User;
     }
 
     // Default constructor
@@ -126,7 +135,7 @@ public class User implements UserDetails {
         Banned
     }
     public enum UserRole {
-        ADMIN,
-        USER,
+        Admin,
+        User,
     }
 }

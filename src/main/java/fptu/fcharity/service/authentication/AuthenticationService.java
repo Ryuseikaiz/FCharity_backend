@@ -47,7 +47,6 @@ public class AuthenticationService {
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
-        user.setUserId(UUID.randomUUID());
         userRepository.save(user);
         sendVerificationEmail(user,"Verify your email address");
         return userRepository.findByEmail(user.getEmail()).get();
