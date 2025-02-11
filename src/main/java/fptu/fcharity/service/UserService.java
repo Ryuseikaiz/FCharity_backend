@@ -2,6 +2,7 @@ package fptu.fcharity.service;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.exception.ApiRequestException;
 import fptu.fcharity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,12 +32,12 @@ public class UserService {
     }
     public User changePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepository.findByEmail(changePasswordDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApiRequestException("User not found"));
         if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPassword())) {
-            throw new RuntimeException("Old password is incorrect");
+            throw new ApiRequestException("Old password is incorrect");
         }
         if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword())) {
-            throw new RuntimeException("New password must be different from the old password");
+            throw new ApiRequestException("New password must be different from the old password");
         }
         updatePassword(user.getEmail(),passwordEncoder.encode(changePasswordDto.getNewPassword()));
         return user;
