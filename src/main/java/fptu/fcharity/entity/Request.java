@@ -13,6 +13,7 @@ import java.util.UUID;
 @Setter
 public class Request {
     @Id
+    @GeneratedValue(generator = "UUID")
     @Column(name="request_id", unique = true, updatable = false, nullable = false)
     private UUID requestId;
 

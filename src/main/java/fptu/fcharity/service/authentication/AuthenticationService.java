@@ -8,7 +8,7 @@ import fptu.fcharity.dto.authentication.VerifyUserDto;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.UserRepository;
 import fptu.fcharity.service.UserService;
-import fptu.fcharity.service.helpers.EmailService;
+import fptu.fcharity.service.helper.EmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,8 +46,8 @@ public class AuthenticationService {
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setEnabled(true);
-        user.setUserId(UUID.randomUUID());
+        user.setEnabled(false);
+//        user.setUserId(UUID.randomUUID());
         userRepository.save(user);
         sendVerificationEmail(user,"Verify your email address");
         return userRepository.findByEmail(user.getEmail()).get();
@@ -86,7 +86,6 @@ public class AuthenticationService {
                         input.getPassword()
                 )
         );
-        System.out.println("authenticated user: " + user.getEmail());
 
         return user;
     }

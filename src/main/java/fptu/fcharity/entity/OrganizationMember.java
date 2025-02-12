@@ -14,6 +14,7 @@ import java.util.UUID;
 public class OrganizationMember {
 
     @Id
+    @GeneratedValue(generator = "UUID")
     @Column(name="membership_id", unique = true, updatable = false, nullable = false)
     private UUID membershipId;
 

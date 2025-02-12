@@ -34,7 +34,7 @@ public class UserController {
         return ResponseEntity.ok("hello it's me");
     }
     @PostMapping("/change-password")
-    public ResponseEntity<User> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
-        return ResponseEntity.ok(userService.changePassword(changePasswordDto));
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+            return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
 }
