@@ -46,7 +46,7 @@ public class AuthenticationService {
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setEnabled(false);
+        user.setEnabled(true);
         user.setUserId(UUID.randomUUID());
         userRepository.save(user);
         sendVerificationEmail(user,"Verify your email address");
@@ -86,6 +86,7 @@ public class AuthenticationService {
                         input.getPassword()
                 )
         );
+        System.out.println("authenticated user: " + user.getEmail());
 
         return user;
     }

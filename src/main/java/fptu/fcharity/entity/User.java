@@ -17,34 +17,34 @@ import java.util.UUID;
 @Setter
 public class User implements UserDetails {
     @Id
-    @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER")
+    @Column(name = "user_id", unique = true, updatable = false, nullable = false)
     private UUID userId;
 
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password",nullable = false)
     private String password;
 
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
-    @Column
+    @Column(name = "address")
     private String address;
 
-    @Column
+    @Column(name="avatar")
     private String avatar;
 
-    @Column(name = "user_role", nullable = false)
+    @Column(name = "user_role", nullable = true)
     private UserRole userRole;
 
-    @Column(name = "created_date", nullable = false)
+    @Column(name = "created_date", nullable = true)
     private LocalDateTime createdDate;
 
-    @Column(name = "user_status", nullable = false)
+    @Column(name = "user_status", nullable = true)
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
