@@ -65,7 +65,7 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.avatar = avatar;
-        this.userRole = UserRole.USER;
+        this.userRole = UserRole.User;
         this.createdDate = createdDate;
         this.userStatus = userStatus;
     }
@@ -77,7 +77,7 @@ public class User implements UserDetails {
         this.password = password;
         this.createdDate = LocalDateTime.now();
         this.userStatus = UserStatus.Unverified;
-        this.userRole = UserRole.USER;
+        this.userRole = UserRole.User;
     }
 
     // Default constructor
@@ -129,7 +129,7 @@ public class User implements UserDetails {
         Banned
     }
     public enum UserRole {
-        ADMIN,
-        USER,
+        Admin,
+        User,
     }
 }
