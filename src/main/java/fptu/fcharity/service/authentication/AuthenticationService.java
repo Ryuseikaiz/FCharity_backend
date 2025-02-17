@@ -16,8 +16,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -202,5 +204,35 @@ public class AuthenticationService {
             throw new ApiRequestException(e.getMessage());
         }
         return u;
+    }
+
+    public User googleLogin(String token) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + token;
+        Map<String, String> userInfo = restTemplate.getForObject(url, Map.class);
+
+        if (userInfo == null || userInfo.get("email") == null) {
+            throw new ApiRequestException("Invalid Google token");
+        }
+
+        String email = userInfo.get("email");
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        User user;
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setEmail(email);
+            user.setFullName(userInfo.get("name"));
+            user.setAvatar(userInfo.get("picture"));
+            user.setEnabled(true);
+            user.setCreatedDate(LocalDateTime.now());
+            user.setUserRole(User.UserRole.User);
+            user.setUserStatus(User.UserStatus.Verified);
+            userRepository.save(user);
+        }
+
+        return user;
     }
 }
