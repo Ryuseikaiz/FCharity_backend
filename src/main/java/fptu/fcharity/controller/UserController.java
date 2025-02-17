@@ -1,6 +1,8 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
+import fptu.fcharity.mapper.UserResponseMapper;
+import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.service.UserService;
 import fptu.fcharity.entity.User;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +16,17 @@ import java.util.List;
 @RestController
 public class UserController {
     private final UserService userService;
-    public UserController(UserService userService) {
+    private final UserResponseMapper userResponseMapper;
+    public UserController(UserService userService,UserResponseMapper userResponseMapper) {
         this.userService = userService;
+        this.userResponseMapper = userResponseMapper;
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<User> authenticatedUser() {
+    @GetMapping("/current-user")
+    public ResponseEntity<?> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(currentUser);
+        return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
     }
 
     @GetMapping("/all-user")

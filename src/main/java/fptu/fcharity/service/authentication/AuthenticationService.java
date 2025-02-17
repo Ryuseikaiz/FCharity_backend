@@ -96,7 +96,7 @@ public class AuthenticationService {
 
     public boolean verifyEmail(User user, String verificationCode) {
         if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Verification code has expired");
+            throw new ApiRequestException("Verification code has expired");
         }
         if (user.getVerificationCode().equals(verificationCode)){
             user.setVerificationCode(null);
