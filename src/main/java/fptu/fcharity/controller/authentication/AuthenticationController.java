@@ -7,9 +7,10 @@ import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-
 import java.sql.SQLException;
+import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
@@ -65,5 +66,14 @@ public class AuthenticationController {
             authenticationService.resendVerificationCode(resendOTPDto.getEmail());
             return ResponseEntity.ok(true);
 
+    }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        User user = authenticationService.googleLogin(token);
+        String jwtToken = jwtService.generateToken(user);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        return ResponseEntity.ok(loginResponse);
     }
 }
