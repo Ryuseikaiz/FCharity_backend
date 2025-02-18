@@ -123,6 +123,7 @@ CREATE TABLE requests (
     is_emergency BIT,
 	category_id UNIQUEIDENTIFIER,
 	tag_id UNIQUEIDENTIFIER,
+	status NVARCHAR(50),
 	FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
