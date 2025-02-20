@@ -64,7 +64,7 @@ public class SecurityConfiguration {
         configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả headers
         configuration.setAllowCredentials(true); // Cho phép gửi cookie/token (nếu cần)
 
-        configuration.setExposedHeaders(List.of("Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Authorization"));
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

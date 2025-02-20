@@ -2,9 +2,9 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.mapper.UserResponseMapper;
-import fptu.fcharity.response.authentication.UserResponse;
-import fptu.fcharity.service.UserService;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.service.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +17,9 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserResponseMapper userResponseMapper;
-    public UserController(UserService userService,UserResponseMapper userResponseMapper) {
+
+    @Autowired
+    public UserController(UserService userService, UserResponseMapper userResponseMapper) {
         this.userService = userService;
         this.userResponseMapper = userResponseMapper;
     }
@@ -31,7 +33,7 @@ public class UserController {
 
     @GetMapping("/all-user")
     public ResponseEntity<List<User>> allUsers() {
-        return ResponseEntity.ok(userService.allUsers());
+        return ResponseEntity.ok(userService.findAllUsers());
     }
     @GetMapping
     public ResponseEntity<String> hello() {
@@ -39,6 +41,6 @@ public class UserController {
     }
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
-            return ResponseEntity.ok(userService.changePassword(changePasswordDto));
+            return ResponseEntity.ok(userService.updatePassword(changePasswordDto.getEmail(), changePasswordDto.getNewPassword(), changePasswordDto.getOldPassword()));
     }
 }

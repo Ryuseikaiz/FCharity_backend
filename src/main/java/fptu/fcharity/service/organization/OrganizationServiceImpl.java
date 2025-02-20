@@ -1,4 +1,4 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.organization;
 
 import fptu.fcharity.dao.OrganizationDAO;
 import fptu.fcharity.entity.Organization;

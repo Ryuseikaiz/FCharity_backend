@@ -1,7 +1,7 @@
 package fptu.fcharity.rest;
 
 import fptu.fcharity.entity.OrganizationMember;
-import fptu.fcharity.service.OrganizationMemberService;
+import fptu.fcharity.service.organization.OrganizationMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.request;
 
 import fptu.fcharity.dao.RequestDAO;
 import fptu.fcharity.entity.Request;

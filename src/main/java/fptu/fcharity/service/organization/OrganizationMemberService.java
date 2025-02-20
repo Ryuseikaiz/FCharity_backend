@@ -1,4 +1,4 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.organization;
 import fptu.fcharity.entity.OrganizationMember;
 import java.util.List;
 import java.util.UUID;

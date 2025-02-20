@@ -6,9 +6,10 @@ import fptu.fcharity.dto.authentication.LoginUserDto;
 import fptu.fcharity.dto.authentication.RegisterUserDto;
 import fptu.fcharity.dto.authentication.VerifyUserDto;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.exception.ApiRequestException;
 import fptu.fcharity.repository.UserRepository;
-import fptu.fcharity.service.UserService;
 import fptu.fcharity.service.helper.EmailService;
+import fptu.fcharity.service.user.UserService;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 public class AuthenticationService {
@@ -197,7 +197,7 @@ public class AuthenticationService {
             if (passwordEncoder.matches(resetPasswordDto.getNewPassword(), u.getPassword())) {
                 throw new RuntimeException("New password must be different from the old password");
             }
-            userService.updatePassword(u.getEmail(), passwordEncoder.encode(newPassword));
+            userService.updatePassword(u.getEmail(), newPassword, u.getPassword());
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }

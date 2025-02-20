@@ -1,7 +1,7 @@
 package fptu.fcharity.rest;
 
 import fptu.fcharity.entity.Request;
-import fptu.fcharity.service.RequestService;
+import fptu.fcharity.service.request.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
