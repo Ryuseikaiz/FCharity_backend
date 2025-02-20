@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name="request")
+@Table(name = "requests")
 @Getter
 @Setter
 public class Request {
@@ -17,46 +17,52 @@ public class Request {
     @Column(name="request_id", unique = true, updatable = false, nullable = false)
     private UUID requestId;
 
-    @Column(name="user_id")
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name="title")
-    private String requestTitle;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(name="content")
+    @Column(nullable = false)
     private String content;
 
-    @Column(name="creation_date")
-    private Date creationDate;
+    @Column(name = "creation_date", nullable = false)
+    private LocalDateTime creationDate;
 
-    @Column(name="phone")
+    @Column(length = 15)
     private String phone;
 
-    @Column(name="email")
+    @Column(nullable = false)
     private String email;
 
-    @Column(name="location")
+    @Column(nullable = false)
     private String location;
 
     @Column(name="attachment")
     private String attachment;
 
-    @Column(name="is_emergency")
+    @Column(name = "is_emergency", nullable = false)
     private boolean isEmergency;
 
-    @Column(name="category_id")
-    private UUID categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category categoryId;
 
-    @Column(name="tag_id")
-    private UUID tagId;
+    @ManyToOne
+    @JoinColumn(name = "tag_id", nullable = false)
+    private Tag tagId;
+
+    @Column(nullable = false)
+    private String status;
 
     public Request() {
     }
 
-    public Request(UUID requestId, UUID userId, String requestTitle, String content, Date creationDate, String phone, String email, String location, String attachment, boolean isEmergency, UUID categoryId, UUID tagId) {
+    public Request(UUID requestId, User user, String title, String content, LocalDateTime creationDate, String phone, String email, String location, String attachment, boolean isEmergency, Category categoryId, Tag tagId, String status) {
         this.requestId = requestId;
-        this.userId = userId;
-        this.requestTitle = requestTitle;
+        this.user = user;
+        this.title = title;
         this.content = content;
         this.creationDate = creationDate;
         this.phone = phone;
@@ -66,14 +72,15 @@ public class Request {
         this.isEmergency = isEmergency;
         this.categoryId = categoryId;
         this.tagId = tagId;
+        this.status = status;
     }
 
     @Override
     public String toString() {
         return "Request{" +
                 "requestId=" + requestId +
-                ", userId=" + userId +
-                ", requestTitle='" + requestTitle + '\'' +
+                ", user=" + user +
+                ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
                 ", creationDate=" + creationDate +
                 ", phone='" + phone + '\'' +
@@ -83,6 +90,7 @@ public class Request {
                 ", isEmergency=" + isEmergency +
                 ", categoryId=" + categoryId +
                 ", tagId=" + tagId +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

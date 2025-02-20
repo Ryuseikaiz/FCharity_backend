@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,72 +17,75 @@ public class Organization {
     @Column(name="organization_id", unique = true, updatable = false, nullable = false)
     private UUID organizationId;
 
-    @Column(name="organization_name")
-    private String name;
+    @Column(name = "organization_name", nullable = false)
+    private String organizationName;
 
-    @Column(name="email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name="phone_number")
+    @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
     @Column(name="address")
     private String address;
 
-    @Column(name="wallet_address")
-    private String walletAddress;
+    @ManyToOne
+    @JoinColumn(name = "wallet_address")
+    private Wallet walletAddress;
 
     @Column(name="organization_description")
     private String organizationDescription;
 
-    @Column(name="pictures")
-    private String picture;
+    @Column(name = "pictures")
+    private String pictures;
 
-    @Column(name="start_time")
-    private Date startTime;
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
 
-    @Column(name="shutdown_day")
-    private Date shutdownDay;
+    @Column(name = "shutdown_day")
+    private LocalDateTime shutdownDay;
 
     @Column(name="organization_status")
     private String organizationStatus;
 
-    @Column(name="ceo_id")
-    private UUID ceoId;
+    @ManyToOne
+    @JoinColumn(name = "ceo_id")
+    private User ceo;
 
     public Organization() {
     }
 
-    public Organization(UUID organizationId, String name, String email, String phoneNumber, String address, String walletAddress, String organizationDescription, String picture, Date startTime, Date shutdownDay, String organizationStatus, UUID ceoId) {
+    public Organization(UUID organizationId, String organizationName, String email, String phoneNumber, String address, Wallet walletAddress, String organizationDescription, String pictures, LocalDateTime startTime, LocalDateTime shutdownDay, String organizationStatus, User ceo) {
         this.organizationId = organizationId;
-        this.name = name;
+        this.organizationName = organizationName;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.walletAddress = walletAddress;
         this.organizationDescription = organizationDescription;
-        this.picture = picture;
+        this.pictures = pictures;
         this.startTime = startTime;
         this.shutdownDay = shutdownDay;
         this.organizationStatus = organizationStatus;
-        this.ceoId = ceoId;
+        this.ceo = ceo;
     }
 
     @Override
     public String toString() {
         return "Organization{" +
                 "organizationId=" + organizationId +
-                ", name='" + name + '\'' +
+                ", organizationName='" + organizationName + '\'' +
                 ", email='" + email + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", address='" + address + '\'' +
-                ", walletAddress='" + walletAddress + '\'' +
+                ", walletAddress=" + walletAddress +
                 ", organizationDescription='" + organizationDescription + '\'' +
-                ", picture='" + picture + '\'' +
+                ", pictures='" + pictures + '\'' +
                 ", startTime=" + startTime +
                 ", shutdownDay=" + shutdownDay +
                 ", organizationStatus='" + organizationStatus + '\'' +
-                ", ceoId='" + ceoId + '\'' +
+                ", ceo=" + ceo +
                 '}';
     }
 }
+

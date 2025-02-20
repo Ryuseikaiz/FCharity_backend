@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -18,25 +18,27 @@ public class OrganizationMember {
     @Column(name="membership_id", unique = true, updatable = false, nullable = false)
     private UUID membershipId;
 
-    @Column(name="user_id")
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name="organization_id")
-    private UUID organizationId;
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
-    @Column(name="join_date")
-    private Date joinDate;
+    @Column(name = "join_date", nullable = false)
+    private LocalDateTime joinDate;
 
-    @Column(name="leave_date")
-    private Date leaveDate;
+    @Column(name = "leave_date")
+    private LocalDateTime leaveDate;
 
     public OrganizationMember() {
     }
 
-    public OrganizationMember(UUID membershipId, UUID userId, UUID organizationId, Date joinDate, Date leaveDate) {
+    public OrganizationMember(UUID membershipId, User user, Organization organization, LocalDateTime joinDate, LocalDateTime leaveDate) {
         this.membershipId = membershipId;
-        this.userId = userId;
-        this.organizationId = organizationId;
+        this.user = user;
+        this.organization = organization;
         this.joinDate = joinDate;
         this.leaveDate = leaveDate;
     }

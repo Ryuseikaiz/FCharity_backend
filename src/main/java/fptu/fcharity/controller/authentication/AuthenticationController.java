@@ -1,16 +1,16 @@
 package fptu.fcharity.controller.authentication;
 
-import fptu.fcharity.dto.authentication.ResetPasswordDto;
-import fptu.fcharity.dto.authentication.LoginUserDto;
-import fptu.fcharity.dto.authentication.RegisterUserDto;
-import fptu.fcharity.dto.authentication.VerifyUserDto;
+import fptu.fcharity.dto.authentication.*;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.service.UserService;
 import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import java.sql.SQLException;
+import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
@@ -57,21 +57,23 @@ public class AuthenticationController {
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {
-        try {
-            authenticationService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok(true);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        authenticationService.verifyUser(verifyUserDto);
+        return ResponseEntity.ok(true);
     }
 
-    @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
-        try {
-            authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @PostMapping("/resendOTP")
+    public ResponseEntity<?> resendVerificationCode(@RequestBody ResendOTPDto resendOTPDto) {
+            authenticationService.resendVerificationCode(resendOTPDto.getEmail());
+            return ResponseEntity.ok(true);
+
+    }
+
+    @PostMapping("/google-login")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        User user = authenticationService.googleLogin(token);
+        String jwtToken = jwtService.generateToken(user);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        return ResponseEntity.ok(loginResponse);
     }
 }

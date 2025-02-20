@@ -38,7 +38,7 @@ CREATE TABLE organizations (
     email NVARCHAR(255),
     phone_number NVARCHAR(15),
     address NVARCHAR(255),
-	wallet_address UNIQUEIDENTIFIER NULL,
+	wallet_address UNIQUEIDENTIFIER,
     organization_description NVARCHAR(255),
     pictures NVARCHAR(255),
     start_time DATETIME,
@@ -300,7 +300,7 @@ create table fcharity_schema.wallets(
 	balance NVARCHAR(255)
 )
 CREATE TABLE fcharity_schema.users (
-    user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
+    user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     full_name NVARCHAR(255),
     email NVARCHAR(255) UNIQUE,
     password NVARCHAR(255),
@@ -338,7 +338,7 @@ CREATE TABLE fcharity_schema.organization_members (
 	membership_id  UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     organization_id UNIQUEIDENTIFIER,
-    join_date DATETIME, 
+    join_date DATETIME,
     leave_date DATETIME,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
@@ -375,7 +375,7 @@ CREATE TABLE fcharity_schema.project_members (
     membership_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     project_id UNIQUEIDENTIFIER,
-    join_date DATETIME, 
+    join_date DATETIME,
     leave_date DATETIME,
     member_role CHAR(36),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
