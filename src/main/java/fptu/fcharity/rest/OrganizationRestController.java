@@ -18,14 +18,8 @@ public class OrganizationRestController {
         this.organizationService = organizationService;
     }
 
-    @GetMapping("/test")
-    public String test() {
-        return "test";
-    }
-
     @GetMapping("/organizations")
     public List<Organization> getOrganization() {
-        System.out.println("getOrganization");
         return organizationService.getAll();
     }
 
@@ -36,8 +30,6 @@ public class OrganizationRestController {
 
     @PostMapping("/organizations")
     public Organization postOrganization(@RequestBody Organization organization) {
-        System.out.println("postOrganization");
-        System.out.println(organization);
         return organizationService.save(organization);
     }
 

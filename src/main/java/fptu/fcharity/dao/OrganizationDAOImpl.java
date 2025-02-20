@@ -32,13 +32,7 @@ public class OrganizationDAOImpl implements OrganizationDAO {
 
     @Override
     public Organization save(Organization organization) {
-        System.out.println(organization);
-        try {
-            entityManager.merge(organization);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return entityManager.merge(organization);
     }
 
     @Override

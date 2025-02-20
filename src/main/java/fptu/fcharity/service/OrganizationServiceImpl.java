@@ -32,7 +32,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public Organization save(Organization organization) {
-        organization.setOrganizationId(UUID.randomUUID());
+        System.out.println("postOrganization");
+        System.out.println(organization);
         return organizationDAO.save(organization);
     }
 
