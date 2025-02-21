@@ -20,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -57,25 +58,7 @@ public class AuthenticationService {
         return userRepository.findByEmail(user.getEmail()).get();
     }
 
-    public void sendResetPwdCode(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (!user.isEnabled()) {
-                throw new ApiRequestException("Account not verified. Please verify your account.");
-            }
-//            if (user.getVerificationCodeExpiresAt() != null &&
-//                    user.getVerificationCodeExpiresAt().isAfter(LocalDateTime.now())) {
-//                throw new RuntimeException("A verification code has already been sent. Please wait before requesting a new one.");
-//            }
-            user.setVerificationCode(generateVerificationCode());
-            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-            userRepository.save(user);
-            sendVerificationEmail(user, "Reset your FCHARITY password");
-        }else{
-            throw new ApiRequestException("Please provide an verificated email!");
-        }
-    }
+
 
     public User authenticate(LoginUserDto input) {
         User user = userRepository.findByEmail(input.getEmail())
@@ -95,16 +78,18 @@ public class AuthenticationService {
     }
 
     public boolean verifyEmail(User user, String verificationCode) {
-        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+        if (Objects.equals(user.getVerificationCode(), "") ||user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new ApiRequestException("Verification code has expired");
         }
+
         if (user.getVerificationCode().equals(verificationCode)){
             user.setVerificationCode(null);
             user.setVerificationCodeExpiresAt(null);
             userRepository.save(user);
-            return true;
+        }else{
+            throw new ApiRequestException("Verification code not match");
         }
-        return false;
+        return true;
     }
     public void verifyUser(VerifyUserDto input) {
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
@@ -120,8 +105,24 @@ public class AuthenticationService {
             throw new ApiRequestException("User not found");
         }
     }
+    public void sendResetPwdOTPCode(String email,String msg) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (user.isEnabled()) {
+                user.setVerificationCode(generateVerificationCode());
+                user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+                sendVerificationEmail(user,msg);
+                userRepository.save(user);
+            }else{
+                throw new ApiRequestException("Account not verified. Please verify your account.");
+            }
+        } else {
+            throw new ApiRequestException("User not found");
+        }
+    }
 
-    public void resendVerificationCode(String email) {
+    public void resendVerificationCode(String email,String msg) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
@@ -130,7 +131,7 @@ public class AuthenticationService {
             }
             user.setVerificationCode(generateVerificationCode());
             user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-            sendVerificationEmail(user,"Verify your email address");
+            sendVerificationEmail(user,msg);
             userRepository.save(user);
         } else {
             throw new ApiRequestException("User not found");
@@ -181,7 +182,7 @@ public class AuthenticationService {
 
 
         try {
-            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+            emailService.sendVerificationEmail(user.getEmail(), subject + ": "+verificationCode, htmlMessage);
         } catch (MessagingException e) {
             // Handle email sending exception
             e.printStackTrace();
