@@ -24,6 +24,7 @@ public class RequestService {
     }
 
     public Request createRequest(Request request) {
+        request.setRequestId(UUID.randomUUID());
         return requestRepository.save(request);
     }
 
