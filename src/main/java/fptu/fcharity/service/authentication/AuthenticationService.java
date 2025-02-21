@@ -109,6 +109,9 @@ public class AuthenticationService {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
+            if (Objects.equals(user.getPassword(), null)) {
+                throw new ApiRequestException("User doesn't have a password");
+            }
             if (user.isEnabled()) {
                 user.setVerificationCode(generateVerificationCode());
                 user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
@@ -197,6 +200,7 @@ public class AuthenticationService {
         User u = userRepository.findByEmail(resetPasswordDto.getEmail()).get();
         try{
             String newPassword = resetPasswordDto.getNewPassword();
+
             if (passwordEncoder.matches(resetPasswordDto.getNewPassword(), u.getPassword())) {
                 throw new ApiRequestException("New password must be different from the old password");
             }
