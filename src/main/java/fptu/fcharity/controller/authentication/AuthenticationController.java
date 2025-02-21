@@ -32,10 +32,10 @@ public class AuthenticationController {
         return ResponseEntity.ok(registeredUser);
     }
 
-    @PostMapping("/reset-password-otp/{email}")
-    public ResponseEntity<?> sendResetPasswordOTP(@PathVariable String email) {
-         authenticationService.sendResetPwdCode(email);
-        return ResponseEntity.ok("Reset password code sent");
+    @PostMapping("/reset-password-otp")
+    public ResponseEntity<?> sendResetPasswordOTP(@RequestBody ResendOTPDto resendOTPDto) {
+         authenticationService.sendResetPwdOTPCode(resendOTPDto.getEmail(),"Reset your FCHARITY password");
+        return ResponseEntity.ok(true);
     }
     @PostMapping("/verify-reset-password-otp")
     public ResponseEntity<?> verifyResetPassword(@RequestBody VerifyUserDto verifyUserDto) {
@@ -63,9 +63,8 @@ public class AuthenticationController {
 
     @PostMapping("/resendOTP")
     public ResponseEntity<?> resendVerificationCode(@RequestBody ResendOTPDto resendOTPDto) {
-            authenticationService.resendVerificationCode(resendOTPDto.getEmail());
+            authenticationService.resendVerificationCode(resendOTPDto.getEmail(),"Verify your email address");
             return ResponseEntity.ok(true);
-
     }
 
     @PostMapping("/google-login")
