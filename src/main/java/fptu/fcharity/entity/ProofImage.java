@@ -3,29 +3,33 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
-import java.util.UUID;
-
-@Entity
-@Table(name = "proof_images")
 @Getter
 @Setter
+@Entity
+@Table(name = "proof_images")
 public class ProofImage {
     @Id
-    @Column(name = "image_id", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
-    private UUID imageId;
+    @ColumnDefault("newid()")
+    @Column(name = "image_id", nullable = false, length = 36)
+    private String imageId;
 
-    @Column(name = "image_url", nullable = false)
+    @Nationalized
+    @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "image_type", nullable = false)
+    @Nationalized
+    @Column(name = "image_type", length = 20)
     private String imageType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_project_allocation_id")
     private ToProjectAllocation toProjectAllocation;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_project_donation_id")
     private ToProjectDonation toProjectDonation;
+
 }

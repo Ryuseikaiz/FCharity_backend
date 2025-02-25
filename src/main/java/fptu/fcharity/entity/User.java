@@ -3,38 +3,48 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "users")
 @Getter
 @Setter
+@Entity
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
+    @ColumnDefault("newid()")
     @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID userId;
+    private UUID id;
 
+    @Nationalized
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Nationalized
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Nationalized
     @Column(nullable = true)
     private String password;
 
+    @Nationalized
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
+    @Nationalized
     @Column
     private String address;
 
+    @Nationalized
     @Column
     private String avatar;
 
@@ -42,38 +52,40 @@ public class User implements UserDetails {
     @Column(name = "user_role", nullable = false)
     private UserRole userRole;
 
-
     @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
-    @Column(name = "user_status", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "user_status", nullable = false)
     private UserStatus userStatus;
 
+    @Nationalized
     @Column(name = "verification_code")
     private String verificationCode;
 
     @Column(name = "verification_code_expires_at")
-    private LocalDateTime verificationCodeExpiresAt;
-    @Column(name = "wallet_address")
-    private String walletAddress;
+    private Instant verificationCodeExpiresAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_address")
+    private Wallet walletAddress;
 
     @PrePersist
     public void generateUUID() {
-        if (userId == null) {
-            userId = UUID.randomUUID();
+        if (id == null) {
+            id = UUID.randomUUID();
         }
     }
 
     // Constructor for creating an unverified user
-    public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, String userRole, LocalDateTime createdDate, UserStatus userStatus) {
+    public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, UserRole userRole, Instant createdDate, UserStatus userStatus) {
         this.fullName = fullName;
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.address = address;
         this.avatar = avatar;
-        this.userRole = UserRole.User;
+        this.userRole = userRole;
         this.createdDate = createdDate;
         this.userStatus = userStatus;
     }
@@ -83,7 +95,7 @@ public class User implements UserDetails {
         this.fullName = username;
         this.email = email;
         this.password = password;
-        this.createdDate = LocalDateTime.now();
+        this.createdDate = Instant.now();
         this.userStatus = UserStatus.Unverified;
         this.userRole = UserRole.User;
     }
@@ -136,6 +148,7 @@ public class User implements UserDetails {
         Verified,
         Banned
     }
+
     public enum UserRole {
         Admin,
         User,

@@ -29,8 +29,9 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<Request> createRequest(@RequestBody RequestDTO requestDTO) {
-        return ResponseEntity.ok(requestService.createRequest(requestDTO));
+    public ResponseEntity<?> createRequest(@RequestBody RequestDTO requestDTO) {
+        Request request = requestService.createRequest(requestDTO);
+        return ResponseEntity.ok(request);
     }
 
     @PutMapping("/{id}")

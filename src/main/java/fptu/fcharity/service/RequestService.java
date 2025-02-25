@@ -13,6 +13,7 @@ import fptu.fcharity.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,30 +40,23 @@ public class RequestService {
     }
 
     public Request createRequest(RequestDTO requestDTO) {
-        User user = userRepository.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new ApiRequestException("User not found"));
+       try{
+           User user = userRepository.findById(requestDTO.getUserId())
+                   .orElseThrow(() -> new ApiRequestException("User not found"));
 
-        Category category = categoryRepository.findById(requestDTO.getCategoryId())
-                .orElseThrow(() -> new ApiRequestException("Category not found"));
-
-        Tag tag = tagRepository.findById(requestDTO.getTagId())
-                .orElseThrow(() -> new ApiRequestException("Tag not found"));
-
-        Request request = new Request();
-        request.setUser(user);
-        request.setTitle(requestDTO.getTitle());
-        request.setContent(requestDTO.getContent());
-        request.setCreationDate(requestDTO.getCreationDate());
-        request.setPhone(requestDTO.getPhone());
-        request.setEmail(requestDTO.getEmail());
-        request.setLocation(requestDTO.getLocation());
-        request.setAttachment(requestDTO.getAttachment());
-        request.setEmergency(requestDTO.isEmergency());
-        request.setCategory(category);
-        request.setTag(tag);
-        request.setStatus(requestDTO.getStatus());
-
-        return requestRepository.save(request);
+           Category category = categoryRepository.findById(requestDTO.getCategoryId())
+                   .orElseThrow(() -> new ApiRequestException("Category not found"));
+           Tag tag = tagRepository.findById(requestDTO.getTagId())
+                   .orElseThrow(() -> new ApiRequestException("Tag not found"));
+           Request request = new Request(UUID.randomUUID(),
+                   user, requestDTO.getTitle(), requestDTO.getContent(),
+                   requestDTO.getPhone(), requestDTO.getEmail(),
+                   requestDTO.getLocation(), requestDTO.getAttachment(),
+                   requestDTO.isEmergency(), category, tag);
+           return requestRepository.save(request);
+       }catch(Exception e){
+           throw new ApiRequestException(e.getMessage());
+       }
     }
 
     public Request updateRequest(UUID requestId, RequestDTO requestDTO) {
@@ -84,10 +78,9 @@ public class RequestService {
             request.setEmail(requestDTO.getEmail());
             request.setLocation(requestDTO.getLocation());
             request.setAttachment(requestDTO.getAttachment());
-            request.setEmergency(requestDTO.isEmergency());
+            request.setIsEmergency(requestDTO.isEmergency());
             request.setCategory(category);
             request.setTag(tag);
-            request.setStatus(requestDTO.getStatus());
             return requestRepository.save(request);
         }
         return null;

@@ -3,34 +3,39 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "reports")
 @Getter
 @Setter
+@Entity
+@Table(name = "reports")
 public class Report {
     @Id
-    @Column(name = "report_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID reportId;
+    @ColumnDefault("newid()")
+    @Column(name = "report_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "reporter_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id")
     private User reporter;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @Column(name = "reason", nullable = false)
+    @Nationalized
+    @Column(name = "reason")
     private String reason;
 
-    @Column(name = "report_date", nullable = false)
-    private LocalDateTime reportDate;
+    @Column(name = "report_date")
+    private Instant reportDate;
+
 }

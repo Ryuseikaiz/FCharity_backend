@@ -13,11 +13,11 @@ import fptu.fcharity.service.helper.EmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class AuthenticationService {
         }
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
         user.setEnabled(false);
         userRepository.save(user);
         sendVerificationEmail(user,"Verify your email address");
@@ -78,7 +78,7 @@ public class AuthenticationService {
     }
 
     public boolean verifyEmail(User user, String verificationCode) {
-        if (Objects.equals(user.getVerificationCode(), "") ||user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+        if (Objects.equals(user.getVerificationCode(), "") ||user.getVerificationCodeExpiresAt().isBefore(Instant.now())) {
             throw new ApiRequestException("Verification code has expired");
         }
 
@@ -114,7 +114,7 @@ public class AuthenticationService {
             }
             if (user.isEnabled()) {
                 user.setVerificationCode(generateVerificationCode());
-                user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+                user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
                 sendVerificationEmail(user,msg);
                 userRepository.save(user);
             }else{
@@ -133,7 +133,7 @@ public class AuthenticationService {
                 throw new ApiRequestException("Account is already verified");
             }
             user.setVerificationCode(generateVerificationCode());
-            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
             sendVerificationEmail(user,msg);
             userRepository.save(user);
         } else {
@@ -232,7 +232,7 @@ public class AuthenticationService {
             user.setFullName(userInfo.get("name"));
             user.setAvatar(userInfo.get("picture"));
             user.setEnabled(true);
-            user.setCreatedDate(LocalDateTime.now());
+            user.setCreatedDate(Instant.now());
             user.setUserRole(User.UserRole.User);
             user.setUserStatus(User.UserStatus.Verified);
             userRepository.save(user);

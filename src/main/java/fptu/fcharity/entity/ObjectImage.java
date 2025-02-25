@@ -3,34 +3,38 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.UUID;
 
-@Entity
-@Table(name = "object_images")
 @Getter
 @Setter
+@Entity
+@Table(name = "object_images")
 public class ObjectImage {
     @Id
-    @Column(name = "image_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID imageId;
+    @ColumnDefault("newid()")
+    @Column(name = "image_id", nullable = false)
+    private UUID id;
 
-    @Column(name = "url", nullable = false)
+    @Nationalized
+    @Column(name = "url")
     private String url;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private Request request;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @Column(name = "organization_id")
+    private UUID organizationId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phase_id")
     private Timeline phase;
+
 }
