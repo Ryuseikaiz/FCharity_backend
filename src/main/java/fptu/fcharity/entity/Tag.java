@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "tags")
 @Getter
 @Setter
 public class Tag {

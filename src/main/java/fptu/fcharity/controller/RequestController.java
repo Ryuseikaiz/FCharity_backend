@@ -1,5 +1,6 @@
 package fptu.fcharity.controller;
 
+import fptu.fcharity.dto.request.RequestDTO;
 import fptu.fcharity.entity.Request;
 import fptu.fcharity.service.RequestService;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,13 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<Request> createRequest(@RequestBody Request request) {
-        return ResponseEntity.ok(requestService.createRequest(request));
+    public ResponseEntity<Request> createRequest(@RequestBody RequestDTO requestDTO) {
+        return ResponseEntity.ok(requestService.createRequest(requestDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Request> updateRequest(@PathVariable UUID id, @RequestBody Request requestDetails) {
-        return ResponseEntity.ok(requestService.updateRequest(id, requestDetails));
+    public ResponseEntity<Request> updateRequest(@PathVariable UUID id, @RequestBody RequestDTO requestDTO) {
+        return ResponseEntity.ok(requestService.updateRequest(id, requestDTO));
     }
 
     @DeleteMapping("/{id}")
