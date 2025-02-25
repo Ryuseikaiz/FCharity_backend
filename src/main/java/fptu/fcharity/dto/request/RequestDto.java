@@ -3,17 +3,17 @@ package fptu.fcharity.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class RequestDTO {
+public class RequestDto {
     private UUID requestId;
     private UUID userId;
     private String title;
     private String content;
-    private LocalDateTime creationDate;
+    private Instant creationDate;
     private String phone;
     private String email;
     private String location;

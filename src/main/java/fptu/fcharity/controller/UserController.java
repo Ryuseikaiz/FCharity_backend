@@ -2,7 +2,7 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.mapper.UserResponseMapper;
+import fptu.fcharity.utils.mapper.UserResponseMapper;
 import fptu.fcharity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

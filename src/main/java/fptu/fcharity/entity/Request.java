@@ -1,5 +1,6 @@
 package fptu.fcharity.entity;
 
+import fptu.fcharity.utils.constants.RequestStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -62,9 +62,8 @@ public class Request {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "request_status")
-    private RequestStatus requestStatus;
+    private String requestStatus;
 
     public Request() {
     }
@@ -89,10 +88,5 @@ public class Request {
         this.requestStatus = RequestStatus.PENDING;
     }
 
-    public enum RequestStatus {
-        PENDING,
-        ACCEPTED,
-        REJECTED,
-        COMPLETED
-    }
+
 }

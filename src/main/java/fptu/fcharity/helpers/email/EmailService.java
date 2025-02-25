@@ -1,4 +1,4 @@
-package fptu.fcharity.service.helper;
+package fptu.fcharity.helpers.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

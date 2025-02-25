@@ -1,4 +1,4 @@
-package fptu.fcharity.mapper;
+package fptu.fcharity.utils.mapper;
 
 
 public interface BaseMapper<E, D> {

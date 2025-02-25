@@ -1,11 +1,11 @@
 package fptu.fcharity.service;
 
-import fptu.fcharity.dto.request.RequestDTO;
+import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Category;
 import fptu.fcharity.entity.Request;
 import fptu.fcharity.entity.Tag;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.exception.ApiRequestException;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.CategoryRepository;
 import fptu.fcharity.repository.RequestRepository;
 import fptu.fcharity.repository.TagRepository;
@@ -13,7 +13,6 @@ import fptu.fcharity.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,10 +35,10 @@ public class RequestService {
     }
 
     public Request getRequestById(UUID requestId) {
-        return requestRepository.findById(requestId).orElse(null);
+        return requestRepository.findWithCategoryAndTagById(requestId);
     }
 
-    public Request createRequest(RequestDTO requestDTO) {
+    public Request createRequest(RequestDto requestDTO) {
        try{
            User user = userRepository.findById(requestDTO.getUserId())
                    .orElseThrow(() -> new ApiRequestException("User not found"));
@@ -59,7 +58,7 @@ public class RequestService {
        }
     }
 
-    public Request updateRequest(UUID requestId, RequestDTO requestDTO) {
+    public Request updateRequest(UUID requestId, RequestDto requestDTO) {
         Request request = requestRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
         if (request != null) {
             User user = userRepository.findById(requestDTO.getUserId())
@@ -81,12 +80,16 @@ public class RequestService {
             request.setIsEmergency(requestDTO.isEmergency());
             request.setCategory(category);
             request.setTag(tag);
+            request.setRequestStatus(requestDTO.getStatus());
             return requestRepository.save(request);
         }
         return null;
     }
 
     public void deleteRequest(UUID requestId) {
+        if(!requestRepository.existsById(requestId)){
+            throw new ApiRequestException("Request not found");
+        }
         requestRepository.deleteById(requestId);
     }
 }
