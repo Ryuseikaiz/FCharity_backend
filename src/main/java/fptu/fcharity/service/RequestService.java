@@ -1,6 +1,9 @@
 package fptu.fcharity.service;
 
 import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.exception.ApiRequestException;
 import fptu.fcharity.repository.RequestRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +13,11 @@ import java.util.UUID;
 @Service
 public class RequestService {
     private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
 
-    public RequestService(RequestRepository requestRepository) {
+    public RequestService(RequestRepository requestRepository, UserRepository userRepository) {
         this.requestRepository = requestRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Request> getAllRequests() {
@@ -24,7 +29,10 @@ public class RequestService {
     }
 
     public Request createRequest(Request request) {
-        request.setRequestId(UUID.randomUUID());
+        // Ensure the user is set correctly
+        User user = userRepository.findById(request.getUser().getUserId())
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+        request.setUser(user);
         return requestRepository.save(request);
     }
 
