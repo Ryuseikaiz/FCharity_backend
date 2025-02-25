@@ -7,8 +7,6 @@ A full-stack web application for managing charity activities, donations, and aid
 - Role-based access control (Admin, Donor, Organization, Beneficiary)
 - Create and manage charity projects
 - Submit and track aid requests
-- Online donations with VNPay integration
-- Real-time updates with WebSockets
 - Search, filter, and pagination for requests and projects
 
 ## Tech Stack
