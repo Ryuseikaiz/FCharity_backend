@@ -2,10 +2,7 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Request;
-import fptu.fcharity.response.request.RequestResponse;
 import fptu.fcharity.service.RequestService;
-import fptu.fcharity.utils.mapper.RequestResponseMapper;
-import fptu.fcharity.utils.mapper.UserResponseMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +13,15 @@ import java.util.UUID;
 @RequestMapping("/requests")
 public class RequestController {
     private final RequestService requestService;
-    private final RequestResponseMapper requestResponseMapper;
 
-    public RequestController(RequestService requestService, RequestResponseMapper requestResponseMapper) {
+    public RequestController(RequestService requestService) {
         this.requestService = requestService;
-        this.requestResponseMapper = requestResponseMapper;
     }
 
     @GetMapping
     public ResponseEntity<List<Request>> getAllRequests() {
-        return ResponseEntity.ok(requestService.getAllRequests());
+        List<Request> requests = requestService.getAllRequests();
+        return ResponseEntity.ok(requests);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")

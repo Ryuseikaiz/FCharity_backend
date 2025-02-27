@@ -31,11 +31,11 @@ public class RequestService {
     }
 
     public List<Request> getAllRequests() {
-        return requestRepository.findAll();
+        return requestRepository.findAllWithInclude();
     }
 
     public Request getRequestById(UUID requestId) {
-        return requestRepository.findWithCategoryAndTagById(requestId);
+        return requestRepository.findWithIncludeById(requestId);
     }
 
     public Request createRequest(RequestDto requestDTO) {
