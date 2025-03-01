@@ -3,32 +3,39 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "notifications")
 @Getter
 @Setter
+@Entity
+@Table(name = "notifications")
 public class Notification {
     @Id
-    @Column(name = "notification_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID notificationId;
+    @ColumnDefault("newid()")
+    @Column(name = "notification_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "message", nullable = false)
+    @Nationalized
+    @Column(name = "message")
     private String message;
 
-    @Column(name = "notification_date", nullable = false)
-    private LocalDateTime notificationDate;
+    @Column(name = "notification_date")
+    private Instant notificationDate;
 
-    @Column(name = "notification_status", nullable = false)
+    @Nationalized
+    @Column(name = "notification_status", length = 50)
     private String notificationStatus;
 
+    @Nationalized
     @Column(name = "link")
     private String link;
+
 }

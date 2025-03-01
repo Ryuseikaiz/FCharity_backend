@@ -1,18 +1,19 @@
 package fptu.fcharity.response.authentication;
 
 import fptu.fcharity.entity.User;
-import jakarta.persistence.Column;
+import fptu.fcharity.entity.Wallet;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 @Getter
 @Setter
 public class UserResponse {
-    private UUID userId;
+    private UUID id;
 
     private String fullName;
 
@@ -30,14 +31,14 @@ public class UserResponse {
     private User.UserRole userRole;
 
 
-    private LocalDateTime createdDate;
+    private Instant createdDate;
 
     @Enumerated(EnumType.STRING)
     private User.UserStatus userStatus;
 
     private String verificationCode;
 
-    private String walletAddress;
+    private Wallet walletAddress;
     public enum UserStatus {
         Unverified,
         Verified,

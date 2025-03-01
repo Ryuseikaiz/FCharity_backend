@@ -7,9 +7,8 @@ import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
-import java.sql.SQLException;
+
 import java.util.Map;
 
 @RequestMapping("/auth")

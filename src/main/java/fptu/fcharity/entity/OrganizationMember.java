@@ -3,30 +3,33 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "organization_members")
 @Getter
 @Setter
+@Entity
+@Table(name = "organization_members")
 public class OrganizationMember {
     @Id
-    @Column(name = "membership_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID membershipId;
+    @ColumnDefault("newid()")
+    @Column(name = "membership_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @Column(name = "join_date", nullable = false)
-    private LocalDateTime joinDate;
+    @Column(name = "join_date")
+    private Instant joinDate;
 
     @Column(name = "leave_date")
-    private LocalDateTime leaveDate;
+    private Instant leaveDate;
+
 }

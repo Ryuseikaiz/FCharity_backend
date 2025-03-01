@@ -3,32 +3,38 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "timeline")
 @Getter
 @Setter
+@Entity
+@Table(name = "timeline")
 public class Timeline {
     @Id
-    @Column(name = "phase_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID phaseId;
+    @ColumnDefault("newid()")
+    @Column(name = "phase_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "title", nullable = false)
+    @Nationalized
+    @Column(name = "title")
     private String title;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    @Column(name = "start_time")
+    private Instant startTime;
 
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    @Column(name = "end_time")
+    private Instant endTime;
 
-    @Column(name = "content", nullable = false)
+    @Nationalized
+    @Column(name = "content")
     private String content;
+
 }

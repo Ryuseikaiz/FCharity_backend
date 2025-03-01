@@ -3,51 +3,62 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "organizations")
 @Getter
 @Setter
+@Entity
+@Table(name = "organizations")
 public class Organization {
     @Id
-    @Column(name = "organization_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID organizationId;
+    @ColumnDefault("newid()")
+    @Column(name = "organization_id", nullable = false)
+    private UUID id;
 
-    @Column(name = "organization_name", nullable = false)
+    @Nationalized
+    @Column(name = "organization_name")
     private String organizationName;
 
-    @Column(name = "email", nullable = false)
+    @Nationalized
+    @Column(name = "email")
     private String email;
 
+    @Nationalized
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
+    @Nationalized
     @Column(name = "address")
     private String address;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_address")
-    private Wallet wallet;
+    private Wallet walletAddress;
 
+    @Nationalized
     @Column(name = "organization_description")
     private String organizationDescription;
 
+    @Nationalized
     @Column(name = "pictures")
     private String pictures;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private Instant startTime;
 
     @Column(name = "shutdown_day")
-    private LocalDateTime shutdownDay;
+    private Instant shutdownDay;
 
-    @Column(name = "organization_status")
+    @Nationalized
+    @Column(name = "organization_status", length = 50)
     private String organizationStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ceo_id")
     private User ceo;
+
 }

@@ -2,7 +2,7 @@ package fptu.fcharity.service;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.exception.ApiRequestException;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
