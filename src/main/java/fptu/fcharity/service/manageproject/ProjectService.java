@@ -1,14 +1,13 @@
 package fptu.fcharity.service.manageproject;
 
+import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.ProjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 @Service
 public class ProjectService {
@@ -42,10 +41,7 @@ public class ProjectService {
             Category category = categoryRepository.findById(projectDto.getCategoryId()).orElse(null);
             project.setCategory(category);
         }
-        if (projectDto.getTagId() != null) {
-            Tag tag = tagRepository.findById(projectDto.getTagId()).orElse(null);
-            project.setTag(tag);
-        }
+
         if (projectDto.getLeaderId() != null) {
             User user = userRepository.findById(projectDto.getLeaderId()).orElse(null);
             project.setLeader(user);

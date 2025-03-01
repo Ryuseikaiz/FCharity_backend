@@ -1,7 +1,9 @@
-package fptu.fcharity.postdto;
+package fptu.fcharity.dto.post;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -10,5 +12,6 @@ public class PostRequestDTO {
     private String title;
     private String content;
     private int vote;
-    private UUID userId;  // ID của User liên kết với Post
+    private UUID userId;
+    private List<UUID> tagIds;
 }

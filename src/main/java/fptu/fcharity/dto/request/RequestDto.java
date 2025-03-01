@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -20,6 +22,6 @@ public class RequestDto {
     private String attachment;
     private boolean isEmergency;
     private UUID categoryId;
-    private UUID tagId;
+    private List<UUID> tagIds;
     private String status;
 }

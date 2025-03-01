@@ -2,6 +2,8 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.Taggable;
+import fptu.fcharity.response.request.RequestResponse;
 import fptu.fcharity.service.RequestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,25 +21,31 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Request>> getAllRequests() {
-        List<Request> requests = requestService.getAllRequests();
+    public ResponseEntity<List<RequestResponse>> getAllRequests() {
+        List<RequestResponse> requests = requestService.getAllRequests();
         return ResponseEntity.ok(requests);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> getRequestById(@PathVariable UUID id) {
-        Request request = requestService.getRequestById(id);
+        RequestResponse request = requestService.getRequestById(id);
         return ResponseEntity.ok(request);
+    }
+
+    @GetMapping(value = "/{id}/tags", produces = "application/json")
+    public ResponseEntity<?> getTagsOfRequest(@PathVariable UUID id) {
+        List<Taggable> tags = requestService.getTagsOfRequest(id);
+        return ResponseEntity.ok(tags);
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createRequest(@RequestBody RequestDto requestDto) {
-        Request request = requestService.createRequest(requestDto);
+        RequestResponse request = requestService.createRequest(requestDto);
         return ResponseEntity.ok(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Request> updateRequest(@PathVariable UUID id, @RequestBody RequestDto requestDTO) {
+    public ResponseEntity<RequestResponse> updateRequest(@PathVariable UUID id, @RequestBody RequestDto requestDTO) {
         return ResponseEntity.ok(requestService.updateRequest(id, requestDTO));
     }
 

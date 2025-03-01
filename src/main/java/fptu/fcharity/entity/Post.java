@@ -5,19 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "posts")
 @Getter
 @Setter
+@Entity
+@Table(name = "posts")
 public class Post {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "post_id", nullable = false)
     private UUID id;
@@ -42,14 +40,9 @@ public class Post {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
-
     @PrePersist
     protected void onCreate() {
-        createdAt =Instant.now();
+        createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 

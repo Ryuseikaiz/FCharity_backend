@@ -47,10 +47,6 @@ public class Request {
     @Column(name = "location")
     private String location;
 
-    @Nationalized
-    @Column(name = "attachment")
-    private String attachment;
-
     @Column(name = "is_emergency")
     private Boolean isEmergency;
 
@@ -58,21 +54,17 @@ public class Request {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
-
-    @Column(name = "request_status")
-    private String requestStatus;
-
+    @Nationalized
+    @Column(name = "status", length = 50)
+    private String status;
     public Request() {
     }
     public Request(UUID id, User user, String title,
                    String content,
                    String phone, String email, String location,
-                   String attachment, Boolean isEmergency,
-                   Category category, Tag tag
-                   ) {
+                    Boolean isEmergency,
+                   Category category
+    ) {
         this.id = id;
         this.user = user;
         this.title = title;
@@ -81,12 +73,8 @@ public class Request {
         this.phone = phone;
         this.email = email;
         this.location = location;
-        this.attachment = attachment;
         this.isEmergency = isEmergency;
         this.category = category;
-        this.tag = tag;
-        this.requestStatus = RequestStatus.PENDING;
+        this.status = RequestStatus.PENDING;
     }
-
-
 }

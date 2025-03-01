@@ -7,7 +7,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -16,6 +15,7 @@ import java.util.UUID;
 @Table(name = "projects")
 public class Project {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "project_id", nullable = false)
     private UUID id;
@@ -73,37 +73,7 @@ public class Project {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id")
-    private Tag tag;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
-    public Project() {
-    }
 
-    public Project(String projectName,
-                   Organization organization, User leader,
-                   String email, String phoneNumber,
-                   String projectDescription, String projectStatus,
-                   String reportFile, Instant plannedStartTime, Instant plannedEndTime, Instant actualStartTime, Instant actualEndTime, String shutdownReason,
-                   Category category, Tag tag,
-                   Wallet walletAddress) {
-        this.projectName = projectName;
-        this.organization = organization;
-        this.leader = leader;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.projectDescription = projectDescription;
-        this.projectStatus = projectStatus;
-        this.reportFile = reportFile;
-        this.plannedStartTime = plannedStartTime;
-        this.plannedEndTime = plannedEndTime;
-        this.actualStartTime = actualStartTime;
-        this.actualEndTime = actualEndTime;
-        this.shutdownReason = shutdownReason;
-        this.category = category;
-        this.tag = tag;
-        this.walletAddress = walletAddress;
-    }
 }

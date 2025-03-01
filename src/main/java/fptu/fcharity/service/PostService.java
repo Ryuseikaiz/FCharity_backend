@@ -1,12 +1,20 @@
 package fptu.fcharity.service;
 
 import fptu.fcharity.entity.Post;
+import fptu.fcharity.entity.Tag;
+import fptu.fcharity.entity.Taggable;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.postdto.PostRequestDTO;
-import fptu.fcharity.postdto.PostResponseDTO;
+import fptu.fcharity.dto.post.PostRequestDTO;
+import fptu.fcharity.repository.TagRepository;
+import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.repository.PostRepository;
 import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.TaggableRepository;
+import fptu.fcharity.utils.constants.TaggableType;
+import fptu.fcharity.utils.exception.ApiRequestException;
+import fptu.fcharity.utils.mapper.PostMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,20 +28,54 @@ public class PostService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TagRepository tagRepository;
+    @Autowired
+    private TaggableRepository taggableRepository;
 
+    @Autowired
+    private PostMapper postMapper;
+
+    public void addPostTags(UUID requestId, List<UUID> tagIds) {
+        Post post = postRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
+        if (post != null) {
+            for (UUID tagId : tagIds) {
+                if (tagRepository.existsById(tagId)) {
+                    Tag tag = tagRepository.findById(tagId)
+                            .orElseThrow(() -> new ApiRequestException("Tag not found"));
+                    Taggable taggable = new Taggable(tag,requestId, TaggableType.POST);
+                    taggableRepository.save(taggable);
+                }
+            }
+        }}
+    public void updatePostTags(UUID postId, List<UUID> tagIds) {
+        List<Taggable> oldTags = taggableRepository.findAllWithInclude().stream()
+                .filter(taggable -> taggable.getTaggableId().equals(postId) && taggable.getTaggableType().equals(TaggableType.POST))
+                .toList();
+        for (Taggable taggable: oldTags) {
+            if(!tagIds.contains(taggable.getTag().getId())){taggableRepository.deleteById(taggable.getId());}
+            tagIds.remove(taggable.getTag().getId());
+        }
+        addPostTags(postId, tagIds);
+    }
     // Lấy tất cả các Post
-    public List<PostResponseDTO> getAllPosts() {
-        List<Post> posts = postRepository.findAll();
-        return posts.stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<PostResponse> getAllPosts() {
+        List<Post> posts = postRepository.findAllWithInclude();
+        return posts.stream().map(post -> postMapper.convertToDTO(post, getTagsOfPost(post.getId()))).collect(Collectors.toList());
     }
 
     // Lấy Post theo ID
-    public Optional<PostResponseDTO> getPostById(UUID postId) {
-        return postRepository.findById(postId).map(this::convertToDTO);
+    public PostResponse getPostById(UUID postId) {
+        Post post = postRepository.findWithIncludeById(postId);
+        return postMapper.convertToDTO(post, getTagsOfPost(postId));
     }
-
+    public List<Taggable> getTagsOfPost(UUID postId) {
+        return taggableRepository.findAllWithInclude().stream()
+                .filter(taggable -> taggable.getTaggableId().equals(postId) && taggable.getTaggableType().equals(TaggableType.POST))
+                .toList();
+    }
     // Tạo mới Post
-    public PostResponseDTO createPost(PostRequestDTO postRequestDTO) {
+    public PostResponse createPost(PostRequestDTO postRequestDTO) {
         // Lấy đối tượng User từ DB theo userId từ DTO
         Optional<User> optionalUser = userRepository.findById(postRequestDTO.getUserId());
         if (optionalUser.isEmpty()) {
@@ -49,26 +91,19 @@ public class PostService {
         post.setUser(user);
 
         Post savedPost = postRepository.save(post);
-        return convertToDTO(savedPost);
+        addPostTags(post.getId(), postRequestDTO.getTagIds());
+        return  postMapper.convertToDTO(savedPost, getTagsOfPost(savedPost.getId()));
     }
 
-    // Cập nhật Post theo ID
-    public PostResponseDTO updatePost(UUID postId, PostRequestDTO postRequestDTO) {
-        Optional<Post> optionalPost = postRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
-            throw new RuntimeException("Post not found with id: " + postId);
-        }
-        Post post = optionalPost.get();
-
-        // Cập nhật các thông tin của Post
+    public PostResponse updatePost(UUID postId, PostRequestDTO postRequestDTO) {
+        Post post = postRepository.findWithIncludeById(postId);
         post.setTitle(postRequestDTO.getTitle());
         post.setContent(postRequestDTO.getContent());
         post.setVote(postRequestDTO.getVote());
-        // Nếu cần cập nhật user, bạn có thể xử lý tương tự
-        // Ở đây, ta giữ nguyên user hiện tại.
 
         Post updatedPost = postRepository.save(post);
-        return convertToDTO(updatedPost);
+        updatePostTags(post.getId(), postRequestDTO.getTagIds());
+        return postMapper.convertToDTO(updatedPost, getTagsOfPost(updatedPost.getId()));
     }
 
     // Xóa Post theo ID
@@ -79,16 +114,5 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-    // Phương thức chuyển đổi Post sang PostResponseDTO
-    private PostResponseDTO convertToDTO(Post post) {
-        PostResponseDTO dto = new PostResponseDTO();
-        dto.setPostId(post.getPostId());
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setVote(post.getVote());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        dto.setUserId(post.getUser().getUserId());
-        return dto;
-    }
+
 }

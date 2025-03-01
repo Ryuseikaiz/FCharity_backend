@@ -1,7 +1,7 @@
 package fptu.fcharity.controller;
 
-import fptu.fcharity.postdto.PostRequestDTO;
-import fptu.fcharity.postdto.PostResponseDTO;
+import fptu.fcharity.dto.post.PostRequestDTO;
+import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,24 +21,23 @@ public class PostController {
 
     // Lấy tất cả Post
     @GetMapping
-    public ResponseEntity<List<PostResponseDTO>> getAllPosts() {
-        List<PostResponseDTO> posts = postService.getAllPosts();
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
 
     // Lấy Post theo ID
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable("id") UUID id) {
-        Optional<PostResponseDTO> responseDTO = postService.getPostById(id);
-        return responseDTO.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<PostResponse> getPostById(@PathVariable("id") UUID id) {
+        PostResponse responseDTO = postService.getPostById(id);
+        return ResponseEntity.ok(responseDTO);
     }
 
     // Tạo mới Post
     @PostMapping
-    public ResponseEntity<PostResponseDTO> createPost(@RequestBody PostRequestDTO postRequestDTO) {
+    public ResponseEntity<PostResponse> createPost(@RequestBody PostRequestDTO postRequestDTO) {
         try {
-            PostResponseDTO savedPostDTO = postService.createPost(postRequestDTO);
+            PostResponse savedPostDTO = postService.createPost(postRequestDTO);
             return new ResponseEntity<>(savedPostDTO, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
@@ -47,9 +46,9 @@ public class PostController {
 
     // Cập nhật Post theo ID
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDTO> updatePost(@PathVariable("id") UUID id, @RequestBody PostRequestDTO postRequestDTO) {
+    public ResponseEntity<PostResponse> updatePost(@PathVariable("id") UUID id, @RequestBody PostRequestDTO postRequestDTO) {
         try {
-            PostResponseDTO updatedPostDTO = postService.updatePost(id, postRequestDTO);
+            PostResponse updatedPostDTO = postService.updatePost(id, postRequestDTO);
             return ResponseEntity.ok(updatedPostDTO);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
