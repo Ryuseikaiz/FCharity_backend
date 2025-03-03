@@ -5,7 +5,7 @@ import fptu.fcharity.entity.User;
 import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
-import fptu.fcharity.service.user.UserService;
+import fptu.fcharity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
