@@ -1,4 +1,4 @@
-package fptu.fcharity.rest;
+package fptu.fcharity.controller;
 
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.service.organization.OrganizationMemberService;

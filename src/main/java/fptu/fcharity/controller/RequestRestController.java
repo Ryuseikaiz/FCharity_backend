@@ -1,4 +1,4 @@
-package fptu.fcharity.rest;
+package fptu.fcharity.controller;
 
 import fptu.fcharity.entity.Request;
 import fptu.fcharity.service.request.RequestService;
