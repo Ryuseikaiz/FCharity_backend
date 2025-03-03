@@ -1,6 +1,5 @@
 package fptu.fcharity.entity;
 
-import com.nimbusds.openid.connect.sdk.assurance.evidences.Organization;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,5 +31,4 @@ public class OrganizationMember {
 
     @Column(name = "leave_date")
     private Instant leaveDate;
-
 }
