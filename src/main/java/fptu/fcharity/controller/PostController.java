@@ -35,7 +35,9 @@ public class PostController {
     }
 
     // Tạo mới Post
-    @PostMapping
+    @PostMapping(
+            consumes = "application/json",
+            produces = "application/json")
     public ResponseEntity<PostResponseDTO> createPost(@RequestBody PostRequestDTO postRequestDTO) {
         try {
             PostResponseDTO savedPostDTO = postService.createPost(postRequestDTO);
@@ -45,7 +47,7 @@ public class PostController {
         }
     }
 
-    // Cập nhật Post theo ID
+    // update Post theo ID
     @PutMapping("/{id}")
     public ResponseEntity<PostResponseDTO> updatePost(@PathVariable("id") UUID id, @RequestBody PostRequestDTO postRequestDTO) {
         try {
