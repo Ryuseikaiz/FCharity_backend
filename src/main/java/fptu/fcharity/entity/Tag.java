@@ -1,6 +1,9 @@
 package fptu.fcharity.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,6 +16,8 @@ import java.util.UUID;
 @Table(name = "tags")
 @Getter
 @Setter
+@Entity
+@Table(name = "tags")
 public class Tag {
 
     @Id

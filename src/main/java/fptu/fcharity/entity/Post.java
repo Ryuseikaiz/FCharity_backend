@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +14,8 @@ import java.util.UUID;
 @Table(name = "posts")
 @Getter
 @Setter
+@Entity
+@Table(name = "posts")
 public class Post {
 
     @Id
@@ -23,9 +24,8 @@ public class Post {
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "post_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID postId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(nullable = false)

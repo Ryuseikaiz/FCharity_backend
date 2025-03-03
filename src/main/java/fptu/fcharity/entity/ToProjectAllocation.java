@@ -3,37 +3,42 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "to_project_allocations")
 @Getter
 @Setter
+@Entity
+@Table(name = "to_project_allocations")
 public class ToProjectAllocation {
     @Id
-    @Column(name = "allocation_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID allocationId;
+    @ColumnDefault("newid()")
+    @Column(name = "allocation_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @Column(name = "organization_id")
+    private UUID organizationId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "allocation_status", nullable = false)
+    @Nationalized
+    @Column(name = "allocation_status", length = 50)
     private String allocationStatus;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount", precision = 18, scale = 2)
     private BigDecimal amount;
 
+    @Nationalized
     @Column(name = "message")
     private String message;
 
-    @Column(name = "allocation_time", nullable = false)
-    private LocalDateTime allocationTime;
+    @Column(name = "allocation_time")
+    private Instant allocationTime;
+
 }

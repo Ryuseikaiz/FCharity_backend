@@ -1,10 +1,9 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
-import fptu.fcharity.mapper.UserResponseMapper;
-import fptu.fcharity.response.authentication.UserResponse;
-import fptu.fcharity.service.UserService;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.service.UserService;
+import fptu.fcharity.utils.mapper.UserResponseMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +16,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserResponseMapper userResponseMapper;
-    public UserController(UserService userService,UserResponseMapper userResponseMapper) {
+    public UserController(UserService userService, UserResponseMapper userResponseMapper) {
         this.userService = userService;
         this.userResponseMapper = userResponseMapper;
     }
