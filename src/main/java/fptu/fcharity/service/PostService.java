@@ -1,5 +1,6 @@
 package fptu.fcharity.service;
 
+import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.entity.Post;
 import fptu.fcharity.entity.Tag;
 import fptu.fcharity.entity.Taggable;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,26 +85,24 @@ public class PostService {
         }
         User user = optionalUser.get();
 
+
         // Tạo mới đối tượng Post và gán dữ liệu từ DTO
-        Post post = new Post();
-        post.setTitle(postRequestDTO.getTitle());
-        post.setContent(postRequestDTO.getContent());
-        post.setVote(postRequestDTO.getVote());
-        post.setUser(user);
+        Post post = new Post(user, postRequestDTO.getTitle(),postRequestDTO.getContent());
+
 
         Post savedPost = postRepository.save(post);
         addPostTags(post.getId(), postRequestDTO.getTagIds());
         return  postMapper.convertToDTO(savedPost, getTagsOfPost(savedPost.getId()));
     }
 
-    public PostResponse updatePost(UUID postId, PostRequestDTO postRequestDTO) {
+    public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
         Post post = postRepository.findWithIncludeById(postId);
-        post.setTitle(postRequestDTO.getTitle());
-        post.setContent(postRequestDTO.getContent());
-        post.setVote(postRequestDTO.getVote());
+        post.setTitle(postUpdateDTO.getTitle());
+        post.setContent(postUpdateDTO.getContent());
+        post.setVote(postUpdateDTO.getVote());
 
         Post updatedPost = postRepository.save(post);
-        updatePostTags(post.getId(), postRequestDTO.getTagIds());
+        updatePostTags(post.getId(), postUpdateDTO.getTagIds());
         return postMapper.convertToDTO(updatedPost, getTagsOfPost(updatedPost.getId()));
     }
 

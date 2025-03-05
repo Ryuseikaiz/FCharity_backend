@@ -229,6 +229,7 @@ CREATE TABLE posts (
     vote INT,
     created_at DATETIME,
     updated_at DATETIME,
+	post_status NVARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 

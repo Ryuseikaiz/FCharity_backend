@@ -1,6 +1,7 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.post.PostRequestDTO;
+import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,9 @@ public class PostController {
 
     // Cập nhật Post theo ID
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable("id") UUID id, @RequestBody PostRequestDTO postRequestDTO) {
+    public ResponseEntity<PostResponse> updatePost(@PathVariable("id") UUID id, @RequestBody PostUpdateDto postUpdateDTO) {
         try {
-            PostResponse updatedPostDTO = postService.updatePost(id, postRequestDTO);
+            PostResponse updatedPostDTO = postService.updatePost(id, postUpdateDTO);
             return ResponseEntity.ok(updatedPostDTO);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);

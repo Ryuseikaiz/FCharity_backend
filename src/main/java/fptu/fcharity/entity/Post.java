@@ -1,5 +1,6 @@
 package fptu.fcharity.entity;
 
+import fptu.fcharity.utils.constants.PostStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +41,11 @@ public class Post {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-    @PrePersist
+
+    @Nationalized
+    @Column(name = "post_status", length = 50)
+    private String postStatus;
+
     protected void onCreate() {
         createdAt = Instant.now();
         updatedAt = Instant.now();
@@ -49,5 +54,14 @@ public class Post {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = Instant.now();
+    }
+    public Post() {
+    }
+    public Post(User user, String title, String content) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+        this.vote = 0;
+        this.postStatus = PostStatus.ACTIVE;
     }
 }
