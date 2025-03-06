@@ -1,5 +1,6 @@
 package fptu.fcharity.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,9 +57,22 @@ public class Organization {
     @Nationalized
     @Column(name = "organization_status", length = 50)
     private String organizationStatus;
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "organization_status", length = 50)
+//    private OrganizationStatus organizationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ceo_id")
     private User ceo;
+
+//    public enum OrganizationStatus {
+//        PENDING,
+//        ACTIVE;
+//
+//        @JsonCreator
+//        public static OrganizationStatus fromString(String value) {
+//            return value != null ? OrganizationStatus.valueOf(value.toUpperCase()) : null;
+//        }
+//    }
 
 }
