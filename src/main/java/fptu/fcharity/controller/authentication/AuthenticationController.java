@@ -84,6 +84,7 @@ public class AuthenticationController {
         User user = authenticationService.googleLogin(token);
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        System.out.println("Refresh token: "+refreshToken);
         LoginResponse loginResponse = new LoginResponse(jwtToken,refreshToken);
         return ResponseEntity.ok(loginResponse);
     }
