@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class RequestDto {
-    private UUID requestId;
+    private UUID id;
     private UUID userId;
     private String title;
     private String content;

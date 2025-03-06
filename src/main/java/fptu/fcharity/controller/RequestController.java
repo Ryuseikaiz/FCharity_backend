@@ -1,9 +1,8 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.request.RequestDto;
-import fptu.fcharity.entity.Request;
 import fptu.fcharity.entity.Taggable;
-import fptu.fcharity.response.request.RequestResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.RequestService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +20,14 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RequestResponse>> getAllRequests() {
-        List<RequestResponse> requests = requestService.getAllRequests();
+    public ResponseEntity<List<RequestFinalResponse>> getAllRequests() {
+        List<RequestFinalResponse> requests = requestService.getAllRequests();
         return ResponseEntity.ok(requests);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> getRequestById(@PathVariable UUID id) {
-        RequestResponse request = requestService.getRequestById(id);
+        RequestFinalResponse request = requestService.getRequestById(id);
         return ResponseEntity.ok(request);
     }
 
@@ -40,13 +39,14 @@ public class RequestController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createRequest(@RequestBody RequestDto requestDto) {
-        RequestResponse request = requestService.createRequest(requestDto);
+        RequestFinalResponse request = requestService.createRequest(requestDto);
         return ResponseEntity.ok(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RequestResponse> updateRequest(@PathVariable UUID id, @RequestBody RequestDto requestDTO) {
-        return ResponseEntity.ok(requestService.updateRequest(id, requestDTO));
+    public ResponseEntity<RequestFinalResponse> updateRequest(@PathVariable UUID id, @RequestBody RequestDto requestDTO) {
+        RequestFinalResponse request = requestService.updateRequest(id, requestDTO);
+        return ResponseEntity.ok(request);
     }
 
     @DeleteMapping("/{id}")
