@@ -1,6 +1,6 @@
 package fptu.fcharity.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,9 +45,6 @@ public class Project {
     @Column(name = "project_description")
     private String projectDescription;
 
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "project_status", length = 50)
-//    private ProjectStatus projectStatus;
     @Nationalized
     @Column(name = "project_status", length = 50)
     private String projectStatus;
@@ -80,14 +77,5 @@ public class Project {
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
-//    public enum ProjectStatus {
-//        PENDING,
-//        ACTIVE,
-//        COMPLETED,
-//        CANCELED;
-//        @JsonCreator
-//        public static ProjectStatus fromString(String value) {
-//            return value != null ? ProjectStatus.valueOf(value.toUpperCase()) : null;
-//        }
-//    }
+
 }

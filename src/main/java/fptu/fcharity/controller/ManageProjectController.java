@@ -15,26 +15,22 @@ import java.util.UUID;
 public class ManageProjectController {
     private final ManageProjectService projectService;
 
-    // Lấy danh sách dự án
     @GetMapping
     public ResponseEntity<List<ProjectDTO>> getAllProjects() {
         return ResponseEntity.ok(projectService.getAllProjects());
     }
 
-    // Lấy dự án theo ID
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectDTO> getProjectById(@PathVariable UUID projectId) {
         return ResponseEntity.ok(projectService.getProjectById(projectId));
     }
 
-    // Xóa dự án
     @DeleteMapping("/{projectId}")
     public ResponseEntity<String> deleteProject(@PathVariable UUID projectId) {
         projectService.deleteProject(projectId);
         return ResponseEntity.ok("Project deleted successfully.");
     }
 
-    // Duyệt dự án (Chuyển từ PENDING → ACTIVE)
     @PutMapping("/{projectId}/approve")
     public ResponseEntity<String> approveProject(@PathVariable UUID projectId) {
         projectService.approveProject(projectId);

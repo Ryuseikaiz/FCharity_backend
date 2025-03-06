@@ -15,26 +15,22 @@ import java.util.UUID;
 public class ManageOrganizationController {
     private final ManageOrganizationService manageOrganizationService;
 
-    // Lấy danh sách tổ chức
     @GetMapping
     public ResponseEntity<List<OrganizationDTO>> getAllOrganizations() {
         return ResponseEntity.ok(manageOrganizationService.getAllOrganizations());
     }
 
-    // Lấy tổ chức theo ID
     @GetMapping("/{orgId}")
     public ResponseEntity<OrganizationDTO> getOrganizationById(@PathVariable UUID orgId) {
         return ResponseEntity.ok(manageOrganizationService.getOrganizationById(orgId));
     }
 
-    // Xóa tổ chức
     @DeleteMapping("/{orgId}")
     public ResponseEntity<String> deleteOrganization(@PathVariable UUID orgId) {
         manageOrganizationService.deleteOrganization(orgId);
         return ResponseEntity.ok("Organization deleted successfully.");
     }
 
-    // Duyệt tổ chức từ Pending → Active
     @PutMapping("/{orgId}/approve")
     public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
         manageOrganizationService.approveOrganization(orgId);

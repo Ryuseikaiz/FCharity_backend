@@ -1,6 +1,5 @@
 package fptu.fcharity.dto.admindashboard;
 
-//import fptu.fcharity.entity.Organization.OrganizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
