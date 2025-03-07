@@ -2,6 +2,7 @@ package fptu.fcharity.dao;
 
 import fptu.fcharity.entity.Request;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

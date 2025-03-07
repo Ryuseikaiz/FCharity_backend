@@ -6,10 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/request")
+@RequestMapping("/api")
 public class RequestRestController {
     private final RequestService requestService;
 
@@ -24,7 +25,7 @@ public class RequestRestController {
     }
 
     @GetMapping("/requests/{request_id}")
-    public Request getRequest(@PathVariable UUID request_id) {
+    public Optional<Request> getRequest(@PathVariable UUID request_id) {
         return requestService.getById(request_id);
     }
 

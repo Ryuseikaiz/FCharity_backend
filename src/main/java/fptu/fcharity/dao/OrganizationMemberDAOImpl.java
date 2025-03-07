@@ -24,6 +24,7 @@ public class OrganizationMemberDAOImpl implements OrganizationMemberDAO {
 
     @Override
     public OrganizationMember getById(UUID id) {
+        System.out.println("Inside getById OrganizationMemberDAOImpl");
         return entityManager.find(OrganizationMember.class, id);
     }
 

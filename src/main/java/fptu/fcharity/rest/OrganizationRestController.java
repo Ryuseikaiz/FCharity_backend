@@ -25,11 +25,13 @@ public class OrganizationRestController {
 
     @GetMapping("/organizations/{organization_id}")
     public Organization getOrganizationById(@PathVariable("organization_id") UUID organization_id) {
+        System.out.println("Get organization by id: " + organization_id);
         return organizationService.getById(organization_id);
     }
 
     @PostMapping("/organizations")
     public Organization postOrganization(@RequestBody Organization organization) {
+        System.out.println("creating organization: " + organization);
         return organizationService.save(organization);
     }
 

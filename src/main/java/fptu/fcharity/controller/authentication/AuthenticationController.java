@@ -38,7 +38,7 @@ public class AuthenticationController {
     }
     @PostMapping("/verify-reset-password-otp")
     public ResponseEntity<?> verifyResetPassword(@RequestBody VerifyUserDto verifyUserDto) {
-        User u = userService.findUserByEmail(verifyUserDto.getEmail());
+        Optional<User> u = userService.findUserByEmail(verifyUserDto.getEmail());
         return ResponseEntity.ok(authenticationService.verifyEmail(u, verifyUserDto.getVerificationCode()));
     }
     @PostMapping("/reset-password")

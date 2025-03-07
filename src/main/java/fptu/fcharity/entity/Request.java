@@ -17,6 +17,9 @@ public class Request {
     @Column(name="request_id", unique = true, updatable = false, nullable = false)
     private UUID requestId;
 
+    @Column(name = "organization_id")
+    private UUID organizationId;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -59,8 +62,9 @@ public class Request {
     public Request() {
     }
 
-    public Request(UUID requestId, User user, String title, String content, LocalDateTime creationDate, String phone, String email, String location, String attachment, boolean isEmergency, Category categoryId, Tag tagId, String status) {
+    public Request(UUID requestId, UUID organizationId, User user, String title, String content, LocalDateTime creationDate, String phone, String email, String location, String attachment, boolean isEmergency, Category categoryId, Tag tagId, String status) {
         this.requestId = requestId;
+        this.organizationId = organizationId;
         this.user = user;
         this.title = title;
         this.content = content;

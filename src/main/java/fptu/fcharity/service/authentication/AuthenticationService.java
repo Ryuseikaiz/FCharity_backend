@@ -92,7 +92,9 @@ public class AuthenticationService {
         return user;
     }
 
-    public boolean verifyEmail(User user, String verificationCode) {
+    public boolean verifyEmail(Optional<User> optionalUser, String verificationCode) {
+        User user = optionalUser.orElseThrow(() -> new ApiRequestException("User not found"));
+
         if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
             throw new ApiRequestException("Verification code has expired");
         }
@@ -106,9 +108,11 @@ public class AuthenticationService {
     }
     public void verifyUser(VerifyUserDto input) {
         Optional<User> optionalUser = userRepository.findByEmail(input.getEmail());
+//        optionalUser.orElseThrow(() -> new ApiRequestException("User not found"));
+
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (verifyEmail(user, input.getVerificationCode())) {
+            if (verifyEmail(Optional.of(user), input.getVerificationCode())) {
                 user.setEnabled(true);
                 userRepository.save(user);
             } else {

@@ -130,6 +130,7 @@ public class User implements UserDetails {
     }
     public enum UserRole {
         Admin,
+        Manager,
         User,
     }
 }

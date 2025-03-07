@@ -50,7 +50,7 @@ public class Organization {
 
     @ManyToOne
     @JoinColumn(name = "ceo_id")
-    private User ceo;
+    private User ceoId;
 
     public Organization() {
     }
@@ -67,7 +67,7 @@ public class Organization {
         this.startTime = startTime;
         this.shutdownDay = shutdownDay;
         this.organizationStatus = organizationStatus;
-        this.ceo = ceo;
+        this.ceoId = ceoId;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Organization {
                 ", startTime=" + startTime +
                 ", shutdownDay=" + shutdownDay +
                 ", organizationStatus='" + organizationStatus + '\'' +
-                ", ceo=" + ceo +
+                ", ceoId=" + ceoId +
                 '}';
     }
 }

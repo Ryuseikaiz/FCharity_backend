@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -25,7 +26,7 @@ public class RequestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Request> getRequestById(@PathVariable UUID id) {
+    public ResponseEntity<Optional<Request>> getRequestById(@PathVariable UUID id) {
         return ResponseEntity.ok(requestService.getById(id));
     }
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -23,9 +24,9 @@ public class OrganizationMemberRestController {
         return organizationMemberService.findAll();
     }
 
-    @GetMapping("/organization_members/{organization_member_id}")
-    public OrganizationMember getOrganizationMember(@PathVariable UUID organization_member_id) {
-        return organizationMemberService.findById(organization_member_id);
+    @GetMapping("/organization-members/{organization_id}")
+    public Optional<OrganizationMember> getOrganizationMember(@PathVariable UUID organization_id) {
+        return organizationMemberService.findById(organization_id);
     }
 
     @PostMapping("/organization_members")

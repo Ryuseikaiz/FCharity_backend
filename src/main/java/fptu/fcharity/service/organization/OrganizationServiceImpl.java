@@ -2,6 +2,7 @@ package fptu.fcharity.service.organization;
 
 import fptu.fcharity.dao.OrganizationDAO;
 import fptu.fcharity.entity.Organization;
+import fptu.fcharity.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,41 +12,41 @@ import java.util.UUID;
 
 @Service
 public class OrganizationServiceImpl implements OrganizationService {
-    private final OrganizationDAO organizationDAO;
+    private final OrganizationRepository organizationRepository;
 
     @Autowired
-    public OrganizationServiceImpl(OrganizationDAO organizationDAO)
+    public OrganizationServiceImpl(OrganizationRepository organizationRepository)
     {
-        this.organizationDAO = organizationDAO;
+        this.organizationRepository = organizationRepository;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Organization> getAll() {
-        return organizationDAO.getAll();
+        return organizationRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Organization getById(UUID id) {
-        return organizationDAO.getById(id);
+        return organizationRepository.findById(id).orElse(null);
     }
 
     @Override
     @Transactional
     public Organization save(Organization organization) {
-        System.out.println("postOrganization");
-        System.out.println(organization);
-        return organizationDAO.save(organization);
+        return organizationRepository.save(organization);
     }
 
     @Override
     @Transactional
     public Organization update(Organization organization) {
-        return organizationDAO.update(organization);
+        return organizationRepository.save(organization);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
-        organizationDAO.delete(id);
+        organizationRepository.deleteById(id);
     }
 }

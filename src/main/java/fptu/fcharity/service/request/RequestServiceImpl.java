@@ -1,47 +1,50 @@
 package fptu.fcharity.service.request;
 
-import fptu.fcharity.dao.RequestDAO;
 import fptu.fcharity.entity.Request;
+import fptu.fcharity.repository.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class RequestServiceImpl implements RequestService {
-    private final RequestDAO requestDAO;
+    private final RequestRepository requestRepository;
 
     @Autowired
-    public RequestServiceImpl(RequestDAO requestDAO) {
-        this.requestDAO = requestDAO;
+    public RequestServiceImpl(RequestRepository requestRepository) {
+        this.requestRepository = requestRepository;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Request> getAll() {
-        return requestDAO.getAll();
+        return requestRepository.findAll();
     }
 
     @Override
-    public Request getById(UUID id) {
-        return requestDAO.getById(id);
+    @Transactional(readOnly = true)
+    public Optional<Request> getById(UUID id) {
+        return requestRepository.findById(id);
     }
 
     @Override
     @Transactional
     public Request save(Request request) {
-        return requestDAO.save(request);
+        return requestRepository.save(request);
     }
 
     @Override
     @Transactional
     public Request update(Request request) {
-        return requestDAO.update(request);
+        return requestRepository.save(request);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
-        requestDAO.delete(id);
+        requestRepository.deleteById(id);
     }
 }
