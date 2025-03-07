@@ -13,4 +13,5 @@ import java.util.List;
 public class RequestFinalResponse {
     private Request request;
     private List<Taggable> requestTags;
+    private List<String> attachments;
 }

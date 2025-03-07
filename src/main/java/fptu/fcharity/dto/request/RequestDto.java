@@ -19,9 +19,10 @@ public class RequestDto {
     private String phone;
     private String email;
     private String location;
-    private String attachment;
     private boolean isEmergency;
     private UUID categoryId;
     private List<UUID> tagIds;
     private String status;
+    private List<String> imageUrls;
+    private List<String> videoUrls;
 }

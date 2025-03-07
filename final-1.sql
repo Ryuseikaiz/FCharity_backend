@@ -11,6 +11,7 @@ create table tags(
 	tag_name NVARCHAR(255),
 )
 
+create table
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
@@ -137,17 +138,18 @@ CREATE TABLE timeline (
 );
 
 -- Table: object_images
-CREATE TABLE object_images (
-    image_id UNIQUEIDENTIFIER  DEFAULT NEWID(),
+CREATE TABLE object_attachments (
+    image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     url NVARCHAR(255),
     request_id UNIQUEIDENTIFIER,
     project_id UNIQUEIDENTIFIER,
 	organization_id UNIQUEIDENTIFIER,
     phase_id UNIQUEIDENTIFIER,
-	PRIMARY KEY (image_id,url), 
+    type_attachment NVARCHAR(50),
     FOREIGN KEY (request_id) REFERENCES requests(request_id),
     FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
 
 -- Table: task_plan

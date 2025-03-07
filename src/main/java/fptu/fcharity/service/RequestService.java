@@ -21,6 +21,7 @@ public class RequestService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final TaggableRepository taggableRepository;
+    private final ObjectAttachmentService objectAttachmentService;
     private final RequestResponseMapper requestResponseMapper;
 
     public RequestService(TaggableRepository _taggableRepository,
@@ -28,26 +29,29 @@ public class RequestService {
                           UserRepository userRepository,
                           CategoryRepository categoryRepository,
                           RequestResponseMapper requestResponseMapper,
-                          TagRepository tagRepository) {
+                          TagRepository tagRepository,
+                          ObjectAttachmentService objectAttachmentService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
+        this.objectAttachmentService = objectAttachmentService;
         taggableRepository = _taggableRepository;
         this.requestResponseMapper = requestResponseMapper;
     }
 
     public List<RequestFinalResponse> getAllRequests() {
-        List<Request> requestList =  requestRepository.findAllWithInclude();
-        return  requestList.stream()
-                .map(request -> new RequestFinalResponse(request,getTagsOfRequest(request.getId())))
+        List<Request> requestList = requestRepository.findAllWithInclude();
+        return requestList.stream()
+                .map(request -> new RequestFinalResponse(request, getTagsOfRequest(request.getId()), objectAttachmentService.getAttachmentsOfObject(request.getId(), "REQUEST")))
                 .toList();
     }
 
     public RequestFinalResponse getRequestById(UUID requestId) {
-        Request request =  requestRepository.findWithIncludeById(requestId);
-        return new RequestFinalResponse(request,getTagsOfRequest(request.getId()));
+        Request request = requestRepository.findWithIncludeById(requestId);
+        return new RequestFinalResponse(request, getTagsOfRequest(request.getId()), objectAttachmentService.getAttachmentsOfObject(request.getId(), "REQUEST"));
     }
+
     public List<Taggable> getTagsOfRequest(UUID requestId) {
         return taggableRepository.findAllWithInclude().stream()
                 .filter(taggable -> taggable.getTaggableId().equals(requestId) && taggable.getTaggableType().equals(TaggableType.REQUEST))
@@ -76,7 +80,7 @@ public class RequestService {
     }
 
     public RequestFinalResponse createRequest(RequestDto requestDTO) {
-        try{
+        try {
             User user = userRepository.findById(requestDTO.getUserId())
                     .orElseThrow(() -> new ApiRequestException("User not found"));
 
@@ -90,8 +94,11 @@ public class RequestService {
                     requestDTO.isEmergency(), category);
             requestRepository.save(request);
             addRequestTags(request.getId(), requestDTO.getTagIds());
-            return new RequestFinalResponse(request,getTagsOfRequest(request.getId()));
-        }catch(Exception e){
+            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), "REQUEST");
+            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), "REQUEST");
+
+            return new RequestFinalResponse(request, getTagsOfRequest(request.getId()), objectAttachmentService.getAttachmentsOfObject(request.getId(), "REQUEST"));
+        } catch (Exception e) {
             throw new ApiRequestException(e.getMessage());
         }
     }
@@ -99,12 +106,12 @@ public class RequestService {
     public RequestFinalResponse updateRequest(UUID requestId, RequestDto requestDTO) {
         Request request = requestRepository.findWithIncludeById(requestId);
         if (request != null) {
-           if(requestDTO.getCategoryId()!=null) {
-               Category category = categoryRepository.findById(requestDTO.getCategoryId()).get();
-               request.setCategory(category);
-           }else{
+            if (requestDTO.getCategoryId() != null) {
+                Category category = categoryRepository.findById(requestDTO.getCategoryId()).get();
+                request.setCategory(category);
+            } else {
                 request.setCategory(null);
-           }
+            }
             request.setTitle(requestDTO.getTitle() != null ? requestDTO.getTitle() : request.getTitle());
             request.setContent(requestDTO.getContent() != null ? requestDTO.getContent() : request.getContent());
             request.setPhone(requestDTO.getPhone() != null ? requestDTO.getPhone() : request.getPhone());
@@ -112,13 +119,15 @@ public class RequestService {
             request.setLocation(requestDTO.getLocation() != null ? requestDTO.getLocation() : request.getLocation());
             request.setIsEmergency(requestDTO.isEmergency());
             request.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : request.getStatus());
-            if(requestDTO.getTagIds()!=null) {
+            if (requestDTO.getTagIds() != null) {
                 updateRequestTags(request.getId(), requestDTO.getTagIds());
-            }else{
-                updateRequestTags(request.getId(),new ArrayList<UUID>());
-        }
+            } else {
+                updateRequestTags(request.getId(), new ArrayList<>());
+            }
+            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getImageUrls(), "REQUEST");
+            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getVideoUrls(), "REQUEST");
             requestRepository.save(request);
-            return new RequestFinalResponse(request, getTagsOfRequest(request.getId()));
+            return new RequestFinalResponse(request, getTagsOfRequest(request.getId()), objectAttachmentService.getAttachmentsOfObject(request.getId(), "REQUEST"));
         }
         throw new ApiRequestException("Request not found");
     }
