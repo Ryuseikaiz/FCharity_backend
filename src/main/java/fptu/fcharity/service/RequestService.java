@@ -3,14 +3,15 @@ package fptu.fcharity.service;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
-import fptu.fcharity.response.request.RequestResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
+import fptu.fcharity.utils.mapper.RequestResponseMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -19,28 +20,34 @@ public class RequestService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TaggableService taggableService;
+    private final ObjectAttachmentService objectAttachmentService;
+    private final RequestResponseMapper requestResponseMapper;
 
     public RequestService(TaggableRepository _taggableRepository,
                           RequestRepository requestRepository,
                           UserRepository userRepository,
                           CategoryRepository categoryRepository,
+                          RequestResponseMapper requestResponseMapper,
+                          ObjectAttachmentService objectAttachmentService) {
                           TaggableService taggableService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.taggableService = taggableService;
+        this.objectAttachmentService = objectAttachmentService;
+        this.requestResponseMapper = requestResponseMapper;
     }
 
-    public List<RequestResponse> getAllRequests() {
+    public List<RequestFinalResponse> getAllRequests() {
         List<Request> requestList =  requestRepository.findAllWithInclude();
         return  requestList.stream()
-                .map(request -> new RequestResponse(request,taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST)))
+                .map(request -> new RequestFinalResponse(request,taggableService.getTagsOfObject(request.getId(),objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST),TaggableType.REQUEST))
                 .toList();
     }
 
-    public RequestResponse getRequestById(UUID requestId) {
+    public RequestFinalResponse getRequestById(UUID requestId) {
         Request request =  requestRepository.findWithIncludeById(requestId);
-       return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
+       return new RequestFinalResponse(request,taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST), objectAttachmentService.getAttachmentsOfObject(request.getId(), TaggableType.REQUEST)));
     }
 
     public RequestResponse createRequest(RequestDto requestDTO) {
@@ -48,8 +55,8 @@ public class RequestService {
            User user = userRepository.findById(requestDTO.getUserId())
                    .orElseThrow(() -> new ApiRequestException("User not found"));
 
-           Category category = categoryRepository.findById(requestDTO.getCategoryId())
-                   .orElseThrow(() -> new ApiRequestException("Category not found"));
+            Category category = categoryRepository.findById(requestDTO.getCategoryId())
+                    .orElseThrow(() -> new ApiRequestException("Category not found"));
 
            Request request = new Request(UUID.randomUUID(),
                    user, requestDTO.getTitle(), requestDTO.getContent(),
@@ -58,23 +65,25 @@ public class RequestService {
                    requestDTO.isEmergency(), category);
            requestRepository.save(request);
            taggableService.addTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
+           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), "REQUEST");
+           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), "REQUEST");
+
            return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
        }catch(Exception e){
            throw new ApiRequestException(e.getMessage());
        }
+
     }
 
-    public RequestResponse updateRequest(UUID requestId, RequestDto requestDTO) {
-        Request request = requestRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
+    public RequestFinalResponse updateRequest(UUID requestId, RequestDto requestDTO) {
+        Request request = requestRepository.findWithIncludeById(requestId);
         if (request != null) {
-            User user = userRepository.findById(requestDTO.getUserId())
-                    .orElseThrow(() -> new ApiRequestException("User not found"));
-
-            Category category = categoryRepository.findById(requestDTO.getCategoryId())
-                    .orElseThrow(() -> new ApiRequestException("Category not found"));
-
-            request.setUser(user);
-            request.setCategory(category);
+            if (requestDTO.getCategoryId() != null) {
+                Category category = categoryRepository.findById(requestDTO.getCategoryId()).get();
+                request.setCategory(category);
+            } else {
+                request.setCategory(null);
+            }
             request.setTitle(requestDTO.getTitle() != null ? requestDTO.getTitle() : request.getTitle());
             request.setContent(requestDTO.getContent() != null ? requestDTO.getContent() : request.getContent());
             request.setPhone(requestDTO.getPhone() != null ? requestDTO.getPhone() : request.getPhone());
@@ -85,15 +94,23 @@ public class RequestService {
             taggableService.updateTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
              requestRepository.save(request);
             return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
+            if (requestDTO.getTagIds() != null) {
+                updateRequestTags(request.getId(), requestDTO.getTagIds());
+            } else {
+                updateRequestTags(request.getId(), new ArrayList<>());
+            }
+            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getImageUrls(), "REQUEST");
+            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getVideoUrls(), "REQUEST");
+            requestRepository.save(request);
+            return new RequestFinalResponse(request, getTagsOfRequest(request.getId()), objectAttachmentService.getAttachmentsOfObject(request.getId(), "REQUEST"));
         }
-        return null;
+        throw new ApiRequestException("Request not found");
     }
 
     public void deleteRequest(UUID requestId) {
-        if(!requestRepository.existsById(requestId)){
+        if (!requestRepository.existsById(requestId)) {
             throw new ApiRequestException("Request not found");
         }
         requestRepository.deleteById(requestId);
     }
 }
-

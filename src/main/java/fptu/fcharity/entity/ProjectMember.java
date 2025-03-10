@@ -34,5 +34,4 @@ public class ProjectMember {
 
     @Column(name = "member_role", length = 36)
     private String memberRole;
-
 }
