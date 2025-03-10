@@ -1,4 +1,4 @@
-package fptu.fcharity.exception;
+package fptu.fcharity.utils.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

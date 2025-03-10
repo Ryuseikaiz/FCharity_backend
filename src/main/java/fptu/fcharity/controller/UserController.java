@@ -1,10 +1,10 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
-import fptu.fcharity.mapper.UserResponseMapper;
-import fptu.fcharity.response.authentication.UserResponse;
-import fptu.fcharity.service.UserService;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.service.UserService;
+import fptu.fcharity.utils.mapper.UserResponseMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +17,8 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final UserResponseMapper userResponseMapper;
-    public UserController(UserService userService,UserResponseMapper userResponseMapper) {
+
+    public UserController(UserService userService, @Qualifier("userResponseMapperImpl") UserResponseMapper userResponseMapper) {
         this.userService = userService;
         this.userResponseMapper = userResponseMapper;
     }
@@ -33,12 +34,14 @@ public class UserController {
     public ResponseEntity<List<User>> allUsers() {
         return ResponseEntity.ok(userService.allUsers());
     }
+
     @GetMapping
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok("hello it's me");
     }
+
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
-            return ResponseEntity.ok(userService.changePassword(changePasswordDto));
+        return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
 }
