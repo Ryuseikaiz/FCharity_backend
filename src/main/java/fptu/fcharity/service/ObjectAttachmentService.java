@@ -1,12 +1,14 @@
 package fptu.fcharity.service;
 
-import fptu.fcharity.entity.*;
+import fptu.fcharity.entity.ObjectAttachment;
 import fptu.fcharity.repository.ObjectAttachmentRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
+@Transactional
 @Service
 public class ObjectAttachmentService {
     private final ObjectAttachmentRepository objectAttachmentRepository;

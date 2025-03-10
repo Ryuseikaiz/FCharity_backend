@@ -64,16 +64,20 @@ public class RequestService {
             if (tagRepository.existsById(tagId)) {
                 Tag tag = tagRepository.findById(tagId)
                         .orElseThrow(() -> new ApiRequestException("Tag not found"));
-                Taggable taggable = new Taggable(tag,requestId, TaggableType.REQUEST);
+                Taggable taggable = new Taggable(tag, requestId, TaggableType.REQUEST);
                 taggableRepository.save(taggable);
             }
-        }}
+        }
+    }
+
     public void updateRequestTags(UUID requestId, List<UUID> tagIds) {
         List<Taggable> oldTags = taggableRepository.findAllWithInclude().stream()
                 .filter(taggable -> taggable.getTaggableId().equals(requestId) && taggable.getTaggableType().equals(TaggableType.REQUEST))
                 .toList();
-        for (Taggable taggable: oldTags) {
-            if(!tagIds.contains(taggable.getTag().getId())){taggableRepository.deleteById(taggable.getId());}
+        for (Taggable taggable : oldTags) {
+            if (!tagIds.contains(taggable.getTag().getId())) {
+                taggableRepository.deleteById(taggable.getId());
+            }
             tagIds.remove(taggable.getTag().getId());
         }
         addRequestTags(requestId, tagIds);
@@ -133,7 +137,7 @@ public class RequestService {
     }
 
     public void deleteRequest(UUID requestId) {
-        if(!requestRepository.existsById(requestId)){
+        if (!requestRepository.existsById(requestId)) {
             throw new ApiRequestException("Request not found");
         }
         requestRepository.deleteById(requestId);
