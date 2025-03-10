@@ -37,29 +37,10 @@ public class PostService {
 
     @Autowired
     private PostMapper postMapper;
+    @Autowired
+    private TaggableService taggableService;
 
-    public void addPostTags(UUID requestId, List<UUID> tagIds) {
-        Post post = postRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
-        if (post != null) {
-            for (UUID tagId : tagIds) {
-                if (tagRepository.existsById(tagId)) {
-                    Tag tag = tagRepository.findById(tagId)
-                            .orElseThrow(() -> new ApiRequestException("Tag not found"));
-                    Taggable taggable = new Taggable(tag,requestId, TaggableType.POST);
-                    taggableRepository.save(taggable);
-                }
-            }
-        }}
-    public void updatePostTags(UUID postId, List<UUID> tagIds) {
-        List<Taggable> oldTags = taggableRepository.findAllWithInclude().stream()
-                .filter(taggable -> taggable.getTaggableId().equals(postId) && taggable.getTaggableType().equals(TaggableType.POST))
-                .toList();
-        for (Taggable taggable: oldTags) {
-            if(!tagIds.contains(taggable.getTag().getId())){taggableRepository.deleteById(taggable.getId());}
-            tagIds.remove(taggable.getTag().getId());
-        }
-        addPostTags(postId, tagIds);
-    }
+
     // Lấy tất cả các Post
     public List<PostResponse> getAllPosts() {
         List<Post> posts = postRepository.findAllWithInclude();
@@ -91,7 +72,7 @@ public class PostService {
 
 
         Post savedPost = postRepository.save(post);
-        addPostTags(post.getId(), postRequestDTO.getTagIds());
+        taggableService.addTaggables(post.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
         return  postMapper.convertToDTO(savedPost, getTagsOfPost(savedPost.getId()));
     }
 
@@ -102,7 +83,7 @@ public class PostService {
         post.setVote(postUpdateDTO.getVote());
 
         Post updatedPost = postRepository.save(post);
-        updatePostTags(post.getId(), postUpdateDTO.getTagIds());
+        taggableService.updateTaggables(post.getId(), postUpdateDTO.getTagIds(), TaggableType.POST);
         return postMapper.convertToDTO(updatedPost, getTagsOfPost(updatedPost.getId()));
     }
 

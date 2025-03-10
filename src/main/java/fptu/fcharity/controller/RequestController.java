@@ -5,6 +5,8 @@ import fptu.fcharity.entity.Request;
 import fptu.fcharity.entity.Taggable;
 import fptu.fcharity.response.request.RequestResponse;
 import fptu.fcharity.service.RequestService;
+import fptu.fcharity.service.TaggableService;
+import fptu.fcharity.utils.constants.TaggableType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +17,12 @@ import java.util.UUID;
 @RequestMapping("/requests")
 public class RequestController {
     private final RequestService requestService;
+    private final TaggableService taggableService;
 
-    public RequestController(RequestService requestService) {
+    public RequestController(RequestService requestService,
+                             TaggableService taggableService) {
         this.requestService = requestService;
+        this.taggableService = taggableService;
     }
 
     @GetMapping
@@ -34,7 +39,7 @@ public class RequestController {
 
     @GetMapping(value = "/{id}/tags", produces = "application/json")
     public ResponseEntity<?> getTagsOfRequest(@PathVariable UUID id) {
-        List<Taggable> tags = requestService.getTagsOfRequest(id);
+        List<Taggable> tags = taggableService.getTagsOfObject(id, TaggableType.REQUEST);
         return ResponseEntity.ok(tags);
     }
 

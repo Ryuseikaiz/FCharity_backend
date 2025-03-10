@@ -18,58 +18,31 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final TagRepository tagRepository;
-    private final TaggableRepository taggableRepository;
+    private final TaggableService taggableService;
 
     public RequestService(TaggableRepository _taggableRepository,
                           RequestRepository requestRepository,
                           UserRepository userRepository,
                           CategoryRepository categoryRepository,
-                          TagRepository tagRepository) {
+                          TaggableService taggableService) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
-        this.tagRepository = tagRepository;
-        taggableRepository = _taggableRepository;
+        this.taggableService = taggableService;
     }
 
     public List<RequestResponse> getAllRequests() {
         List<Request> requestList =  requestRepository.findAllWithInclude();
         return  requestList.stream()
-                .map(request -> new RequestResponse(request,getTagsOfRequest(request.getId())))
+                .map(request -> new RequestResponse(request,taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST)))
                 .toList();
     }
 
     public RequestResponse getRequestById(UUID requestId) {
         Request request =  requestRepository.findWithIncludeById(requestId);
-       return new RequestResponse(request,getTagsOfRequest(request.getId()));
-    }
-    public List<Taggable> getTagsOfRequest(UUID requestId) {
-        return taggableRepository.findAllWithInclude().stream()
-                .filter(taggable -> taggable.getTaggableId().equals(requestId) && taggable.getTaggableType().equals(TaggableType.REQUEST))
-                .toList();
+       return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
     }
 
-    public void addRequestTags(UUID requestId, List<UUID> tagIds) {
-        Request request = requestRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
-            for (UUID tagId : tagIds) {
-                if (tagRepository.existsById(tagId)) {
-                    Tag tag = tagRepository.findById(tagId)
-                            .orElseThrow(() -> new ApiRequestException("Tag not found"));
-                    Taggable taggable = new Taggable(tag,requestId, TaggableType.REQUEST);
-                    taggableRepository.save(taggable);
-                }
-        }}
-    public void updateRequestTags(UUID requestId, List<UUID> tagIds) {
-        List<Taggable> oldTags = taggableRepository.findAllWithInclude().stream()
-                .filter(taggable -> taggable.getTaggableId().equals(requestId) && taggable.getTaggableType().equals(TaggableType.REQUEST))
-                .toList();
-        for (Taggable taggable: oldTags) {
-           if(!tagIds.contains(taggable.getTag().getId())){taggableRepository.deleteById(taggable.getId());}
-            tagIds.remove(taggable.getTag().getId());
-        }
-        addRequestTags(requestId, tagIds);
-    }
     public RequestResponse createRequest(RequestDto requestDTO) {
        try{
            User user = userRepository.findById(requestDTO.getUserId())
@@ -84,8 +57,8 @@ public class RequestService {
                    requestDTO.getLocation(),
                    requestDTO.isEmergency(), category);
            requestRepository.save(request);
-           addRequestTags(request.getId(), requestDTO.getTagIds());
-           return new RequestResponse(request,getTagsOfRequest(request.getId()));
+           taggableService.addTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
+           return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
        }catch(Exception e){
            throw new ApiRequestException(e.getMessage());
        }
@@ -109,9 +82,9 @@ public class RequestService {
             request.setLocation(requestDTO.getLocation() != null ? requestDTO.getLocation() : request.getLocation());
             request.setIsEmergency(requestDTO.isEmergency());
             request.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : request.getStatus());
-            updateRequestTags(request.getId(), requestDTO.getTagIds());
+            taggableService.updateTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
              requestRepository.save(request);
-            return new RequestResponse(request,getTagsOfRequest(request.getId()));
+            return new RequestResponse(request,taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST));
         }
         return null;
     }
