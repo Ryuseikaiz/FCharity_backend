@@ -25,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping("/current-user")
-    public ResponseEntity<?> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<?> authenticatedUser(Authentication authentication) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
     }

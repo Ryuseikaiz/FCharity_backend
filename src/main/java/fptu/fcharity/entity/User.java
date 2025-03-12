@@ -44,7 +44,7 @@ public class User implements UserDetails {
     private UserRole userRole;
 
 
-    @Column(name = "created_date", nullable = false)
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
 
     @Column(name = "user_status", nullable = false)

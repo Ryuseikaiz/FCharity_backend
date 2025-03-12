@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api")
 public class UserRestController {
     private final UserService userService;
     private final UserResponseMapper userResponseMapper;
@@ -22,13 +22,6 @@ public class UserRestController {
     public UserRestController(UserService userService, UserResponseMapper userResponseMapper) {
         this.userService = userService;
         this.userResponseMapper = userResponseMapper;
-    }
-
-    @GetMapping("/current-user")
-    public ResponseEntity<?> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
     }
     @GetMapping("/users/me")
     public Optional<User> me(@RequestAttribute("userEmail") String email) {

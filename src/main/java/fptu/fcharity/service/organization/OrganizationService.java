@@ -1,6 +1,8 @@
 package fptu.fcharity.service.organization;
 
+import fptu.fcharity.dto.organization.OrganizationDTO;
 import fptu.fcharity.entity.Organization;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,4 +14,6 @@ public interface OrganizationService {
     Organization createOrganization(Organization organization) throws IOException;
     Organization updateOrganization(Organization organization) throws IOException;
     void deleteOrganization(UUID id);
+    List<OrganizationDTO> getOrganizationsByManager(UUID managerId);
+    OrganizationDTO getOrganizationByIdAndManager(UUID id, UUID managerId);
 }
