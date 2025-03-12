@@ -31,9 +31,16 @@ public class ManageProjectController {
         return ResponseEntity.ok("Project deleted successfully.");
     }
 
-    @PutMapping("/{projectId}/approve")
+    @PutMapping("/approve/{projectId}")
     public ResponseEntity<String> approveProject(@PathVariable UUID projectId) {
         projectService.approveProject(projectId);
         return ResponseEntity.ok("Project has been approved successfully.");
     }
+
+    @PutMapping("/hide/{projectId}")
+    public ResponseEntity<String> hideProject(@PathVariable UUID projectId) {
+        projectService.hideProject(projectId);
+        return ResponseEntity.ok("Project has been hidden successfully.");
+    }
+
 }

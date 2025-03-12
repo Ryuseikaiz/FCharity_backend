@@ -47,4 +47,11 @@ public class ManageUserController {
         manageUserService.banUser(userId);
         return ResponseEntity.ok("User has been banned successfully.");
     }
+
+    @PutMapping("/unban/{userId}")
+    public ResponseEntity<String> unbanUser(@PathVariable UUID userId) {
+        manageUserService.unbanUser(userId);
+        return ResponseEntity.ok("User has been unbanned successfully.");
+    }
+
 }
