@@ -126,4 +126,15 @@ public class RequestService {
         objectAttachmentService.clearAttachments(requestId, TaggableType.REQUEST);
         requestRepository.deleteById(requestId);
     }
+
+    public List<RequestFinalResponse> getActiveRequests() {
+        List<Request> requestList =  requestRepository.findAllWithInclude();
+        return  requestList.stream()
+                .filter(request -> request.getStatus().equals("ACTIVE"))
+                .map(request -> new RequestFinalResponse(request,
+                        taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
+                        objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
+                ))
+                .toList();
+    }
 }

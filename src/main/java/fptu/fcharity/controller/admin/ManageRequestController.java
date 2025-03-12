@@ -1,4 +1,4 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.admin;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.service.ManageRequestService;
