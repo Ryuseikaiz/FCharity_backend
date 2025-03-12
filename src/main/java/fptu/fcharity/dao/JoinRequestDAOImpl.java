@@ -1,6 +1,6 @@
 package fptu.fcharity.dao;
 
-import fptu.fcharity.entity.JoinRequest;
+import fptu.fcharity.entity.InviteJoinRequest;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
@@ -17,40 +17,40 @@ public class JoinRequestDAOImpl implements JoinRequestDAO {
     }
 
     @Override
-    public JoinRequest createJoinRequest(JoinRequest joinRequest) {
+    public InviteJoinRequest createJoinRequest(InviteJoinRequest joinRequest) {
         return entityManager.merge(joinRequest);
     }
 
     @Override
-    public JoinRequest updateJoinRequest(JoinRequest joinRequest) {
+    public InviteJoinRequest updateJoinRequest(InviteJoinRequest joinRequest) {
         return entityManager.merge(joinRequest);
     }
 
     @Override
-    public void deleteJoinRequest(JoinRequest joinRequest) {
+    public void deleteJoinRequest(InviteJoinRequest joinRequest) {
         entityManager.remove(joinRequest);
     }
 
     @Override
-    public List<JoinRequest> getAllJoinRequests() {
-        return entityManager.createQuery("from JoinRequest", JoinRequest.class).getResultList();
+    public List<InviteJoinRequest> getAllJoinRequests() {
+        return entityManager.createQuery("from InviteJoinRequest", InviteJoinRequest.class).getResultList();
     }
 
     @Override
-    public List<JoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId) {
-        TypedQuery<JoinRequest> query = entityManager.createQuery("from JoinRequest where organizationId = :organizationId", JoinRequest.class);
+    public List<InviteJoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId) {
+        TypedQuery<InviteJoinRequest> query = entityManager.createQuery("from InviteJoinRequest where organizationId = :organizationId", InviteJoinRequest.class);
         query.setParameter("organizationId", organizationId);
         return query.getResultList();
     }
 
     @Override
-    public JoinRequest getJoinRequestById(UUID id) {
-        return entityManager.find(JoinRequest.class, id);
+    public InviteJoinRequest getJoinRequestById(UUID id) {
+        return entityManager.find(InviteJoinRequest.class, id);
     }
 
     @Override
-    public List<JoinRequest> getAllJoinRequestsByUserId(UUID userId) {
-        TypedQuery<JoinRequest> query = entityManager.createQuery("from JoinRequest where userId = :userId", JoinRequest.class);
+    public List<InviteJoinRequest> getAllJoinRequestsByUserId(UUID userId) {
+        TypedQuery<InviteJoinRequest> query = entityManager.createQuery("from InviteJoinRequest where userId = :userId", InviteJoinRequest.class);
         query.setParameter("userId", userId);
         return query.getResultList();
     }

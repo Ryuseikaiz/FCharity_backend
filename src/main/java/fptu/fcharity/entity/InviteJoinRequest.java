@@ -7,20 +7,25 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "join_requests")
+@Table(name = "invite_join_requests")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class JoinRequest {
+@Data
+public class InviteJoinRequest {
     @Id
     @GeneratedValue(generator = "UUID")
-    @Column(name = "join_request_id", unique = true, updatable = false, nullable = false)
-    private UUID joinRequestId;
+    @Column(name = "invite_join_request_id", unique = true, updatable = false, nullable = false)
+    private UUID inviteJoinRequestId;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    private User user; // Thay userId bằng đối tượng User
+
+//    @Column(name = "user_id")
+//    private UUID userId;
 
     @Column(name = "organization_id")
     private UUID organizationId;
@@ -33,6 +38,12 @@ public class JoinRequest {
 
     @Column(name = "cv_location")
     private String cvLocation;
+
+    @Column(name = "request_type")
+    private String requestType;
+
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "created_at")
     private Date createdAt;

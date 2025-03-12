@@ -1,18 +1,18 @@
 package fptu.fcharity.dao;
 
-import fptu.fcharity.entity.JoinRequest;
+import fptu.fcharity.entity.InviteJoinRequest;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface JoinRequestDAO {
-    JoinRequest createJoinRequest(JoinRequest joinRequest);
-    JoinRequest updateJoinRequest(JoinRequest joinRequest);
-    void deleteJoinRequest(JoinRequest joinRequest);
+    InviteJoinRequest createJoinRequest(InviteJoinRequest joinRequest);
+    InviteJoinRequest updateJoinRequest(InviteJoinRequest joinRequest);
+    void deleteJoinRequest(InviteJoinRequest joinRequest);
 
-    List<JoinRequest> getAllJoinRequests();
-    List<JoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId);
-    JoinRequest getJoinRequestById(UUID id);
-    List<JoinRequest> getAllJoinRequestsByUserId(UUID userId);
+    List<InviteJoinRequest> getAllJoinRequests();
+    List<InviteJoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId);
+    InviteJoinRequest getJoinRequestById(UUID id);
+    List<InviteJoinRequest> getAllJoinRequestsByUserId(UUID userId);
 
 }

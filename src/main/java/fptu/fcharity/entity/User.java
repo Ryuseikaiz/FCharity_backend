@@ -56,6 +56,9 @@ public class User implements UserDetails {
 
     @Column(name = "verification_code_expires_at")
     private LocalDateTime verificationCodeExpiresAt;
+//
+    @Column(name = "wallet_address")
+    private String walletAddress;
 
     // Constructor for creating an unverified user
     public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, String userRole, LocalDateTime createdDate, UserStatus userStatus) {

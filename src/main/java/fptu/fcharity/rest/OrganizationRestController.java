@@ -5,6 +5,7 @@ import fptu.fcharity.service.organization.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class OrganizationRestController {
 
     @GetMapping("/organizations")
     public List<Organization> getOrganization() {
-        return organizationService.getAll();
+        return organizationService.getAllOrganizations();
     }
 
     @GetMapping("/organizations/{organization_id}")
@@ -30,18 +31,18 @@ public class OrganizationRestController {
     }
 
     @PostMapping("/organizations")
-    public Organization postOrganization(@RequestBody Organization organization) {
+    public Organization postOrganization(@RequestBody Organization organization) throws IOException {
         System.out.println("creating organization: " + organization);
-        return organizationService.save(organization);
+        return organizationService.createOrganization(organization);
     }
 
     @PutMapping("/organizations")
-    public Organization putOrganization(@RequestBody Organization organization) {
-        return organizationService.update(organization);
+    public Organization putOrganization(@RequestBody Organization organization) throws IOException {
+        return organizationService.updateOrganization(organization);
     }
 
     @DeleteMapping("/organizations/{organization_id}")
     public void deleteOrganization(@PathVariable UUID organization_id) {
-        organizationService.delete(organization_id);
+        organizationService.deleteOrganization(organization_id);
     }
 }

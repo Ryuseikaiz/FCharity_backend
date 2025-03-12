@@ -2,6 +2,7 @@ package fptu.fcharity.rest;
 
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.service.organization.OrganizationMemberService;
+import fptu.fcharity.service.organization.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +14,12 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class OrganizationMemberRestController {
     private final OrganizationMemberService organizationMemberService;
+    private final OrganizationService organizationService;
 
     @Autowired
-    public OrganizationMemberRestController(OrganizationMemberService organizationMemberService) {
+    public OrganizationMemberRestController(OrganizationMemberService organizationMemberService, OrganizationService organizationService) {
         this.organizationMemberService = organizationMemberService;
+        this.organizationService = organizationService;
     }
 
     @GetMapping("/organization_members")
@@ -25,8 +28,8 @@ public class OrganizationMemberRestController {
     }
 
     @GetMapping("/organization-members/{organization_id}")
-    public Optional<OrganizationMember> getOrganizationMember(@PathVariable UUID organization_id) {
-        return organizationMemberService.findById(organization_id);
+    public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organization_id) {
+        return organizationMemberService.findOrganizationMemberByOrganization(organizationService.getById(organization_id));
     }
 
     @PostMapping("/organization_members")
@@ -39,7 +42,7 @@ public class OrganizationMemberRestController {
         return organizationMemberService.save(organizationMember);
     }
 
-    @DeleteMapping("/organization_members/{organization_member_id}")
+    @DeleteMapping("/organization-members/{organization_member_id}")
     public void deleteOrganizationMember(@PathVariable UUID organization_member_id) {
         organizationMemberService.delete(organization_member_id);
     }
