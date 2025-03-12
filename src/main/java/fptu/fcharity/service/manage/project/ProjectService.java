@@ -1,47 +1,57 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.service.ObjectAttachmentService;
+import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.ProjectMapper;
-import jakarta.transaction.Transactional;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final CategoryRepository categoryRepository;
-    private final TagRepository tagRepository;
     private final ProjectMapper projectMapper;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
     private final OrganizationRepository organizationRepository;
     private final TaggableService taggableService;
-
+    private final ObjectAttachmentService objectAttachmentService;
 
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
-                          TagRepository tagRepository,
                           UserRepository userRepository,
                           WalletRepository walletRepository,
                           OrganizationRepository organizationRepository,
-                          TaggableService taggableService) {
+                          TaggableService taggableService,
+                          ObjectAttachmentService objectAttachmentService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
-        this.tagRepository = tagRepository;
         this.projectMapper = projectMapper;
         this.userRepository = userRepository;
         this.walletRepository = walletRepository;
         this.organizationRepository = organizationRepository;
         this.taggableService = taggableService;
+        this.objectAttachmentService = objectAttachmentService;
+    }
+    public List<ProjectFinalResponse> getAllProjects() {
+        List<Project> projects = projectRepository.findAllWithInclude();
+        return projects.stream().map(project -> new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(),TaggableType.PROJECT),
+                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT))
+        ).toList();
     }
     public void takeObject(Project project, ProjectDto projectDto) {
         System.out.println("Category ID: " + projectDto.getCategoryId());
@@ -79,26 +89,47 @@ public class ProjectService {
         takeObject(project, projectDto);
         projectRepository.save(project);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
-        return new ProjectFinalResponse(project,taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT));
+        objectAttachmentService.saveAttachments(project.getId(), projectDto.getImageUrls(), TaggableType.PROJECT);
+        objectAttachmentService.saveAttachments(project.getId(), projectDto.getVideoUrls(), TaggableType.PROJECT);
+
+        return new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
     }
 
     public ProjectFinalResponse getProjectById(UUID id) {
         Project project =  projectRepository.findWithEssentialById(id);
-        return new ProjectFinalResponse(project,taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT));
+        if(project == null ){
+            throw new ApiRequestException("Project not found");
+        }
+        return new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
     }
 
     public ProjectFinalResponse updateProject(ProjectDto projectDto) {
         Project project = projectRepository.findWithEssentialById(projectDto.getId());
         projectMapper.updateEntityFromDto(projectDto, project);
         takeObject(project, projectDto);
+        if (projectDto.getTagIds() != null) {
+            taggableService.updateTaggables(project.getId(), projectDto.getTagIds(),TaggableType.PROJECT);
+        } else {
+            taggableService.updateTaggables(project.getId(), new ArrayList<>(),TaggableType.PROJECT);
+        }
+        objectAttachmentService.clearAttachments(project.getId(), TaggableType.PROJECT);
+        objectAttachmentService.saveAttachments(project.getId(), projectDto.getImageUrls(), TaggableType.PROJECT);
+        objectAttachmentService.saveAttachments(project.getId(), projectDto.getVideoUrls(), TaggableType.PROJECT);
+
         projectRepository.save(project);
-        taggableService.updateTaggables(project.getId(), projectDto.getTagIds(),TaggableType.PROJECT);
-        return new ProjectFinalResponse(project,taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT));
+        return new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
     }
 
     public void deleteProject(UUID projectId) {
         try
         {
+            objectAttachmentService.clearAttachments(projectId, TaggableType.PROJECT);
             projectRepository.deleteById(projectId);
         }
         catch (Exception e)

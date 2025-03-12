@@ -2,15 +2,19 @@ package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "object_attachments")
 public class ObjectAttachment {
     @Id
@@ -25,6 +29,7 @@ public class ObjectAttachment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Request request;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,19 +44,8 @@ public class ObjectAttachment {
     @JoinColumn(name = "phase_id")
     private Timeline phase;
 
-    public ObjectAttachment(UUID id, String url, UUID objectId, String objectType) {
-        this.id = id;
-        this.url = url;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-        switch (objectType) {
-            case "REQUEST":
-                this.request = new Request(objectId); // Creates a new Request but does not fetch existing entity
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid object type: " + objectType);
-        }
-    }
-
-    public ObjectAttachment() {
-    }
 }

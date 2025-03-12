@@ -1,9 +1,10 @@
 package fptu.fcharity.service;
 
 import fptu.fcharity.entity.ObjectAttachment;
-import fptu.fcharity.entity.Request;
 import fptu.fcharity.repository.ObjectAttachmentRepository;
-import fptu.fcharity.repository.RequestRepository;
+import fptu.fcharity.repository.manage.post.PostRepository;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -14,49 +15,54 @@ import java.util.UUID;
 @Service
 public class ObjectAttachmentService {
     private final ObjectAttachmentRepository objectAttachmentRepository;
-    private final RequestRepository requestRepository;
+private final RequestRepository requestRepository;
+private final ProjectRepository projectRepository;
+    private final PostRepository postRepository;
 
-    public ObjectAttachmentService(ObjectAttachmentRepository objectAttachmentRepository, RequestRepository requestRepository) {
+    public ObjectAttachmentService(
+            ObjectAttachmentRepository objectAttachmentRepository,
+            RequestRepository requestRepository,
+            ProjectRepository projectRepository,
+            PostRepository postRepository) {
         this.objectAttachmentRepository = objectAttachmentRepository;
         this.requestRepository = requestRepository;
+        this.projectRepository = projectRepository;
+        this.postRepository = postRepository;
     }
 
-    @Transactional
+    public void takeObject(ObjectAttachment objectAttachment,UUID objectId, String type) {
+        switch (type){
+            case "REQUEST":
+                objectAttachment.setRequest(requestRepository.findById(objectId).orElse(null));
+                break;
+            case "PROJECT":
+                objectAttachment.setProject(projectRepository.findById(objectId).orElse(null));
+                break;
+            case "POST":
+                objectAttachment.setPost(postRepository.findById(objectId).orElse(null));
+                break;
+            case "ORGANIZATION":
+//                objectAttachment.setOrganization(organizationRepository.findById(objectId).orElse(null));
+                break;
+            case "PHASE":
+//                objectAttachment.setPhase(requestRepository.findById(objectId).orElse(null));
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid object type: " + type);
+        }
+    }
     public void saveAttachments(UUID objectId, List<String> urls, String objectType) {
         for (String url : urls) {
             ObjectAttachment attachment = new ObjectAttachment();
-            attachment.setId(UUID.randomUUID());
             attachment.setUrl(url);
-
-            switch (objectType) {
-                case "REQUEST":
-                    Request request = requestRepository.findById(objectId)
-                            .orElseThrow(() -> new IllegalArgumentException("Request not found"));
-
-                    // Reattach request entity to the current Hibernate session
-                    request = requestRepository.saveAndFlush(request);
-
-                    attachment.setRequest(request);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid object type: " + objectType);
-            }
-
+            takeObject(attachment,objectId,objectType);
             objectAttachmentRepository.save(attachment);
         }
     }
-
-
-    @Transactional
-    public void updateAttachments(UUID objectId, List<String> urls, String objectType) {
+    public void clearAttachments(UUID objectId, String objectType) {
         List<ObjectAttachment> existingAttachments = getAttachmentsByObjectType(objectId, objectType);
         objectAttachmentRepository.deleteAll(existingAttachments);
-
-        objectAttachmentRepository.flush(); // Ensures deletion is committed before new inserts
-
-        saveAttachments(objectId, urls, objectType);
     }
-
 
     public List<String> getAttachmentsOfObject(UUID objectId, String objectType) {
         return getAttachmentsByObjectType(objectId, objectType).stream()
@@ -74,6 +80,8 @@ public class ObjectAttachmentService {
                 return objectAttachmentRepository.findByOrganizationId(objectId);
             case "PHASE":
                 return objectAttachmentRepository.findByPhaseId(objectId);
+            case "POST":
+                return objectAttachmentRepository.findByPostId(objectId);
             default:
                 throw new IllegalArgumentException("Invalid object type: " + objectType);
         }

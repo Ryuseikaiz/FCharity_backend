@@ -1,15 +1,21 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
+import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
+import fptu.fcharity.utils.constants.ObjectType;
+import fptu.fcharity.utils.constants.ProjectMemberRole;
+import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
-import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -17,7 +23,6 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
     public List<User> allUsers() {
         return userRepository.findAll();
     }
@@ -42,4 +47,5 @@ public class UserService {
         updatePassword(user.getEmail(),passwordEncoder.encode(changePasswordDto.getNewPassword()));
         return user;
     }
+
 }

@@ -13,4 +13,5 @@ import java.util.List;
 public class ProjectFinalResponse {
     private Project project;
     private List<Taggable> projectTags;
+    private List<String> attachments;
 }

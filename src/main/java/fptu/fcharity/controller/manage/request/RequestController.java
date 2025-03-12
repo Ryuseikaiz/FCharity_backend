@@ -1,9 +1,9 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.manage.request;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Taggable;
 import fptu.fcharity.response.request.RequestFinalResponse;
-import fptu.fcharity.service.RequestService;
+import fptu.fcharity.service.manage.request.RequestService;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.TaggableType;
 import org.springframework.http.ResponseEntity;

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "task_plan")
 public class TaskPlan {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "task_plan_id", nullable = false)
     private UUID id;
