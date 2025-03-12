@@ -1,4 +1,4 @@
-package fptu.fcharity.repository;
+package fptu.fcharity.repository.admindashboard;
 
 import fptu.fcharity.entity.User;
 import fptu.fcharity.entity.User.UserRole;

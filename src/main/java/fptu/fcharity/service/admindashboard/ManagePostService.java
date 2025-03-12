@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admindashboard;
 
 import fptu.fcharity.dto.admindashboard.PostDTO;
 import fptu.fcharity.entity.Post;
-import fptu.fcharity.repository.ManagePostRepository;
+import fptu.fcharity.repository.admindashboard.ManagePostRepository;
 import fptu.fcharity.utils.constants.PostStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;

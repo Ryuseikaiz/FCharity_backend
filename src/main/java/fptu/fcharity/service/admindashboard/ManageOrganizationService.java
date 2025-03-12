@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admindashboard;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
 import fptu.fcharity.entity.Organization;
-import fptu.fcharity.repository.ManageOrganizationRepository;
+import fptu.fcharity.repository.admindashboard.ManageOrganizationRepository;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

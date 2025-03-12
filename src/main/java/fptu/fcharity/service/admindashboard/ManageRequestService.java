@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admindashboard;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Request;
-import fptu.fcharity.repository.ManageRequestRepository;
+import fptu.fcharity.repository.admindashboard.ManageRequestRepository;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;

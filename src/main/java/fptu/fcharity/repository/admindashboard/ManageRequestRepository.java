@@ -1,4 +1,4 @@
-package fptu.fcharity.repository;
+package fptu.fcharity.repository.admindashboard;
 
 import fptu.fcharity.entity.Request;
 import org.springframework.data.jpa.repository.JpaRepository;

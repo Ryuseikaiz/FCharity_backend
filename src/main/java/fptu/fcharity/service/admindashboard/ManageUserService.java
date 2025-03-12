@@ -1,11 +1,11 @@
-package fptu.fcharity.service.manageuser;
+package fptu.fcharity.service.admindashboard;
 
 import fptu.fcharity.dto.admindashboard.UserDTO;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.entity.User.UserStatus;
 import fptu.fcharity.repository.ProjectMemberRepository;
 import fptu.fcharity.utils.exception.ApiRequestException;
-import fptu.fcharity.repository.ManageUserRepository;
+import fptu.fcharity.repository.admindashboard.ManageUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
