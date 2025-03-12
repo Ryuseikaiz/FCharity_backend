@@ -39,7 +39,6 @@ public class ProjectDto {
 
     private List<UUID> tagIds;
 
-    private List<String> images;
-
-    private List<String> videos;
+    private List<String> imageUrls;
+    private List<String> videoUrls;
 }

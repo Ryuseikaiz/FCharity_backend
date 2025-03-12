@@ -1,5 +1,6 @@
 package fptu.fcharity.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,15 +15,16 @@ import java.util.UUID;
 @Table(name = "project_members")
 public class ProjectMember {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "membership_id", nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
     private Project project;
 

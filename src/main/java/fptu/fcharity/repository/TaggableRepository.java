@@ -1,6 +1,5 @@
 package fptu.fcharity.repository;
 
-import fptu.fcharity.entity.Request;
 import fptu.fcharity.entity.Taggable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,13 +1,13 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.manage.project;
 
-import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.response.project.ProjectFinalResponse;
-import fptu.fcharity.service.ProjectService;
+import fptu.fcharity.service.manage.project.ProjectService;
 import fptu.fcharity.utils.mapper.ProjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,7 +18,11 @@ public class ProjectController {
     public ProjectController(ProjectService projectService, ProjectMapper projectMapper) {
         this.projectService = projectService;
     }
-
+    @GetMapping
+    public ResponseEntity< List<ProjectFinalResponse>> getAllProjects() {
+        List<ProjectFinalResponse> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<ProjectFinalResponse> getProjectById(@PathVariable UUID id) {
         ProjectFinalResponse project = projectService.getProjectById(id);

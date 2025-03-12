@@ -12,4 +12,6 @@ public class PostUpdateDto {
     private String content;
     private int vote;
     private List<UUID> tagIds;
+    private List<String> imageUrls;
+    private List<String> videoUrls;
 }

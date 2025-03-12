@@ -1,16 +1,15 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.manage.post;
 
 import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.response.post.PostResponse;
-import fptu.fcharity.service.PostService;
+import fptu.fcharity.service.manage.post.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -37,12 +36,8 @@ public class PostController {
     // Tạo mới Post
     @PostMapping
     public ResponseEntity<PostResponse> createPost(@RequestBody PostRequestDTO postRequestDTO) {
-        try {
             PostResponse savedPostDTO = postService.createPost(postRequestDTO);
             return new ResponseEntity<>(savedPostDTO, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
     }
 
     // Cập nhật Post theo ID

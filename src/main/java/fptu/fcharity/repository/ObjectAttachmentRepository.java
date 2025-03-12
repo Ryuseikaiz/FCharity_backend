@@ -13,4 +13,5 @@ public interface ObjectAttachmentRepository extends JpaRepository<ObjectAttachme
     List<ObjectAttachment> findByProjectId(UUID projectId);
     List<ObjectAttachment> findByOrganizationId(UUID organizationId);
     List<ObjectAttachment> findByPhaseId(UUID phaseId);
+    List<ObjectAttachment> findByPostId(UUID postId);
 }

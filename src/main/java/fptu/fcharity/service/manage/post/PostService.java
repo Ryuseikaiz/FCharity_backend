@@ -1,26 +1,22 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.manage.post;
 
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.entity.Post;
-import fptu.fcharity.entity.Tag;
-import fptu.fcharity.entity.Taggable;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.repository.TagRepository;
 import fptu.fcharity.response.post.PostResponse;
-import fptu.fcharity.repository.PostRepository;
-import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.manage.post.PostRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.repository.TaggableRepository;
+import fptu.fcharity.service.ObjectAttachmentService;
+import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
-import fptu.fcharity.utils.mapper.PostMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -36,26 +32,29 @@ public class PostService {
     private TaggableRepository taggableRepository;
 
     @Autowired
-    private PostMapper postMapper;
-    @Autowired
     private TaggableService taggableService;
+    @Autowired
+    private ObjectAttachmentService objectAttachmentService;
 
 
     // Lấy tất cả các Post
     public List<PostResponse> getAllPosts() {
         List<Post> posts = postRepository.findAllWithInclude();
-        return posts.stream().map(post -> postMapper.convertToDTO(post, getTagsOfPost(post.getId()))).collect(Collectors.toList());
+        return posts.stream().map(post -> new PostResponse(post,
+                taggableService.getTagsOfObject(post.getId(),TaggableType.POST),
+                objectAttachmentService.getAttachmentsOfObject(post.getId(),TaggableType.POST))
+                ).toList();
     }
 
     // Lấy Post theo ID
     public PostResponse getPostById(UUID postId) {
         Post post = postRepository.findWithIncludeById(postId);
-        return postMapper.convertToDTO(post, getTagsOfPost(postId));
-    }
-    public List<Taggable> getTagsOfPost(UUID postId) {
-        return taggableRepository.findAllWithInclude().stream()
-                .filter(taggable -> taggable.getTaggableId().equals(postId) && taggable.getTaggableType().equals(TaggableType.POST))
-                .toList();
+        if(post == null){
+            throw new ApiRequestException("Post not found");
+        }
+        return new PostResponse(post,
+                taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                objectAttachmentService.getAttachmentsOfObject(post.getId(),TaggableType.POST));
     }
     // Tạo mới Post
     public PostResponse createPost(PostRequestDTO postRequestDTO) {
@@ -65,15 +64,16 @@ public class PostService {
             throw new RuntimeException("User not found with id: " + postRequestDTO.getUserId());
         }
         User user = optionalUser.get();
-
-
-        // Tạo mới đối tượng Post và gán dữ liệu từ DTO
         Post post = new Post(user, postRequestDTO.getTitle(),postRequestDTO.getContent());
-
 
         Post savedPost = postRepository.save(post);
         taggableService.addTaggables(post.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
-        return  postMapper.convertToDTO(savedPost, getTagsOfPost(savedPost.getId()));
+        objectAttachmentService.saveAttachments(post.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
+        objectAttachmentService.saveAttachments(post.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
+
+        return new PostResponse(savedPost,
+                taggableService.getTagsOfObject(savedPost.getId(), TaggableType.POST),
+                objectAttachmentService.getAttachmentsOfObject(savedPost.getId(),TaggableType.POST));
     }
 
     public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
@@ -83,8 +83,17 @@ public class PostService {
         post.setVote(postUpdateDTO.getVote());
 
         Post updatedPost = postRepository.save(post);
-        taggableService.updateTaggables(post.getId(), postUpdateDTO.getTagIds(), TaggableType.POST);
-        return postMapper.convertToDTO(updatedPost, getTagsOfPost(updatedPost.getId()));
+        if (postUpdateDTO.getTagIds() != null) {
+            taggableService.updateTaggables(updatedPost.getId(), postUpdateDTO.getTagIds(),TaggableType.POST);
+        } else {
+            taggableService.updateTaggables(updatedPost.getId(), new ArrayList<>(),TaggableType.POST);
+        }
+        objectAttachmentService.clearAttachments(updatedPost.getId(), TaggableType.POST);
+        objectAttachmentService.saveAttachments(updatedPost.getId(), postUpdateDTO.getImageUrls(), TaggableType.POST);
+        objectAttachmentService.saveAttachments(updatedPost.getId(), postUpdateDTO.getVideoUrls(), TaggableType.POST);
+        return new PostResponse(updatedPost,
+                taggableService.getTagsOfObject(updatedPost.getId(), TaggableType.POST),
+                objectAttachmentService.getAttachmentsOfObject(updatedPost.getId(),TaggableType.POST));
     }
 
     // Xóa Post theo ID
@@ -92,6 +101,7 @@ public class PostService {
         if (!postRepository.existsById(postId)) {
             throw new RuntimeException("Post not found with id: " + postId);
         }
+        objectAttachmentService.clearAttachments(postId, TaggableType.POST);
         postRepository.deleteById(postId);
     }
 

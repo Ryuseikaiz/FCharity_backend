@@ -2,7 +2,7 @@ package fptu.fcharity.controller.authentication;
 
 import fptu.fcharity.dto.authentication.*;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.service.UserService;
+import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
