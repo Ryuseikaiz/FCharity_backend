@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.ProjectDTO;
 import fptu.fcharity.entity.Project;
-import fptu.fcharity.repository.ManageProjectRepository;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ManageProjectService {
-    private final ManageProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
     public List<ProjectDTO> getAllProjects() {
         return projectRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
