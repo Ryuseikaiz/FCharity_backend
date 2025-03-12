@@ -2,11 +2,11 @@ package fptu.fcharity.controller.authentication;
 
 import fptu.fcharity.dto.authentication.*;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.service.UserService;
 import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
 import org.springframework.http.HttpStatus;
-import fptu.fcharity.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,12 +14,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RequestMapping("/auth")
 @RestController
 public class AuthenticationController {
     private final JwtService jwtService;
+
     private final AuthenticationService authenticationService;
     private final UserService userService;
     private final UserDetailsService userDetailsService;
@@ -37,7 +37,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterUserDto registerUserDto) {
+    public ResponseEntity<?> register(@RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
         return ResponseEntity.ok(registeredUser);
     }

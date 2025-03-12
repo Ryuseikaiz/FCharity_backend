@@ -31,4 +31,5 @@ public class OrganizationMember {
 
     @Column(name = "leave_date")
     private Instant leaveDate;
+
 }
