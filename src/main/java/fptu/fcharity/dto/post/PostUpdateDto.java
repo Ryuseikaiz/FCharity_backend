@@ -5,14 +5,11 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.UUID;
-
 @Getter
 @Setter
-public class PostRequestDTO {
+public class PostUpdateDto {
     private String title;
     private String content;
     private int vote;
-    private UUID userId;
     private List<UUID> tagIds;
-    private String status;
 }

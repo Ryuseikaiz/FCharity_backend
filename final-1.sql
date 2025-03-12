@@ -1,4 +1,4 @@
---CREATE DATABASE fcharity_database;
+﻿--CREATE DATABASE fcharity_database;
 --USE fcharity_database;
 
 -- Table: users
@@ -41,7 +41,6 @@ CREATE TABLE organizations (
     address NVARCHAR(255),
 	wallet_address UNIQUEIDENTIFIER,
     organization_description NVARCHAR(255),
-    pictures NVARCHAR(255),
     start_time DATETIME,
     shutdown_day DATETIME,
     organization_status NVARCHAR(50),
@@ -60,6 +59,7 @@ CREATE TABLE organization_members (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
+
 
 -- Table: projects
 CREATE TABLE projects (
@@ -84,6 +84,7 @@ CREATE TABLE projects (
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
 );
+
 
 -- Table: project_members
 CREATE TABLE project_members (
@@ -137,17 +138,18 @@ CREATE TABLE timeline (
 );
 
 -- Table: object_images
-CREATE TABLE object_images (
-    image_id UNIQUEIDENTIFIER  DEFAULT NEWID(),
+CREATE TABLE object_attachments (
+    image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     url NVARCHAR(255),
     request_id UNIQUEIDENTIFIER,
     project_id UNIQUEIDENTIFIER,
 	organization_id UNIQUEIDENTIFIER,
     phase_id UNIQUEIDENTIFIER,
-	PRIMARY KEY (image_id,url), 
+    type_attachment NVARCHAR(50),
     FOREIGN KEY (request_id) REFERENCES requests(request_id),
     FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
 
 -- Table: task_plan
@@ -229,6 +231,7 @@ CREATE TABLE posts (
     vote INT,
     created_at DATETIME,
     updated_at DATETIME,
+	post_status NVARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
@@ -319,3 +322,25 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
+	CREATE TABLE organizations (
+    organization_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    organization_name NVARCHAR(255),
+    email NVARCHAR(255),
+    phone_number NVARCHAR(15),
+    address NVARCHAR(255),
+	wallet_address UNIQUEIDENTIFIER,
+    organization_description NVARCHAR(255),
+    start_time DATETIME,
+    shutdown_day DATETIME,
+    organization_status NVARCHAR(50),
+	ceo_id  UNIQUEIDENTIFIER,
+     FOREIGN KEY (ceo_id) REFERENCES users(user_id),
+	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
+);
+
+INSERT INTO organizations (organization_name, email, phone_number, address, wallet_address, organization_description, start_time, shutdown_day, organization_status, ceo_id)
+VALUES
+(N'Tổ chức A', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE'),
+(N'Tổ chức B', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE'),
+(N'Tổ chức C', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE', '3E5C721B-CAFE-4408-9658-87521CAB78DE'),
+(N'Tổ chức D', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE');

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "organizations")
 public class Organization {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "organization_id", nullable = false)
     private UUID id;
@@ -42,10 +43,6 @@ public class Organization {
     @Nationalized
     @Column(name = "organization_description")
     private String organizationDescription;
-
-    @Nationalized
-    @Column(name = "pictures")
-    private String pictures;
 
     @Column(name = "start_time")
     private Instant startTime;

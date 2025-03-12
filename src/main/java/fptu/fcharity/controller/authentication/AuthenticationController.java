@@ -6,7 +6,11 @@ import fptu.fcharity.service.UserService;
 import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.service.authentication.JwtService;
 import fptu.fcharity.response.authentication.LoginResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -18,11 +22,18 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
+    private final UserDetailsService userDetailsService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService, UserService userService) {
+
+    public AuthenticationController(JwtService jwtService,
+                                    AuthenticationManager authenticationManager,
+                                    AuthenticationService authenticationService,
+                                    UserDetailsService userDetailsService,
+                                    UserService userService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
         this.userService = userService;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/signup")
@@ -50,7 +61,8 @@ public class AuthenticationController {
     public ResponseEntity<?> authenticate(@RequestBody LoginUserDto loginUserDto){
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
+        LoginResponse loginResponse = new LoginResponse(jwtToken,refreshToken);
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -71,7 +83,31 @@ public class AuthenticationController {
         String token = payload.get("token");
         User user = authenticationService.googleLogin(token);
         String jwtToken = jwtService.generateToken(user);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        String refreshToken = jwtService.generateRefreshToken(user);
+        System.out.println("Refresh token: "+refreshToken);
+        LoginResponse loginResponse = new LoginResponse(jwtToken,refreshToken);
         return ResponseEntity.ok(loginResponse);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is required");
+        }
+
+        try {
+            String username = jwtService.extractUsername(refreshToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (jwtService.isTokenValid(refreshToken, userDetails)) {
+                String newAccessToken = jwtService.generateToken(userDetails);
+                LoginResponse loginResponse = new LoginResponse(newAccessToken,refreshToken);
+                return ResponseEntity.ok(loginResponse);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
     }
 }

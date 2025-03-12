@@ -2,7 +2,8 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
-import fptu.fcharity.service.manageproject.ProjectService;
+import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.service.ProjectService;
 import fptu.fcharity.utils.mapper.ProjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,19 +19,19 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    @GetMapping
-    public ResponseEntity<Project> getProjectById(@PathVariable UUID id) {
-        Project project = projectService.getProjectById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<ProjectFinalResponse> getProjectById(@PathVariable UUID id) {
+        ProjectFinalResponse project = projectService.getProjectById(id);
         return ResponseEntity.ok(project);
     }
     @PostMapping("/create")
     public ResponseEntity<?> createProject(@RequestBody ProjectDto projectDto) {
-             Project newProject =  projectService.createProject(projectDto);
+        ProjectFinalResponse newProject =  projectService.createProject(projectDto);
         return ResponseEntity.ok(newProject);
     }
     @PutMapping("/update")
     public ResponseEntity<?> updateProject(@RequestBody ProjectDto projectDto) {
-        Project newProject =  projectService.updateProject(projectDto);
+        ProjectFinalResponse newProject =  projectService.updateProject(projectDto);
         return ResponseEntity.ok(newProject);
     }
     @DeleteMapping("/{id}")

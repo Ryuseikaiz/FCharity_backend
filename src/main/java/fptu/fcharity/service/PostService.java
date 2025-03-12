@@ -1,5 +1,6 @@
 package fptu.fcharity.service;
 
+import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.entity.Post;
 import fptu.fcharity.entity.Tag;
 import fptu.fcharity.entity.Taggable;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,29 +37,10 @@ public class PostService {
 
     @Autowired
     private PostMapper postMapper;
+    @Autowired
+    private TaggableService taggableService;
 
-    public void addPostTags(UUID requestId, List<UUID> tagIds) {
-        Post post = postRepository.findById(requestId).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()).getBody();
-        if (post != null) {
-            for (UUID tagId : tagIds) {
-                if (tagRepository.existsById(tagId)) {
-                    Tag tag = tagRepository.findById(tagId)
-                            .orElseThrow(() -> new ApiRequestException("Tag not found"));
-                    Taggable taggable = new Taggable(tag,requestId, TaggableType.POST);
-                    taggableRepository.save(taggable);
-                }
-            }
-        }}
-    public void updatePostTags(UUID postId, List<UUID> tagIds) {
-        List<Taggable> oldTags = taggableRepository.findAllWithInclude().stream()
-                .filter(taggable -> taggable.getTaggableId().equals(postId) && taggable.getTaggableType().equals(TaggableType.POST))
-                .toList();
-        for (Taggable taggable: oldTags) {
-            if(!tagIds.contains(taggable.getTag().getId())){taggableRepository.deleteById(taggable.getId());}
-            tagIds.remove(taggable.getTag().getId());
-        }
-        addPostTags(postId, tagIds);
-    }
+
     // Lấy tất cả các Post
     public List<PostResponse> getAllPosts() {
         List<Post> posts = postRepository.findAllWithInclude();
@@ -83,26 +66,24 @@ public class PostService {
         }
         User user = optionalUser.get();
 
+
         // Tạo mới đối tượng Post và gán dữ liệu từ DTO
-        Post post = new Post();
-        post.setTitle(postRequestDTO.getTitle());
-        post.setContent(postRequestDTO.getContent());
-        post.setVote(postRequestDTO.getVote());
-        post.setUser(user);
+        Post post = new Post(user, postRequestDTO.getTitle(),postRequestDTO.getContent());
+
 
         Post savedPost = postRepository.save(post);
-        addPostTags(post.getId(), postRequestDTO.getTagIds());
+        taggableService.addTaggables(post.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
         return  postMapper.convertToDTO(savedPost, getTagsOfPost(savedPost.getId()));
     }
 
-    public PostResponse updatePost(UUID postId, PostRequestDTO postRequestDTO) {
+    public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
         Post post = postRepository.findWithIncludeById(postId);
-        post.setTitle(postRequestDTO.getTitle());
-        post.setContent(postRequestDTO.getContent());
-        post.setVote(postRequestDTO.getVote());
+        post.setTitle(postUpdateDTO.getTitle());
+        post.setContent(postUpdateDTO.getContent());
+        post.setVote(postUpdateDTO.getVote());
 
         Post updatedPost = postRepository.save(post);
-        updatePostTags(post.getId(), postRequestDTO.getTagIds());
+        taggableService.updateTaggables(post.getId(), postUpdateDTO.getTagIds(), TaggableType.POST);
         return postMapper.convertToDTO(updatedPost, getTagsOfPost(updatedPost.getId()));
     }
 

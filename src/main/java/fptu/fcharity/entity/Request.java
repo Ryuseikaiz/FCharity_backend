@@ -77,4 +77,7 @@ public class Request {
         this.category = category;
         this.status = RequestStatus.PENDING;
     }
+
+    public Request(UUID objectId) {
+    }
 }

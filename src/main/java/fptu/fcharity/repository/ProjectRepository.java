@@ -9,6 +9,8 @@ import java.util.UUID;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
-    @EntityGraph(attributePaths = {"category", "tag","wallet"})
-    Project findWithCategoryTagWalletById(UUID id);
+    @EntityGraph(attributePaths = {"category","wallet"})
+    Project findWithCategoryWalletById(UUID id);
+    @EntityGraph(attributePaths = {"category","leader","organization"})
+    Project findWithEssentialById(UUID id);
 }
