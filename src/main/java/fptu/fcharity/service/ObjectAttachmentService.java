@@ -1,7 +1,9 @@
 package fptu.fcharity.service;
 
 import fptu.fcharity.entity.ObjectAttachment;
+import fptu.fcharity.entity.Request;
 import fptu.fcharity.repository.ObjectAttachmentRepository;
+import fptu.fcharity.repository.RequestRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -12,26 +14,49 @@ import java.util.UUID;
 @Service
 public class ObjectAttachmentService {
     private final ObjectAttachmentRepository objectAttachmentRepository;
+    private final RequestRepository requestRepository;
 
-    public ObjectAttachmentService(ObjectAttachmentRepository objectAttachmentRepository) {
+    public ObjectAttachmentService(ObjectAttachmentRepository objectAttachmentRepository, RequestRepository requestRepository) {
         this.objectAttachmentRepository = objectAttachmentRepository;
+        this.requestRepository = requestRepository;
     }
 
+    @Transactional
     public void saveAttachments(UUID objectId, List<String> urls, String objectType) {
         for (String url : urls) {
-            ObjectAttachment attachment = new ObjectAttachment(UUID.randomUUID(), url, objectId, objectType);
+            ObjectAttachment attachment = new ObjectAttachment();
+            attachment.setId(UUID.randomUUID());
+            attachment.setUrl(url);
+
+            switch (objectType) {
+                case "REQUEST":
+                    Request request = requestRepository.findById(objectId)
+                            .orElseThrow(() -> new IllegalArgumentException("Request not found"));
+
+                    // Reattach request entity to the current Hibernate session
+                    request = requestRepository.saveAndFlush(request);
+
+                    attachment.setRequest(request);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid object type: " + objectType);
+            }
+
             objectAttachmentRepository.save(attachment);
         }
     }
 
+
+    @Transactional
     public void updateAttachments(UUID objectId, List<String> urls, String objectType) {
-        // Delete existing attachments
         List<ObjectAttachment> existingAttachments = getAttachmentsByObjectType(objectId, objectType);
         objectAttachmentRepository.deleteAll(existingAttachments);
 
-        // Save new attachments
+        objectAttachmentRepository.flush(); // Ensures deletion is committed before new inserts
+
         saveAttachments(objectId, urls, objectType);
     }
+
 
     public List<String> getAttachmentsOfObject(UUID objectId, String objectType) {
         return getAttachmentsByObjectType(objectId, objectType).stream()

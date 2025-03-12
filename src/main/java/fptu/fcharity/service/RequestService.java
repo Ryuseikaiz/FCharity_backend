@@ -6,6 +6,7 @@ import fptu.fcharity.repository.*;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class RequestService {
         );
     }
 
+    @Transactional
     public RequestFinalResponse createRequest(RequestDto requestDTO) {
        try{
            User user = userRepository.findById(requestDTO.getUserId())

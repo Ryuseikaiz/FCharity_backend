@@ -42,22 +42,10 @@ public class ObjectAttachment {
     public ObjectAttachment(UUID id, String url, UUID objectId, String objectType) {
         this.id = id;
         this.url = url;
+
         switch (objectType) {
             case "REQUEST":
-                this.request = new Request();
-                this.request.setId(objectId);
-                break;
-            case "PROJECT":
-                this.project = new Project();
-                this.project.setId(objectId);
-                break;
-            case "ORGANIZATION":
-                this.organization = new Organization();
-                this.organization.setId(objectId);
-                break;
-            case "PHASE":
-                this.phase = new Timeline();
-                this.phase.setId(objectId);
+                this.request = new Request(objectId); // Creates a new Request but does not fetch existing entity
                 break;
             default:
                 throw new IllegalArgumentException("Invalid object type: " + objectType);
