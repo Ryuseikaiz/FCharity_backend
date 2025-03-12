@@ -48,6 +48,19 @@ public class ManagePostService {
         postRepository.save(post);
     }
 
+    @Transactional
+    public void hidePost(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
+
+        if (!PostStatus.ACTIVE.equals(post.getPostStatus())) {
+            throw new ApiRequestException("Only active posts can be hidden.");
+        }
+
+        post.setPostStatus(PostStatus.HIDDEN);
+        postRepository.save(post);
+    }
+
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(
                 post.getId(),

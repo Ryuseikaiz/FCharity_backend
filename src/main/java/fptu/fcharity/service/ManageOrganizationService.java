@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static fptu.fcharity.utils.constants.RequestStatus.APPROVED;
+import static fptu.fcharity.utils.constants.RequestStatus.HIDDEN;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +49,19 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(APPROVED);
+        organizationRepository.save(organization);
+    }
+
+    @Transactional
+    public void hideOrganization(UUID orgId) {
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
+
+        if (!APPROVED.equals(organization.getOrganizationStatus())) {
+            throw new ApiRequestException("Only approved organizations can be hidden.");
+        }
+
+        organization.setOrganizationStatus(HIDDEN);
         organizationRepository.save(organization);
     }
 

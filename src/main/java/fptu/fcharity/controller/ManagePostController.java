@@ -31,9 +31,16 @@ public class ManagePostController {
         return ResponseEntity.ok("Post deleted successfully.");
     }
 
-    @PutMapping("/{postId}/approve")
+    @PutMapping("/approve/{postId}")
     public ResponseEntity<String> approvePost(@PathVariable UUID postId) {
         postService.approvePost(postId);
         return ResponseEntity.ok("Post has been approved successfully.");
     }
+
+    @PutMapping("/hide/{postId}")
+    public ResponseEntity<String> hidePost(@PathVariable UUID postId) {
+        postService.hidePost(postId);
+        return ResponseEntity.ok("Post has been hidden successfully.");
+    }
+
 }

@@ -49,6 +49,20 @@ public class ManageUserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void unbanUser(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiRequestException("User not found with ID: " + userId));
+
+        if (!UserStatus.Banned.equals(user.getUserStatus())) {
+            throw new ApiRequestException("Only banned users can be unbanned.");
+        }
+
+        user.setUserStatus(UserStatus.Verified);
+        userRepository.save(user);
+    }
+
+
     private UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),

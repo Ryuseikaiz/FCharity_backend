@@ -47,6 +47,19 @@ public class ManageProjectService {
         project.setProjectStatus(RequestStatus.APPROVED);
         projectRepository.save(project);
     }
+    @Transactional
+    public void hideProject(UUID projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+
+        if (!RequestStatus.APPROVED.equals(project.getProjectStatus())) {
+            throw new ApiRequestException("Only approved projects can be hidden.");
+        }
+
+        project.setProjectStatus(RequestStatus.HIDDEN);
+        projectRepository.save(project);
+    }
+
     private ProjectDTO convertToDTO(Project project) {
         return new ProjectDTO(
                 project.getId(),
