@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
 import fptu.fcharity.entity.Organization;
-import fptu.fcharity.repository.ManageOrganizationRepository;
+import fptu.fcharity.repository.OrganizationRepository;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import static fptu.fcharity.utils.constants.RequestStatus.APPROVED;
 @Service
 @RequiredArgsConstructor
 public class ManageOrganizationService {
-    private final ManageOrganizationRepository organizationRepository;
+    private final OrganizationRepository organizationRepository;
 
     public List<OrganizationDTO> getAllOrganizations() {
         return organizationRepository.findAll().stream()

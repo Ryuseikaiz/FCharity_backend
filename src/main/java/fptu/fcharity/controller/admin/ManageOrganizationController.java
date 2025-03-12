@@ -1,7 +1,7 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
-import fptu.fcharity.service.ManageOrganizationService;
+import fptu.fcharity.service.admin.ManageOrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

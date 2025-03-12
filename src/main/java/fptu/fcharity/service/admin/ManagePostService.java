@@ -1,8 +1,8 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.PostDTO;
 import fptu.fcharity.entity.Post;
-import fptu.fcharity.repository.ManagePostRepository;
+import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.utils.constants.PostStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ManagePostService {
-    private final ManagePostRepository postRepository;
+    private final PostRepository postRepository;
 
     public List<PostDTO> getAllPosts() {
         return postRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
