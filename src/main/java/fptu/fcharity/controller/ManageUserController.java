@@ -41,13 +41,8 @@ public class ManageUserController {
 //        return ResponseEntity.ok().build();
 //    }
 
-//    // Ban user
-//    @PutMapping("/{userId}/ban")
-//    public ResponseEntity<Void> banUser(@PathVariable UUID userId) {
-//        manageUserService.banUser(userId);
-//        return ResponseEntity.ok().build();
-//    }
-    @PutMapping("/{userId}/ban")
+    // Ban user
+    @PutMapping("/ban/{userId}")
     public ResponseEntity<String> banUser(@PathVariable UUID userId) {
         manageUserService.banUser(userId);
         return ResponseEntity.ok("User has been banned successfully.");

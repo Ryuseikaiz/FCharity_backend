@@ -96,3 +96,4 @@ public class Project {
         this.category = category;
         this.walletAddress = walletAddress;
     }
+}
