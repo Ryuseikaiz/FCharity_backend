@@ -36,7 +36,7 @@ public class Organization {
     @Column(name = "address")
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
@@ -54,7 +54,7 @@ public class Organization {
     @Column(name = "organization_status", length = 50)
     private String organizationStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ceo_id")
     private User ceo;
 

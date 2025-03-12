@@ -4,6 +4,7 @@ import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
