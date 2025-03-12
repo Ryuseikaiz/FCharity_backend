@@ -58,4 +58,5 @@ public class Organization {
     @JoinColumn(name = "ceo_id")
     private User ceo;
 
+
 }

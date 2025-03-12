@@ -65,3 +65,4 @@ public class Post {
         this.postStatus = PostStatus.ACTIVE;
     }
 }
+
