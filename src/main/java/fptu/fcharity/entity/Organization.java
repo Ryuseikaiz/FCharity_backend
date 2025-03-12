@@ -57,5 +57,4 @@ public class Organization {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ceo_id")
     private User ceo;
-
 }

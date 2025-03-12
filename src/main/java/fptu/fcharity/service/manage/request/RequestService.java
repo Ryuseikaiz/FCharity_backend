@@ -10,6 +10,7 @@ import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class RequestService {
         );
     }
 
+    @Transactional
     public RequestFinalResponse createRequest(RequestDto requestDTO) {
        try{
            User user = userRepository.findById(requestDTO.getUserId())
@@ -123,5 +125,16 @@ public class RequestService {
         }
         objectAttachmentService.clearAttachments(requestId, TaggableType.REQUEST);
         requestRepository.deleteById(requestId);
+    }
+
+    public List<RequestFinalResponse> getActiveRequests() {
+        List<Request> requestList =  requestRepository.findAllWithInclude();
+        return  requestList.stream()
+                .filter(request -> request.getStatus().equals("ACTIVE"))
+                .map(request -> new RequestFinalResponse(request,
+                        taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
+                        objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
+                ))
+                .toList();
     }
 }

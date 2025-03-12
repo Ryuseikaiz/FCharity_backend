@@ -5,3 +5,4 @@ public class PostStatus {
     public static String    HIDDEN = "HIDDEN";
     public static String    BANNED = "BANNED";
 }
+

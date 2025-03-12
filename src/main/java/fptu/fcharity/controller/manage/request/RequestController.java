@@ -30,6 +30,12 @@ public class RequestController {
         return ResponseEntity.ok(requests);
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<RequestFinalResponse>> getActiveRequests() {
+        List<RequestFinalResponse> requests = requestService.getActiveRequests();
+        return ResponseEntity.ok(requests);
+    }
+
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<?> getRequestById(@PathVariable UUID id) {
         RequestFinalResponse request = requestService.getRequestById(id);
