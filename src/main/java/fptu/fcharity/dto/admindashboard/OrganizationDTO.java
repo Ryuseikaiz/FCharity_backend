@@ -15,7 +15,6 @@ public class OrganizationDTO {
     private String phoneNumber;
     private String address;
     private String organizationDescription;
-    private String pictures;
     private Instant startTime;
     private Instant shutdownDay;
     private String organizationStatus;

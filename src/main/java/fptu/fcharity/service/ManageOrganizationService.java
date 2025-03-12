@@ -59,7 +59,6 @@ public class ManageOrganizationService {
                 organization.getPhoneNumber(),
                 organization.getAddress(),
                 organization.getOrganizationDescription(),
-                organization.getPictures(),
                 organization.getStartTime(),
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
