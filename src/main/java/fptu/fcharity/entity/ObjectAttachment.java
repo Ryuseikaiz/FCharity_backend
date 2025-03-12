@@ -2,15 +2,19 @@ package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "object_attachments")
 public class ObjectAttachment {
     @Id
@@ -25,6 +29,7 @@ public class ObjectAttachment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Request request;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,31 +44,8 @@ public class ObjectAttachment {
     @JoinColumn(name = "phase_id")
     private Timeline phase;
 
-    public ObjectAttachment(UUID id, String url, UUID objectId, String objectType) {
-        this.id = id;
-        this.url = url;
-        switch (objectType) {
-            case "REQUEST":
-                this.request = new Request();
-                this.request.setId(objectId);
-                break;
-            case "PROJECT":
-                this.project = new Project();
-                this.project.setId(objectId);
-                break;
-            case "ORGANIZATION":
-                this.organization = new Organization();
-                this.organization.setId(objectId);
-                break;
-            case "PHASE":
-                this.phase = new Timeline();
-                this.phase.setId(objectId);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid object type: " + objectType);
-        }
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id")
+    private Post post;
 
-    public ObjectAttachment() {
-    }
 }

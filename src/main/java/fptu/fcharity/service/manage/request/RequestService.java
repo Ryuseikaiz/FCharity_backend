@@ -1,9 +1,13 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.manage.request;
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.request.RequestRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.request.RequestFinalResponse;
+import fptu.fcharity.service.ObjectAttachmentService;
+import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.stereotype.Service;
@@ -20,7 +24,7 @@ public class RequestService {
     private final TaggableService taggableService;
     private final ObjectAttachmentService objectAttachmentService;
 
-    public RequestService(TaggableRepository _taggableRepository,
+    public RequestService(
                                                      RequestRepository requestRepository,
                                                      UserRepository userRepository,
                                                      CategoryRepository categoryRepository,
@@ -45,6 +49,9 @@ public class RequestService {
 
     public RequestFinalResponse getRequestById(UUID requestId) {
         Request request =  requestRepository.findWithIncludeById(requestId);
+        if(request == null){
+            throw new ApiRequestException("Request not found");
+        }
         return new RequestFinalResponse(request,
                 taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
                 objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
@@ -59,15 +66,15 @@ public class RequestService {
             Category category = categoryRepository.findById(requestDTO.getCategoryId())
                     .orElseThrow(() -> new ApiRequestException("Category not found"));
 
-           Request request = new Request(UUID.randomUUID(),
+           Request request = new Request(
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
                    requestDTO.getLocation(),
                    requestDTO.isEmergency(), category);
            requestRepository.save(request);
            taggableService.addTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
-           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), "REQUEST");
-           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), "REQUEST");
+           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
+           objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
 
            return new RequestFinalResponse(request,
                    taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
@@ -99,8 +106,9 @@ public class RequestService {
             } else {
                 taggableService.updateTaggables(request.getId(), new ArrayList<>(),TaggableType.REQUEST);
             }
-            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
-            objectAttachmentService.updateAttachments(request.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
+            objectAttachmentService.clearAttachments(request.getId(), TaggableType.REQUEST);
+            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
+            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
             requestRepository.save(request);
             return new RequestFinalResponse(request,
                     taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
@@ -113,6 +121,7 @@ public class RequestService {
         if (!requestRepository.existsById(requestId)) {
             throw new ApiRequestException("Request not found");
         }
+        objectAttachmentService.clearAttachments(requestId, TaggableType.REQUEST);
         requestRepository.deleteById(requestId);
     }
 }

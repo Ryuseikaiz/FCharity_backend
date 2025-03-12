@@ -1,8 +1,8 @@
-package fptu.fcharity.controller;
+package fptu.fcharity.controller.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.service.UserService;
+import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;

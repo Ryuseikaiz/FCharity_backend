@@ -1,12 +1,13 @@
 package fptu.fcharity.service;
 
-import fptu.fcharity.entity.Request;
 import fptu.fcharity.entity.Tag;
 import fptu.fcharity.entity.Taggable;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.post.PostRepository;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

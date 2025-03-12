@@ -1,4 +1,4 @@
-package fptu.fcharity.repository;
+package fptu.fcharity.repository.manage.post;
 
 import fptu.fcharity.entity.Post;
 import org.springframework.data.jpa.repository.EntityGraph;
