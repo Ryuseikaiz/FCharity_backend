@@ -1,8 +1,9 @@
-package fptu.fcharity.service;
+package fptu.fcharity.service.admin;
+
 
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.Request;
-import fptu.fcharity.repository.ManageRequestRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ManageRequestService {
-    private final ManageRequestRepository requestRepository;
+    private final RequestRepository requestRepository;
 
     public List<RequestDto> getAllRequests() {
         return requestRepository.findAll().stream()
