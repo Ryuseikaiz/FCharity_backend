@@ -12,6 +12,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/organizations")
 public class OrganizationController {
+    //thêm xử lý ảnh của organization trong api tạo,update organization
+    //thêm api lấy các project của org
+    //test lại với db mới
+
     private final OrganizationService organizationService;
 
     public OrganizationController(OrganizationService organizationService) {
