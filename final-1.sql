@@ -137,6 +137,19 @@ CREATE TABLE timeline (
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
+-- Table: posts
+CREATE TABLE posts (
+    post_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    user_id UNIQUEIDENTIFIER,
+    title NVARCHAR(255),
+    content NVARCHAR(255),
+    vote INT,
+    created_at DATETIME,
+    updated_at DATETIME,
+	post_status NVARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 -- Table: object_images
 CREATE TABLE object_attachments (
     image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -223,18 +236,7 @@ CREATE TABLE to_organization_donations (
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
 
--- Table: posts
-CREATE TABLE posts (
-    post_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    user_id UNIQUEIDENTIFIER,
-    title NVARCHAR(255),
-    content NVARCHAR(255),
-    vote INT,
-    created_at DATETIME,
-    updated_at DATETIME,
-	post_status NVARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+
 
 -- Junction table for many-to-many relationship
 CREATE TABLE taggable (
@@ -323,21 +325,6 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
-	CREATE TABLE organizations (
-    organization_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    organization_name NVARCHAR(255),
-    email NVARCHAR(255),
-    phone_number NVARCHAR(15),
-    address NVARCHAR(255),
-	wallet_address UNIQUEIDENTIFIER,
-    organization_description NVARCHAR(255),
-    start_time DATETIME,
-    shutdown_day DATETIME,
-    organization_status NVARCHAR(50),
-	ceo_id  UNIQUEIDENTIFIER,
-     FOREIGN KEY (ceo_id) REFERENCES users(user_id),
-	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
-);
 
 INSERT INTO organizations (organization_name, email, phone_number, address, wallet_address, organization_description, start_time, shutdown_day, organization_status, ceo_id)
 VALUES
@@ -345,3 +332,4 @@ VALUES
 (N'Tổ chức B', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE'),
 (N'Tổ chức C', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE', '3E5C721B-CAFE-4408-9658-87521CAB78DE'),
 (N'Tổ chức D', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE');
+
