@@ -16,6 +16,7 @@ import java.util.UUID;
 @Table(name = "requests")
 public class Request {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "request_id", nullable = false)
     private UUID id;
@@ -59,13 +60,12 @@ public class Request {
     private String status;
     public Request() {
     }
-    public Request(UUID id, User user, String title,
-                   String content,
-                   String phone, String email, String location,
+    public Request( User user, String title,
+                    String content,
+                    String phone, String email, String location,
                     Boolean isEmergency,
-                   Category category
+                    Category category
     ) {
-        this.id = id;
         this.user = user;
         this.title = title;
         this.content = content;
@@ -77,4 +77,5 @@ public class Request {
         this.category = category;
         this.status = RequestStatus.PENDING;
     }
+
 }

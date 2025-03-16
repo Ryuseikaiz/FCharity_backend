@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 @Getter
 @Setter
@@ -34,6 +35,10 @@ public class ProjectDto {
 
     private UUID categoryId;
 
-
     private UUID walletId;
+
+    private List<UUID> tagIds;
+
+    private List<String> imageUrls;
+    private List<String> videoUrls;
 }
