@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestService {
@@ -109,8 +110,12 @@ public class RequestService {
                 taggableService.updateTaggables(request.getId(), new ArrayList<>(),TaggableType.REQUEST);
             }
             objectAttachmentService.clearAttachments(request.getId(), TaggableType.REQUEST);
-            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
-            objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
+            if(requestDTO.getImageUrls() != null){
+                objectAttachmentService.saveAttachments(request.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
+            }
+            if(requestDTO.getVideoUrls() != null){
+                objectAttachmentService.saveAttachments(request.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
+            }
             requestRepository.save(request);
             return new RequestFinalResponse(request,
                     taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
@@ -134,6 +139,17 @@ public class RequestService {
                 .map(request -> new RequestFinalResponse(request,
                         taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
                         objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
+                ))
+                .toList();
+    }
+
+    public List<RequestFinalResponse> getRequestsByUserId(UUID userId) {
+        List<Request> requests = requestRepository.findByUserId(userId);
+        return requests.stream()
+                .map(request -> new RequestFinalResponse(
+                        request,
+                        taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST),
+                        objectAttachmentService.getAttachmentsOfObject(request.getId(), TaggableType.REQUEST)
                 ))
                 .toList();
     }
