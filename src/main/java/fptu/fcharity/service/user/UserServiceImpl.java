@@ -1,27 +1,36 @@
 package fptu.fcharity.service.user;
 
+import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.exception.ApiRequestException;
+import fptu.fcharity.repository.OrganizationMemberRepository;
+import fptu.fcharity.repository.OrganizationRepository;
 import fptu.fcharity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
+    private final OrganizationRepository organizationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, OrganizationMemberRepository organizationMemberRepository, OrganizationRepository organizationRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.organizationMemberRepository = organizationMemberRepository;
+        this.organizationRepository = organizationRepository;
     }
 
     @Override
@@ -62,5 +71,20 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public List<User> getAllUsersNotInOrganization(UUID organizationId) {
+        List<User> allUsers = userRepository.findAll();
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByOrganization(organizationRepository.findById(organizationId).orElseThrow(() -> new RuntimeException("Organization not found")));
+
+        return allUsers.stream().filter(user -> {
+            for (OrganizationMember organizationMember : organizationMembers) {
+                if (organizationMember.getUser().getUserId() == user.getUserId()) {
+                    return false;
+                }
+            }
+            return true;
+        }).toList();
     }
 }

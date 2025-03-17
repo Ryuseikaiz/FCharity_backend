@@ -2,7 +2,6 @@ package fptu.fcharity.repository;
 
 import fptu.fcharity.entity.InviteJoinRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +17,7 @@ public interface InviteJoinRequestRepository extends JpaRepository<InviteJoinReq
 
     List<InviteJoinRequest> findByUserUserIdAndStatusAndRequestType(UUID userId, String status, String requestType);
 
+    InviteJoinRequest findByInviteJoinRequestId(UUID inviteJoinRequestId);
+
+    InviteJoinRequest findByUserUserIdAndOrganizationId(UUID userId, UUID organizationId);
 }

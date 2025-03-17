@@ -10,6 +10,7 @@ import fptu.fcharity.service.organization.OrganizationService;
 import fptu.fcharity.service.request.InviteJoinRequestService;
 import fptu.fcharity.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,33 +39,13 @@ public class InviteJoinRequestRestController {
     }
 
     @PutMapping("/join-requests")
-    public InviteJoinRequest updateJoinRequest(@RequestBody InviteJoinRequest inviteJoinRequest) {
-        System.out.println(inviteJoinRequest);
-        if (inviteJoinRequestService.getInviteRequestById(inviteJoinRequest.getInviteJoinRequestId()).isPresent()) {
-            System.out.println(inviteJoinRequest + " already exists");
-            switch (inviteJoinRequest.getStatus()) {
-                case "Approved":
-                    System.out.println("created new organization member: ");
-
-                    OrganizationMember newMember = new OrganizationMember();
-                    newMember.setUser(inviteJoinRequest.getUser());
-                    newMember.setOrganization(organizationService.getById(inviteJoinRequest.getOrganizationId()));
-                    System.out.println("New member: " + newMember);
-                    System.out.println("After creating: ");
-                    System.out.println(organizationMemberService.save(newMember));
-                    break;
-                case "Rejected":
-                    break;
-                default:
-                    break;
-            }
-        }
-        return inviteJoinRequestService.updateJoinRequest(inviteJoinRequest);
+    public InviteJoinRequest updateJoinRequest(@RequestBody InviteJoinRequestDto inviteJoinRequestDto) {
+        return inviteJoinRequestService.updateJoinRequest(inviteJoinRequestDto);
     }
 
-    @DeleteMapping("/join-requests")
-    public void deleteJoinRequest(@RequestBody InviteJoinRequest joinRequest) {
-        inviteJoinRequestService.deleteJoinRequest(joinRequest);
+    @DeleteMapping("/join-requests/{joinRequestId}")
+    public void deleteJoinRequest(@PathVariable UUID joinRequestId) {
+        inviteJoinRequestService.deleteJoinRequest(joinRequestId);
     }
 
     @GetMapping("/join-requests")
@@ -73,15 +54,9 @@ public class InviteJoinRequestRestController {
     }
 
     @GetMapping("/join-requests/organizations/{organization_id}")
-    public List<InviteJoinRequest> getJoinRequestsByOrganizationId(@PathVariable("organization_id") UUID organization_id) {
-        System.out.println("getJoinRequestsByOrganizationId " + organization_id);
-        return inviteJoinRequestService.getAllJoinRequestsByOrganizationId(organization_id);
-    }
-
-    @GetMapping("/invite-requests/organizations/{organization_id}")
-    public List<InviteJoinRequest> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organization_id) {
-        System.out.println("getJoinRequestsByOrganizationId " + organization_id);
-        return inviteJoinRequestService.getAllInviteRequestsByOrganizationId(organization_id);
+    public List<InviteJoinRequest> getJoinRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
+        System.out.println("getJoinRequestsByOrganizationId " + organizationId);
+        return inviteJoinRequestService.getAllJoinRequestsByOrganizationId(organizationId);
     }
 
     @GetMapping("/join-requests/{request_id}")
@@ -93,4 +68,26 @@ public class InviteJoinRequestRestController {
     public List<InviteJoinRequest> getJoinRequestsByUserId(@PathVariable("user_id") UUID user_id) {
         return inviteJoinRequestService.getAllJoinRequestsByUserId(user_id);
     }
+
+    @GetMapping("/invite-requests/organizations/{organization_id}")
+    public List<InviteJoinRequest> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
+        return inviteJoinRequestService.getAllInviteRequestsByOrganizationId(organizationId);
+    }
+
+    @PostMapping("/invite-requests")
+    public ResponseEntity<InviteJoinRequest> createInviteRequest(@RequestBody InviteJoinRequestDto inviteJoinRequestDto) {
+        InviteJoinRequest inviteJoinRequest = inviteJoinRequestService.createInviteRequest(inviteJoinRequestDto);
+        return ResponseEntity.ok(inviteJoinRequest);
+    }
+
+    @PutMapping("/invite-requests")
+    public ResponseEntity<InviteJoinRequest> updateInviteRequest(@RequestBody InviteJoinRequestDto inviteJoinRequestDto) {
+        return ResponseEntity.ok(inviteJoinRequestService.updateInviteRequest(inviteJoinRequestDto));
+    }
+
+    @DeleteMapping("/invite-requests/{inviteRequest_id}")
+    public void deleteInviteRequest(@PathVariable("inviteRequest_id") UUID inviteRequestId) {
+        inviteJoinRequestService.deleteInviteRequest(inviteRequestId);
+    }
+
 }

@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public interface InviteJoinRequestService {
     InviteJoinRequest createJoinRequest(InviteJoinRequestDto inviteJoinRequestDto);
-    InviteJoinRequest updateJoinRequest(InviteJoinRequest inviteJoinRequest);
-    void deleteJoinRequest(InviteJoinRequest joinRequest);
+    InviteJoinRequest updateJoinRequest(InviteJoinRequestDto inviteJoinRequestDto);
+    void deleteJoinRequest(UUID joinRequestId);
 
     List<InviteJoinRequest> getAllJoinRequests();
     List<InviteJoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId);
@@ -19,5 +19,7 @@ public interface InviteJoinRequestService {
 
     Optional<InviteJoinRequest> getInviteRequestById(UUID id);
     List<InviteJoinRequest> getAllInviteRequestsByOrganizationId(UUID organizationId);
-
+    InviteJoinRequest createInviteRequest(InviteJoinRequestDto inviteJoinRequestDto);
+    InviteJoinRequest updateInviteRequest(InviteJoinRequestDto inviteJoinRequestDto);
+    void deleteInviteRequest(UUID id);
 }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -33,5 +34,10 @@ public class UserRestController {
     @GetMapping("/users")
     public List<User> users() {
         return userService.getAllUsers();
+    }
+
+    @GetMapping("/users/{organizationId}")
+    public List<User> getUser(@PathVariable UUID organizationId) {
+        return userService.getAllUsersNotInOrganization(organizationId);
     }
 }

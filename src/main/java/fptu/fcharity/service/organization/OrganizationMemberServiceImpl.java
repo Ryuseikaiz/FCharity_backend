@@ -41,8 +41,6 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
     @Override
     @Transactional
     public OrganizationMember save(OrganizationMember organizationMember) {
-        System.out.println("In service: save OrganizationMember");
-        System.out.println(organizationMember);
         return organizationMemberRepository.save(organizationMember);
     }
 

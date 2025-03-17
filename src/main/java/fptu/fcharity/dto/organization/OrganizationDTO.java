@@ -1,10 +1,12 @@
 package fptu.fcharity.dto.organization;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganizationDTO {
     private String organizationId;
     private String organizationName;

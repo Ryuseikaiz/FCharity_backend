@@ -13,4 +13,5 @@ public interface UserService {
     User updatePassword(String email, String newPassword, String oldPassword) throws ApiRequestException;
     Optional<User> getById(UUID id);
     List<User> getAllUsers();
+    List<User> getAllUsersNotInOrganization(UUID organizationId);
 }

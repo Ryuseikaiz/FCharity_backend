@@ -9,8 +9,7 @@ import java.util.UUID;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationUserRoleDTO {
+public class OrganizationMemberDTO {
     private UUID userId;
     private UUID organizationId;
-    private UUID roleId;
 }
