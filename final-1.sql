@@ -114,7 +114,7 @@ CREATE TABLE requests (
     request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     title NVARCHAR(255),
-    content NVARCHAR(255),
+    content NVARCHAR(MAX),
     creation_date DATETIME,
     phone NVARCHAR(15),
     email NVARCHAR(255),
@@ -125,6 +125,7 @@ CREATE TABLE requests (
 	FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+--ALTER TABLE requests ALTER COLUMN content NVARCHAR(MAX);
 
 -- Table: timeline
 CREATE TABLE timeline (
@@ -323,21 +324,7 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
-	CREATE TABLE organizations (
-    organization_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    organization_name NVARCHAR(255),
-    email NVARCHAR(255),
-    phone_number NVARCHAR(15),
-    address NVARCHAR(255),
-	wallet_address UNIQUEIDENTIFIER,
-    organization_description NVARCHAR(255),
-    start_time DATETIME,
-    shutdown_day DATETIME,
-    organization_status NVARCHAR(50),
-	ceo_id  UNIQUEIDENTIFIER,
-     FOREIGN KEY (ceo_id) REFERENCES users(user_id),
-	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
-);
+
 
 INSERT INTO organizations (organization_name, email, phone_number, address, wallet_address, organization_description, start_time, shutdown_day, organization_status, ceo_id)
 VALUES

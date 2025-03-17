@@ -30,7 +30,7 @@ public class Request {
     private String title;
 
     @Nationalized
-    @Column(name = "content")
+    @Column(name = "content",  length = 1000)
     private String content;
 
     @Column(name = "creation_date")
