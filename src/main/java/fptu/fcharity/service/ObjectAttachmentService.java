@@ -30,7 +30,7 @@ private final ProjectRepository projectRepository;
         this.postRepository = postRepository;
     }
 
-    public void takeObject(ObjectAttachment objectAttachment,UUID objectId, String type) {
+    public void takeObject(ObjectAttachment objectAttachment, UUID objectId, String type) {
         switch (type){
             case "REQUEST":
                 objectAttachment.setRequest(requestRepository.findById(objectId).orElse(null));

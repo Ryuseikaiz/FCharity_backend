@@ -65,4 +65,10 @@ public class RequestController {
         requestService.deleteRequest(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<RequestFinalResponse>> getRequestsByUserId(@PathVariable UUID userId) {
+        List<RequestFinalResponse> userRequests = requestService.getRequestsByUserId(userId);
+        return ResponseEntity.ok(userRequests);
+    }
 }
