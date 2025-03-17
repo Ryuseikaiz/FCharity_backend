@@ -324,11 +324,3 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
-
-
-INSERT INTO organizations (organization_name, email, phone_number, address, wallet_address, organization_description, start_time, shutdown_day, organization_status, ceo_id)
-VALUES
-(N'Tổ chức A', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE'),
-(N'Tổ chức B', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE'),
-(N'Tổ chức C', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE', '3E5C721B-CAFE-4408-9658-87521CAB78DE'),
-(N'Tổ chức D', NULL, NULL, NULL, NULL, NULL, GETDATE(), NULL, N'ACTIVE','3E5C721B-CAFE-4408-9658-87521CAB78DE');
