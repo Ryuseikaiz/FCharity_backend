@@ -16,6 +16,7 @@ import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -81,7 +82,7 @@ public class PostService {
         post.setTitle(postUpdateDTO.getTitle());
         post.setContent(postUpdateDTO.getContent());
         post.setVote(postUpdateDTO.getVote());
-
+        post.setUpdatedAt(Instant.now());
         Post updatedPost = postRepository.save(post);
         if (postUpdateDTO.getTagIds() != null) {
             taggableService.updateTaggables(updatedPost.getId(), postUpdateDTO.getTagIds(),TaggableType.POST);

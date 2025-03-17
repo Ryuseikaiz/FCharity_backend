@@ -63,6 +63,7 @@ public class Post {
         this.content = content;
         this.vote = 0;
         this.postStatus = PostStatus.ACTIVE;
+        this.createdAt  = Instant.now();
     }
 }
 
