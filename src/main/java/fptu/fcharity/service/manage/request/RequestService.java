@@ -72,7 +72,7 @@ public class RequestService {
            Request request = new Request(
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
-                   requestDTO.getLocation(),
+                   requestDTO.getFullAddress(),
                    requestDTO.isEmergency(), category);
            requestRepository.save(request);
            taggableService.addTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
@@ -101,7 +101,7 @@ public class RequestService {
             request.setContent(requestDTO.getContent() != null ? requestDTO.getContent() : request.getContent());
             request.setPhone(requestDTO.getPhone() != null ? requestDTO.getPhone() : request.getPhone());
             request.setEmail(requestDTO.getEmail() != null ? requestDTO.getEmail() : request.getEmail());
-            request.setLocation(requestDTO.getLocation() != null ? requestDTO.getLocation() : request.getLocation());
+            request.setLocation(requestDTO.getFullAddress() != null ? requestDTO.getFullAddress() : request.getLocation());
             request.setIsEmergency(requestDTO.isEmergency());
             request.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : request.getStatus());
             if (requestDTO.getTagIds() != null) {
