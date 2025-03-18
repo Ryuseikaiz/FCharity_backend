@@ -55,31 +55,31 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
     @Override
     @Transactional
     public InviteJoinRequest updateJoinRequest(InviteJoinRequestDto inviteJoinRequestDto) {
-        InviteJoinRequest inviteJoinRequest = new InviteJoinRequest();
         User user = userRepository.findById(inviteJoinRequestDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + inviteJoinRequestDto.getUserId()));
         Organization organization = organizationRepository.findById(inviteJoinRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + inviteJoinRequestDto.getOrganizationId()));
 
-        if (inviteJoinRequestRepository.findByUserUserIdAndOrganizationId(inviteJoinRequestDto.getUserId(), inviteJoinRequestDto.getOrganizationId()) == null)
+        InviteJoinRequest inviteJoinRequest = inviteJoinRequestRepository.findByUserUserIdAndOrganizationId(inviteJoinRequestDto.getUserId(), inviteJoinRequestDto.getOrganizationId());
+
+        if ( inviteJoinRequest == null)
             throw new IllegalArgumentException("InviteJoinRequest not found with ID: " + inviteJoinRequestDto.getUserId());
 
-        if (inviteJoinRequestRepository.findByInviteJoinRequestId(inviteJoinRequestDto.getInviteJoinRequestId()) != null) {
-            switch (inviteJoinRequest.getStatus()) {
-                case "Approved":
-                    System.out.println("created new organization member: ");
 
-                    OrganizationMember newMember = new OrganizationMember();
-                    newMember.setUser(user);
-                    newMember.setOrganization(organization);
+        switch (inviteJoinRequestDto.getStatus()) {
+            case "Approved":
+                System.out.println("created new organization member: ");
 
-                    System.out.println(organizationMemberRepository.save(newMember));
-                    break;
-                case "Rejected":
-                    break;
-                default:
-                    break;
-            }
-        } else throw new IllegalArgumentException("InviteJoinRequest not found with ID: " + inviteJoinRequestDto.getUserId());
+                OrganizationMember newMember = new OrganizationMember();
+                newMember.setUser(user);
+                newMember.setOrganization(organization);
+
+                System.out.println(organizationMemberRepository.save(newMember));
+                break;
+            case "Rejected":
+                break;
+            default:
+                break;
+        }
 
         inviteJoinRequest.setTitle(inviteJoinRequestDto.getTitle());
         inviteJoinRequest.setContent(inviteJoinRequestDto.getContent());
@@ -159,31 +159,28 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
     @Override
     public InviteJoinRequest updateInviteRequest(InviteJoinRequestDto inviteJoinRequestDto) {
-        InviteJoinRequest inviteJoinRequest = new InviteJoinRequest();
         User user = userRepository.findById(inviteJoinRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + inviteJoinRequestDto.getUserId()));
         Organization organization = organizationRepository.findById(inviteJoinRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + inviteJoinRequestDto.getOrganizationId()));
 
-        if (inviteJoinRequestRepository.findByUserUserIdAndOrganizationId(user.getUserId(), inviteJoinRequest.getOrganizationId()) == null)
+        InviteJoinRequest inviteJoinRequest = inviteJoinRequestRepository.findByUserUserIdAndOrganizationId(user.getUserId(), organization.getOrganizationId());
+        if (inviteJoinRequest == null)
             throw new IllegalArgumentException("Invite request does not exist");
 
-        if (inviteJoinRequestRepository.findByInviteJoinRequestId(inviteJoinRequestDto.getInviteJoinRequestId()) != null) {
-            switch (inviteJoinRequest.getStatus()) {
-                case "Approved":
-                    System.out.println("created new organization member: ");
+        switch (inviteJoinRequestDto.getStatus()) {
+            case "Approved":
+                System.out.println("created new organization member: ");
 
-                    OrganizationMember newMember = new OrganizationMember();
-                    newMember.setUser(user);
-                    newMember.setOrganization(organization);
+                OrganizationMember newMember = new OrganizationMember();
+                newMember.setUser(user);
+                newMember.setOrganization(organization);
 
-                    System.out.println(organizationMemberRepository.save(newMember));
-                    break;
-                case "Rejected":
-                    break;
-                default:
-                    break;
-            }
-        } else
-            throw new IllegalArgumentException("Invite request does not exist");
+                System.out.println(organizationMemberRepository.save(newMember));
+                break;
+            case "Rejected":
+                break;
+            default:
+                break;
+        }
 
         inviteJoinRequest.setUser(user);
         inviteJoinRequest.setOrganizationId(inviteJoinRequestDto.getOrganizationId());
