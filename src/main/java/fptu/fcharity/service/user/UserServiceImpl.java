@@ -2,20 +2,19 @@ package fptu.fcharity.service.user;
 
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.exception.ApiRequestException;
-import fptu.fcharity.repository.OrganizationMemberRepository;
-import fptu.fcharity.repository.OrganizationRepository;
-import fptu.fcharity.repository.UserRepository;
+
+import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service

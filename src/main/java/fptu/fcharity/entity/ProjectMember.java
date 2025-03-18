@@ -1,35 +1,39 @@
 package fptu.fcharity.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "project_members")
 @Getter
 @Setter
+@Entity
+@Table(name = "project_members")
 public class ProjectMember {
     @Id
-    @Column(name = "membership_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID membershipId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @ColumnDefault("newid()")
+    @Column(name = "membership_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "project_id")
     private Project project;
 
-    @Column(name = "join_date", nullable = false)
-    private LocalDateTime joinDate;
+    @Column(name = "join_date")
+    private Instant joinDate;
 
     @Column(name = "leave_date")
-    private LocalDateTime leaveDate;
+    private Instant leaveDate;
 
-    @Column(name = "member_role", nullable = false)
+    @Column(name = "member_role", length = 36)
     private String memberRole;
 }

@@ -6,9 +6,10 @@ import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.InviteJoinRequestRepository;
-import fptu.fcharity.repository.OrganizationMemberRepository;
-import fptu.fcharity.repository.OrganizationRepository;
-import fptu.fcharity.repository.UserRepository;
+
+import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +45,8 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
         inviteJoinRequest.setTitle(inviteJoinRequestDto.getTitle());
         inviteJoinRequest.setContent(inviteJoinRequestDto.getContent());
         inviteJoinRequest.setCvLocation(inviteJoinRequestDto.getCvLocation());
-        inviteJoinRequest.setRequestType("Request");
-        inviteJoinRequest.setStatus("Pending");
+        inviteJoinRequest.setRequestType(InviteJoinRequest.RequestType.Request);
+        inviteJoinRequest.setStatus(InviteJoinRequest.RequestStatus.Pending);
         inviteJoinRequest.setOrganizationId(inviteJoinRequestDto.getOrganizationId());
 
         inviteJoinRequest.setUser(user);
@@ -66,7 +67,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
 
         switch (inviteJoinRequestDto.getStatus()) {
-            case "Approved":
+            case InviteJoinRequest.RequestStatus.Approved:
                 System.out.println("created new organization member: ");
 
                 OrganizationMember newMember = new OrganizationMember();
@@ -75,7 +76,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
                 System.out.println(organizationMemberRepository.save(newMember));
                 break;
-            case "Rejected":
+            case InviteJoinRequest.RequestStatus.Rejected:
                 break;
             default:
                 break;
@@ -84,7 +85,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
         inviteJoinRequest.setTitle(inviteJoinRequestDto.getTitle());
         inviteJoinRequest.setContent(inviteJoinRequestDto.getContent());
         inviteJoinRequest.setCvLocation(inviteJoinRequestDto.getCvLocation());
-        inviteJoinRequest.setRequestType("Request");
+        inviteJoinRequest.setRequestType(InviteJoinRequest.RequestType.Request);
         inviteJoinRequest.setStatus(inviteJoinRequestDto.getStatus());
         inviteJoinRequest.setOrganizationId(inviteJoinRequestDto.getOrganizationId());
 
@@ -152,8 +153,8 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
        inviteJoinRequest.setUser(user);
        inviteJoinRequest.setOrganizationId(inviteJoinRequestDto.getOrganizationId());
-       inviteJoinRequest.setRequestType("Invitation");
-       inviteJoinRequest.setStatus("Pending");
+       inviteJoinRequest.setRequestType(InviteJoinRequest.RequestType.Invitation);
+       inviteJoinRequest.setStatus(InviteJoinRequest.RequestStatus.Pending);
        return inviteJoinRequestRepository.save(inviteJoinRequest);
     }
 
@@ -167,7 +168,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
             throw new IllegalArgumentException("Invite request does not exist");
 
         switch (inviteJoinRequestDto.getStatus()) {
-            case "Approved":
+            case InviteJoinRequest.RequestStatus.Approved:
                 System.out.println("created new organization member: ");
 
                 OrganizationMember newMember = new OrganizationMember();
@@ -176,7 +177,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
                 System.out.println(organizationMemberRepository.save(newMember));
                 break;
-            case "Rejected":
+            case InviteJoinRequest.RequestStatus.Rejected:
                 break;
             default:
                 break;
@@ -184,7 +185,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
 
         inviteJoinRequest.setUser(user);
         inviteJoinRequest.setOrganizationId(inviteJoinRequestDto.getOrganizationId());
-        inviteJoinRequest.setRequestType("Invitation");
+        inviteJoinRequest.setRequestType(InviteJoinRequest.RequestType.Invitation);
         inviteJoinRequest.setStatus(inviteJoinRequestDto.getStatus());
 
         return inviteJoinRequestRepository.save(inviteJoinRequest);

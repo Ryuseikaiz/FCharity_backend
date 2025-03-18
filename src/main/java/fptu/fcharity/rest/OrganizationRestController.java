@@ -1,10 +1,10 @@
 package fptu.fcharity.rest;
 
-import fptu.fcharity.dto.organization.OrganizationDTO;
-import fptu.fcharity.dto.organization.OrganizationUserRoleDTO;
+import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.UserRepository;
+
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.organization.OrganizationManagerService;
 import fptu.fcharity.service.organization.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,12 +58,12 @@ public class OrganizationRestController {
     }
 
     @GetMapping("/organizations/managed")
-    public ResponseEntity<List<OrganizationDTO>> getManagedOrganizations(Authentication authentication) {
+    public ResponseEntity<List<OrganizationDto>> getManagedOrganizations(Authentication authentication) {
         Optional<User> currentUser  = userRepository.findByEmail(authentication.getName()); // email
 
         if (currentUser.isPresent()) {
             UUID currentUserId = currentUser.get().getUserId();
-            List<OrganizationDTO> organizations = organizationService.getOrganizationsByManager(currentUserId);
+            List<OrganizationDto> organizations = organizationService.getOrganizationsByManager(currentUserId);
             if (organizations == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }

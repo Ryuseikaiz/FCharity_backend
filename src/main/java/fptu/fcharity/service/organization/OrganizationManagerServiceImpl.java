@@ -5,10 +5,10 @@ import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationUserRole;
 import fptu.fcharity.entity.Role;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.OrganizationRepository;
 import fptu.fcharity.repository.OrganizationUserRoleRepository;
 import fptu.fcharity.repository.RoleRepository;
-import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

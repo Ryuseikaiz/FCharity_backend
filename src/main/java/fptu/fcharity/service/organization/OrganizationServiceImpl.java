@@ -1,14 +1,13 @@
 package fptu.fcharity.service.organization;
 
-import fptu.fcharity.dao.OrganizationDAO;
-import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationUserRole;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.OrganizationRepository;
 import fptu.fcharity.repository.OrganizationUserRoleRepository;
 import fptu.fcharity.repository.RoleRepository;
-import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.filestorage.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,9 +65,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         // Gán CEO nếu có ceoId
-        if (organization.getCeoId() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeoId().getUserId());
-            ceo.ifPresent(organization::setCeoId);
+        if (organization.getCeo() != null) {
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+            ceo.ifPresent(organization::setCeo);
         }
 
         return organizationRepository.save(organization);
@@ -78,7 +77,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional
     public Organization updateOrganization(Organization organization) throws IOException {
         Optional<Organization> existingOrg = organizationRepository.findById(organization.getOrganizationId());
-        if (!existingOrg.isPresent()) {
+        if (existingOrg.isEmpty()) {
             throw new RuntimeException("Organization not found");
         }
 
@@ -99,9 +98,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
 
-        if (organization.getCeoId() != null && organization.getCeoId().getUserId() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeoId().getUserId());
-            ceo.ifPresent(orgToUpdate::setCeoId);
+        if (organization.getCeo() != null && organization.getCeo().getUserId() != null) {
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+            ceo.ifPresent(orgToUpdate::setCeo);
         }
 
         return organizationRepository.save(orgToUpdate);
@@ -115,7 +114,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationDTO> getOrganizationsByManager(UUID managerId) {
+    public List<OrganizationDto> getOrganizationsByManager(UUID managerId) {
         UUID managerRoleId = roleRepository.findByName("Manager")
                 .orElseThrow(() -> new RuntimeException("Role Manager not found"))
                 .getRoleId();
@@ -129,7 +128,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         return organizations.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public OrganizationDTO getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
+    public OrganizationDto getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
         UUID managerRoleId = roleRepository.findByName("Manager").orElseThrow(() -> new RuntimeException("Role Manager not found"))
                 .getRoleId();
 
@@ -144,15 +143,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         return convertToDTO(organization);
     }
 
-    private OrganizationDTO convertToDTO(Organization organization) {
-        OrganizationDTO dto = new OrganizationDTO();
-        dto.setOrganizationId(organization.getOrganizationId().toString());
+    private OrganizationDto convertToDTO(Organization organization) {
+        OrganizationDto dto = new OrganizationDto();
+        dto.setId(organization.getOrganizationId());
         dto.setOrganizationName(organization.getOrganizationName());
         dto.setEmail(organization.getEmail());
         dto.setPhoneNumber(organization.getPhoneNumber());
         dto.setAddress(organization.getAddress());
         dto.setOrganizationDescription(organization.getOrganizationDescription());
-        dto.setPictures(organization.getPictures());
         dto.setOrganizationStatus(organization.getOrganizationStatus());
         return dto;
     }

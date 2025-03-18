@@ -1,7 +1,8 @@
 package fptu.fcharity.service.request;
 
 import fptu.fcharity.entity.Request;
-import fptu.fcharity.repository.RequestRepository;
+
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,5 +1,6 @@
 package fptu.fcharity.dto.request;
 
+import fptu.fcharity.entity.InviteJoinRequest;
 import lombok.*;
 
 import java.util.Date;
@@ -13,8 +14,8 @@ public class InviteJoinRequestDto {
     private String title;
     private String content;
     private String cvLocation;
-    private String requestType;
-    private String status;
+    private InviteJoinRequest.RequestType requestType;
+    private InviteJoinRequest.RequestStatus status;
     private Date createdAt;
     private Date updatedAt;
 }

@@ -3,34 +3,37 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Nationalized;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@Table(name = "to_organization_donations")
 @Getter
 @Setter
+@Entity
+@Table(name = "to_organization_donations")
 public class ToOrganizationDonation {
     @Id
-    @Column(name = "donation_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID donationId;
+    @Column(name = "donation_id", nullable = false)
+    private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @Column(name = "donation_status", nullable = false)
+    @Nationalized
+    @Column(name = "donation_status", length = 50)
     private String donationStatus;
 
-    @Column(name = "donation_time", nullable = false)
-    private LocalDateTime donationTime;
+    @Column(name = "donation_time")
+    private Instant donationTime;
 
+    @Nationalized
     @Column(name = "message")
     private String message;
+
 }

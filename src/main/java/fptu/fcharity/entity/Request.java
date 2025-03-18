@@ -1,9 +1,12 @@
 package fptu.fcharity.entity;
 
+import fptu.fcharity.utils.constants.RequestStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,90 +14,81 @@ import java.util.UUID;
 @Table(name = "requests")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Request {
     @Id
     @GeneratedValue(generator = "UUID")
+    @ColumnDefault("newid()")
     @Column(name="request_id", unique = true, updatable = false, nullable = false)
-    private UUID requestId;
+    private UUID id;
 
     @Column(name = "organization_id")
     private UUID organizationId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false)
+    @Nationalized
+    @Column(name = "title")
     private String title;
 
-    @Column(nullable = false)
+    @Nationalized
+    @Column(length = 1000)
     private String content;
 
-    @Column(name = "creation_date", nullable = false)
-    private LocalDateTime creationDate;
+    @Column(name = "creation_date")
+    private Instant creationDate;
 
+    @Nationalized
     @Column(length = 15)
     private String phone;
 
+    @Nationalized
     @Column(nullable = false)
     private String email;
 
+    @Nationalized
     @Column(nullable = false)
     private String location;
 
     @Column(name="attachment")
     private String attachment;
 
-    @Column(name = "is_emergency", nullable = false)
+    @Column(name = "is_emergency")
     private boolean isEmergency;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    private Category categoryId;
+    private Category category;
 
     @ManyToOne
     @JoinColumn(name = "tag_id", nullable = false)
     private Tag tagId;
 
-    @Column(nullable = false)
+    @Nationalized
+    @Column(nullable = false, length = 50)
     private String status;
 
-    public Request() {
-    }
 
-    public Request(UUID requestId, UUID organizationId, User user, String title, String content, LocalDateTime creationDate, String phone, String email, String location, String attachment, boolean isEmergency, Category categoryId, Tag tagId, String status) {
-        this.requestId = requestId;
-        this.organizationId = organizationId;
+
+    public Request( User user, String title,
+                    String content,
+                    String phone, String email, String location,
+                    Boolean isEmergency,
+                    Category category
+    ) {
         this.user = user;
         this.title = title;
         this.content = content;
-        this.creationDate = creationDate;
+        this.creationDate = Instant.now();
         this.phone = phone;
         this.email = email;
         this.location = location;
-        this.attachment = attachment;
         this.isEmergency = isEmergency;
-        this.categoryId = categoryId;
-        this.tagId = tagId;
-        this.status = status;
-    }
-
-    @Override
-    public String toString() {
-        return "Request{" +
-                "requestId=" + requestId +
-                ", user=" + user +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", creationDate=" + creationDate +
-                ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
-                ", location='" + location + '\'' +
-                ", attachment='" + attachment + '\'' +
-                ", isEmergency=" + isEmergency +
-                ", categoryId=" + categoryId +
-                ", tagId=" + tagId +
-                ", status='" + status + '\'' +
-                '}';
+        this.category = category;
+        this.status = RequestStatus.PENDING;
     }
 }

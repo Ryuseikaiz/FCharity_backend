@@ -24,9 +24,6 @@ public class InviteJoinRequest {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user; // Thay userId bằng đối tượng User
 
-//    @Column(name = "user_id")
-//    private UUID userId;
-
     @Column(name = "organization_id")
     private UUID organizationId;
 
@@ -39,15 +36,25 @@ public class InviteJoinRequest {
     @Column(name = "cv_location")
     private String cvLocation;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "request_type")
-    private String requestType;
+    private RequestType requestType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private RequestStatus status;
 
     @Column(name = "created_at")
     private Date createdAt;
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    public enum RequestType {
+        Request, Invitation
+    }
+
+    public enum RequestStatus {
+        Pending, Approved, Rejected
+    }
 }
