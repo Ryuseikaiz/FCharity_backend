@@ -135,7 +135,7 @@ public class RequestService {
     public List<RequestFinalResponse> getActiveRequests() {
         List<Request> requestList =  requestRepository.findAllWithInclude();
         return  requestList.stream()
-                .filter(request -> request.getStatus().equals("ACTIVE"))
+                .filter(request -> request.getStatus().equals("APPROVED"))
                 .map(request -> new RequestFinalResponse(request,
                         taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
                         objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
