@@ -43,4 +43,9 @@ public class ManagePostController {
         return ResponseEntity.ok("Post has been hidden successfully.");
     }
 
+    @PutMapping("/activate/{postId}")
+    public ResponseEntity<String> activatePost(@PathVariable UUID postId) {
+        postService.activatePost(postId);
+        return ResponseEntity.ok("Post has been activated successfully.");
+    }
 }

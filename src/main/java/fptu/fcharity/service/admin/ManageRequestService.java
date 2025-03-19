@@ -64,6 +64,19 @@ public class ManageRequestService {
         requestRepository.save(request);
     }
 
+    @Transactional
+    public void rejectRequest(UUID requestId) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
+
+        if (RequestStatus.REJECTED.equals(request.getStatus())) {
+            throw new ApiRequestException("Request is already rejected.");
+        }
+
+        request.setStatus(RequestStatus.REJECTED);
+        requestRepository.save(request);
+    }
+
     private RequestDto convertToDTO(Request request) {
         RequestDto dto = new RequestDto();
         dto.setId(request.getId());

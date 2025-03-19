@@ -42,4 +42,10 @@ public class ManageRequestController {
         manageRequestService.hideRequest(requestId);
         return ResponseEntity.ok("Request has been hidden successfully.");
     }
+    //Set Status thành REJECTED
+    @PutMapping("/reject/{requestId}")
+    public ResponseEntity<String> rejectRequest(@PathVariable UUID requestId) {
+        manageRequestService.rejectRequest(requestId);
+        return ResponseEntity.ok("Request has been rejected successfully.");
+    }
 }

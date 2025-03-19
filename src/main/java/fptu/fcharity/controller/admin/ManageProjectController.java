@@ -43,4 +43,9 @@ public class ManageProjectController {
         return ResponseEntity.ok("Project has been hidden successfully.");
     }
 
+    @PutMapping("/ban/{projectId}")
+    public ResponseEntity<String> banProject(@PathVariable UUID projectId) {
+        projectService.banProject(projectId);
+        return ResponseEntity.ok("Project has been banned successfully.");
+    }
 }

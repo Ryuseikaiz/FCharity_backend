@@ -3,6 +3,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.admindashboard.ProjectDTO;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.utils.constants.ProjectStatus;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,20 @@ public class ManageProjectService {
         project.setProjectStatus(RequestStatus.HIDDEN);
         projectRepository.save(project);
     }
+
+    @Transactional
+    public void banProject(UUID projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+
+        if (ProjectStatus.BANNED.equals(project.getProjectStatus())) {
+            throw new ApiRequestException("Project is already banned.");
+        }
+
+        project.setProjectStatus(ProjectStatus.BANNED);
+        projectRepository.save(project);
+    }
+
 
     private ProjectDTO convertToDTO(Project project) {
         return new ProjectDTO(

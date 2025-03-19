@@ -31,10 +31,15 @@ public class ManageOrganizationController {
         return ResponseEntity.ok("Organization deleted successfully.");
     }
 
-    @PutMapping("/approve/{orgId}")
-    public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
-        manageOrganizationService.approveOrganization(orgId);
-        return ResponseEntity.ok("Organization has been approved successfully.");
+//    @PutMapping("/approve/{orgId}")
+//    public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
+//        manageOrganizationService.approveOrganization(orgId);
+//        return ResponseEntity.ok("Organization has been approved successfully.");
+//    }
+    @PutMapping("/unhide/{orgId}")
+    public ResponseEntity<String> unHideOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.unHideOrganization(orgId);
+        return ResponseEntity.ok("Organization has been unhided successfully.");
     }
 
     @PutMapping("/hide/{orgId}")
@@ -43,4 +48,9 @@ public class ManageOrganizationController {
         return ResponseEntity.ok("Organization has been hidden successfully.");
     }
 
+    @PutMapping("/activate/{orgId}")
+    public ResponseEntity<String> activateOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.activateOrganization(orgId);
+        return ResponseEntity.ok("Organization has been activated successfully.");
+    }
 }

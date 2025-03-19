@@ -61,6 +61,19 @@ public class ManagePostService {
         postRepository.save(post);
     }
 
+    @Transactional
+    public void activatePost(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
+
+        if (!PostStatus.PENDING.equals(post.getPostStatus())) {
+            throw new ApiRequestException("Only pending posts can be activated.");
+        }
+
+        post.setPostStatus(PostStatus.ACTIVE);
+        postRepository.save(post);
+    }
+
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(
                 post.getId(),
