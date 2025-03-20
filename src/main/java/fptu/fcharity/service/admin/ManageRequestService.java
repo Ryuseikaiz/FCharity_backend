@@ -38,29 +38,29 @@ public class ManageRequestService {
         requestRepository.delete(request);
     }
 
+//    @Transactional
+//    public void hideRequest(UUID requestId) {
+//        Request request = requestRepository.findById(requestId)
+//                .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
+//
+//        if (!RequestStatus.APPROVED.equals(request.getStatus())) {
+//            throw new ApiRequestException("Only approved requests can be hidden.");
+//        }
+//
+//        request.setStatus(RequestStatus.HIDDEN);
+//        requestRepository.save(request);
+//    }
+
     @Transactional
     public void approveRequest(UUID requestId) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
-        if (RequestStatus.APPROVED.equals(request.getStatus())) {
-            throw new ApiRequestException("Request is already approved.");
+        if (!RequestStatus.PENDING.equals(request.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be approve.");
         }
 
         request.setStatus(RequestStatus.APPROVED);
-        requestRepository.save(request);
-    }
-
-    @Transactional
-    public void hideRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
-
-        if (!RequestStatus.APPROVED.equals(request.getStatus())) {
-            throw new ApiRequestException("Only approved requests can be hidden.");
-        }
-
-        request.setStatus(RequestStatus.HIDDEN);
         requestRepository.save(request);
     }
 
@@ -69,8 +69,8 @@ public class ManageRequestService {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
-        if (RequestStatus.REJECTED.equals(request.getStatus())) {
-            throw new ApiRequestException("Request is already rejected.");
+        if (!RequestStatus.PENDING.equals(request.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be reject.");
         }
 
         request.setStatus(RequestStatus.REJECTED);

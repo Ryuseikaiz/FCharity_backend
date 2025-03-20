@@ -37,11 +37,11 @@ public class ManageRequestController {
         return ResponseEntity.ok("Request has been approved successfully.");
     }
 
-    @PutMapping("/hide/{requestId}")
-    public ResponseEntity<String> hideRequest(@PathVariable UUID requestId) {
-        manageRequestService.hideRequest(requestId);
-        return ResponseEntity.ok("Request has been hidden successfully.");
-    }
+//    @PutMapping("/hide/{requestId}")
+//    public ResponseEntity<String> hideRequest(@PathVariable UUID requestId) {
+//        manageRequestService.hideRequest(requestId);
+//        return ResponseEntity.ok("Request has been hidden successfully.");
+//    }
     //Set Status thành REJECTED
     @PutMapping("/reject/{requestId}")
     public ResponseEntity<String> rejectRequest(@PathVariable UUID requestId) {

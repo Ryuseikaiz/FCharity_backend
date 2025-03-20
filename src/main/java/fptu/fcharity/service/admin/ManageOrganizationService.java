@@ -41,7 +41,7 @@ public class ManageOrganizationService {
     }
 
 //    @Transactional
-//    public void approveOrganization(UUID orgId) {
+//    public void unHideOrganization(UUID orgId) {
 //        Organization organization = organizationRepository.findById(orgId)
 //                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 //
@@ -52,42 +52,29 @@ public class ManageOrganizationService {
 //        organization.setOrganizationStatus(APPROVED);
 //        organizationRepository.save(organization);
 //    }
-//
-//    @Transactional
-//    public void hideOrganization(UUID orgId) {
-//        Organization organization = organizationRepository.findById(orgId)
-//                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
-//
-//        if (!APPROVED.equals(organization.getOrganizationStatus())) {
-//            throw new ApiRequestException("Only approved organizations can be hidden.");
-//        }
-//
-//        organization.setOrganizationStatus(HIDDEN);
-//        organizationRepository.save(organization);
-
     @Transactional
-    public void unHideOrganization(UUID orgId) {
+    public void banOrganization(UUID orgId) {
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 
-        if (organization.getOrganizationStatus().equals(ACTIVE)) {
-            throw new ApiRequestException("Organization is already active.");
+        if (!APPROVED.equals(organization.getOrganizationStatus())) {
+            throw new ApiRequestException("Only approved organizations can be hidden.");
         }
 
-        organization.setOrganizationStatus(ACTIVE);
+        organization.setOrganizationStatus(BANNED);
         organizationRepository.save(organization);
     }
 
     @Transactional
-    public void hideOrganization(UUID orgId) {
+    public void unbanOrganization(UUID orgId) {
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 
-        if (!ACTIVE.equals(organization.getOrganizationStatus())) {
+        if (!BANNED.equals(organization.getOrganizationStatus())) {
             throw new ApiRequestException("Only approved organizations can be hidden.");
         }
 
-        organization.setOrganizationStatus(HIDDEN);
+        organization.setOrganizationStatus(APPROVED);
         organizationRepository.save(organization);
     }
 
@@ -96,7 +83,7 @@ public class ManageOrganizationService {
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 
-        if (ACTIVE.equals(organization.getOrganizationStatus())) {
+        if (APPROVED.equals(organization.getOrganizationStatus())) {
             throw new ApiRequestException("Organization is already active.");
         }
 
@@ -104,7 +91,20 @@ public class ManageOrganizationService {
             throw new ApiRequestException("Only organizations in PENDING status can be activated.");
         }
 
-        organization.setOrganizationStatus(ACTIVE);
+        organization.setOrganizationStatus(APPROVED);
+        organizationRepository.save(organization);
+    }
+
+    @Transactional
+    public void rejectOrganization(UUID orgId) {
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
+
+        if (!PENDING.equals(organization.getOrganizationStatus())) {
+            throw new ApiRequestException("Only organizations in PENDING status can be activated.");
+        }
+
+        organization.setOrganizationStatus(REJECTED);
         organizationRepository.save(organization);
     }
 

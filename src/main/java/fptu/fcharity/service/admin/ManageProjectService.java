@@ -36,30 +36,30 @@ public class ManageProjectService {
         projectRepository.delete(project);
     }
 
-    @Transactional
-    public void approveProject(UUID projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
-
-        if (!RequestStatus.PENDING.equals(project.getProjectStatus())) {
-            throw new ApiRequestException("Project is not in PENDING status");
-        }
-
-        project.setProjectStatus(RequestStatus.APPROVED);
-        projectRepository.save(project);
-    }
-    @Transactional
-    public void hideProject(UUID projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
-
-        if (!RequestStatus.APPROVED.equals(project.getProjectStatus())) {
-            throw new ApiRequestException("Only approved projects can be hidden.");
-        }
-
-        project.setProjectStatus(RequestStatus.HIDDEN);
-        projectRepository.save(project);
-    }
+//    @Transactional
+//    public void approveProject(UUID projectId) {
+//        Project project = projectRepository.findById(projectId)
+//                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+//
+//        if (!RequestStatus.PENDING.equals(project.getProjectStatus())) {
+//            throw new ApiRequestException("Project is not in PENDING status");
+//        }
+//
+//        project.setProjectStatus(RequestStatus.APPROVED);
+//        projectRepository.save(project);
+//    }
+//    @Transactional
+//    public void hideProject(UUID projectId) {
+//        Project project = projectRepository.findById(projectId)
+//                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+//
+//        if (!RequestStatus.APPROVED.equals(project.getProjectStatus())) {
+//            throw new ApiRequestException("Only approved projects can be hidden.");
+//        }
+//
+//        project.setProjectStatus(RequestStatus.HIDDEN);
+//        projectRepository.save(project);
+//    }
 
     @Transactional
     public void banProject(UUID projectId) {

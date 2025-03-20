@@ -62,7 +62,7 @@ public class Post {
         this.title = title;
         this.content = content;
         this.vote = 0;
-        this.postStatus = PostStatus.ACTIVE;
+        this.postStatus = PostStatus.APPROVED;
     }
 }
 

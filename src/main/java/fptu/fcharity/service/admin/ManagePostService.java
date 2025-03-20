@@ -36,28 +36,28 @@ public class ManagePostService {
     }
 
     @Transactional
-    public void approvePost(UUID postId) {
+    public void unbanPost(UUID postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
 
-        if (!PostStatus.HIDDEN.equals(post.getPostStatus())) {
+        if (!PostStatus.BANNED.equals(post.getPostStatus())) {
             throw new ApiRequestException("Post is not in HIDDEN status");
         }
 
-        post.setPostStatus(PostStatus.ACTIVE);
+        post.setPostStatus(PostStatus.APPROVED);
         postRepository.save(post);
     }
 
     @Transactional
-    public void hidePost(UUID postId) {
+    public void banPost(UUID postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
 
-        if (!PostStatus.ACTIVE.equals(post.getPostStatus())) {
+        if (!PostStatus.APPROVED.equals(post.getPostStatus())) {
             throw new ApiRequestException("Only active posts can be hidden.");
         }
 
-        post.setPostStatus(PostStatus.HIDDEN);
+        post.setPostStatus(PostStatus.BANNED);
         postRepository.save(post);
     }
 
@@ -70,7 +70,20 @@ public class ManagePostService {
             throw new ApiRequestException("Only pending posts can be activated.");
         }
 
-        post.setPostStatus(PostStatus.ACTIVE);
+        post.setPostStatus(PostStatus.APPROVED);
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void rejectPost(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
+
+        if (!PostStatus.PENDING.equals(post.getPostStatus())) {
+            throw new ApiRequestException("Only pending posts can be rejected.");
+        }
+
+        post.setPostStatus(PostStatus.REJECTED);
         postRepository.save(post);
     }
 
