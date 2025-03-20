@@ -18,9 +18,9 @@ import java.util.UUID;
 @Table(name = "object_attachments")
 public class ObjectAttachment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
     @ColumnDefault("newid()")
-    @Column(name = "image_id", nullable = false)
+    @Column(name = "image_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
     @Nationalized

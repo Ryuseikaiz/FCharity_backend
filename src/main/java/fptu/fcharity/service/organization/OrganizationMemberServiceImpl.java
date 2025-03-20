@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,7 +30,12 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
 
     @Override
     public Optional<OrganizationMember> findById(UUID id) {
-        return organizationMemberRepository.findById(id);
+        return organizationMemberRepository.findOrganizationMemberByMembershipId(id);
+    }
+
+    @Override
+    public OrganizationMemberRole findUserRoleInOrganization(UUID userId, UUID organizationId) {
+        return  organizationMemberRepository.findOrganizationMemberByUserUserIdAndOrganizationOrganizationId(userId, organizationId).getMemberRole();
     }
 
     @Override
@@ -54,4 +61,6 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
     public void delete(UUID id) {
         organizationMemberRepository.deleteById(id);
     }
+
+    public void updateMemberRole(OrganizationMember organizationMember, UUID id) {}
 }

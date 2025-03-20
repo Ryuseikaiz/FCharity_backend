@@ -49,7 +49,7 @@ public class ProjectMemberService {
     }
     //để mời/ thêm thành viên vào dự án
     public ProjectMemberResponse addMemberToProject(ProjectMemberDto projectMemberDto) {
-      List<ProjectMember> membershipHistory = projectMemberRepository.findByProjectIdAndUserId(projectMemberDto.getProjectId(),projectMemberDto.getUserId());
+      List<ProjectMember> membershipHistory = projectMemberRepository.findByProjectIdAndUserUserId(projectMemberDto.getProjectId(),projectMemberDto.getUserId());
         ProjectMember pm = membershipHistory.stream().filter(projectMember -> projectMember.getLeaveDate() == null).findFirst().orElse(null);
       if(pm != null){
           if(pm.getMemberRole().equals(ProjectMemberRole.MEMBER)){

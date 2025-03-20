@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface ObjectAttachmentRepository extends JpaRepository<ObjectAttachment, UUID> {
     List<ObjectAttachment> findByRequestId(UUID requestId);
     List<ObjectAttachment> findByProjectId(UUID projectId);
-    List<ObjectAttachment> findByOrganizationId(UUID organizationId);
+    List<ObjectAttachment> findObjectAttachmentByOrganizationOrganizationId(UUID organizationId);
     List<ObjectAttachment> findByPhaseId(UUID phaseId);
     List<ObjectAttachment> findByPostId(UUID postId);
 }

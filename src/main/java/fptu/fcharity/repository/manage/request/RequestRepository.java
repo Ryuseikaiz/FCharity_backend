@@ -17,7 +17,7 @@ public interface RequestRepository extends JpaRepository<Request, UUID> {
     @EntityGraph(attributePaths = {"category","user"})
     @Query("SELECT r FROM Request r")
     List<Request> findAllWithInclude();
-    @Query("SELECT r FROM Request r WHERE r.user.id = :userId")
+    @Query("SELECT r FROM Request r WHERE r.user.userId = :userId")
     @EntityGraph(attributePaths = {"category","user"})
     List<Request> findByUserId(@Param("userId") UUID userId);
 }

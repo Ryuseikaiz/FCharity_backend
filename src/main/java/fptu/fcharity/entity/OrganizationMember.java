@@ -30,9 +30,16 @@ public class OrganizationMember {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
+    @Column(name = "member_role")
+    private OrganizationMemberRole memberRole;
+
     @Column(name = "join_date")
     private LocalDateTime joinDate;
 
     @Column(name = "leave_date")
     private LocalDateTime leaveDate;
+
+    public enum OrganizationMemberRole {
+        CEO, Manager, Member
+    }
 }

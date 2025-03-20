@@ -1,11 +1,10 @@
-package fptu.fcharity.rest;
+package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.User;
 
 import fptu.fcharity.repository.manage.user.UserRepository;
-import fptu.fcharity.service.organization.OrganizationManagerService;
 import fptu.fcharity.service.organization.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class OrganizationRestController {
     private final UserRepository userRepository;
 
     @Autowired
-    public OrganizationRestController(OrganizationService organizationService, UserRepository userRepository, OrganizationManagerService organizationManagerService) {
+    public OrganizationRestController(OrganizationService organizationService, UserRepository userRepository) {
         this.organizationService = organizationService;
         this.userRepository = userRepository;
     }

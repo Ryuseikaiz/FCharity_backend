@@ -77,7 +77,7 @@ private final ProjectRepository projectRepository;
             case "PROJECT":
                 return objectAttachmentRepository.findByProjectId(objectId);
             case "ORGANIZATION":
-                return objectAttachmentRepository.findByOrganizationId(objectId);
+                return objectAttachmentRepository.findObjectAttachmentByOrganizationOrganizationId(objectId);
             case "PHASE":
                 return objectAttachmentRepository.findByPhaseId(objectId);
             case "POST":

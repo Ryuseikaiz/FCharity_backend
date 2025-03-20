@@ -13,7 +13,8 @@ import org.hibernate.annotations.Nationalized;
 public class ProofImage {
     @Id
     @ColumnDefault("newid()")
-    @Column(name = "image_id", nullable = false, length = 36)
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "image_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false, length = 36)
     private String imageId;
 
     @Nationalized

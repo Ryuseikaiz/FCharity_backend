@@ -110,7 +110,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<InviteJoinRequest> getAllJoinRequestsByOrganizationId(UUID organizationId) {
-        return inviteJoinRequestRepository.findByOrganizationIdAndRequestType(organizationId, "Request");
+        return inviteJoinRequestRepository.findByOrganizationIdAndRequestType(organizationId, InviteJoinRequest.RequestType.Request);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<InviteJoinRequest> getAllJoinRequestsByUserId(UUID userId) {
-        return inviteJoinRequestRepository.findByUserUserIdAndRequestType(userId, "Request");
+        return inviteJoinRequestRepository.findByUserUserIdAndRequestType(userId, InviteJoinRequest.RequestType.Request);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class InviteJoinRequestServiceImpl implements InviteJoinRequestService {
     @Override
     @Transactional(readOnly = true)
     public List<InviteJoinRequest> getAllInviteRequestsByOrganizationId(UUID organizationId) {
-        return inviteJoinRequestRepository.findByOrganizationIdAndRequestType(organizationId, "Invitation");
+        return inviteJoinRequestRepository.findByOrganizationIdAndRequestType(organizationId, InviteJoinRequest.RequestType.Invitation);
     }
 
     @Override

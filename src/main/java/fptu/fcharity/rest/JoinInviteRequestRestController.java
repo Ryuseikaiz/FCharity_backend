@@ -11,11 +11,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-public class RequestRestController {
+public class JoinInviteRequestRestController {
     private final RequestService requestService;
 
     @Autowired
-    public RequestRestController(RequestService requestService) {
+    public JoinInviteRequestRestController(RequestService requestService) {
         this.requestService = requestService;
     }
 

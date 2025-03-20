@@ -2,10 +2,10 @@ package fptu.fcharity.service.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
-import fptu.fcharity.entity.OrganizationUserRole;
+import fptu.fcharity.entity.OrganizationMember;
+import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.OrganizationUserRoleRepository;
-import fptu.fcharity.repository.RoleRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.filestorage.FileStorageService;
@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final OrganizationUserRoleRepository organizationUserRoleRepository;
-    private final RoleRepository roleRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
@@ -31,16 +29,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationServiceImpl(
             OrganizationRepository organizationRepository,
             UserRepository userRepository,
-            OrganizationUserRoleRepository organizationUserRoleRepository,
             FileStorageService fileStorageService,
-            RoleRepository roleRepository
+            OrganizationMemberRepository organizationMemberRepository
     )
     {
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
-        this.organizationUserRoleRepository = organizationUserRoleRepository;
-        this.roleRepository = roleRepository;
+        this.organizationMemberRepository = organizationMemberRepository;
     }
 
     @Override
@@ -59,10 +55,10 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional
     public Organization createOrganization(Organization organization) throws IOException {
 // Xử lý ảnh nếu có
-        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
-            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
-            organization.setPictures(imagePath);
-        }
+//        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
+//            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
+//            organization.setPictures(imagePath);
+//        }
 
         // Gán CEO nếu có ceoId
         if (organization.getCeo() != null) {
@@ -90,12 +86,12 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgToUpdate.setOrganizationDescription(organization.getOrganizationDescription());
 
 
-        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
-            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
-            orgToUpdate.setPictures(imagePath);
-        } else if (organization.getPictures() == null || organization.getPictures().isEmpty()) {
-            orgToUpdate.setPictures(null); // Xóa ảnh nếu frontend gửi rỗng
-        }
+//        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
+//            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
+//            orgToUpdate.setPictures(imagePath);
+//        } else if (organization.getPictures() == null || organization.getPictures().isEmpty()) {
+//            orgToUpdate.setPictures(null); // Xóa ảnh nếu frontend gửi rỗng
+//        }
 
 
         if (organization.getCeo() != null && organization.getCeo().getUserId() != null) {
@@ -115,26 +111,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationDto> getOrganizationsByManager(UUID managerId) {
-        UUID managerRoleId = roleRepository.findByName("Manager")
-                .orElseThrow(() -> new RuntimeException("Role Manager not found"))
-                .getRoleId();
-
-        List<OrganizationUserRole> roles = organizationUserRoleRepository.findByIdUserIdAndRoleId(managerId, managerRoleId);
-
-        List<UUID> organizationIds = roles.stream().map(role -> role.getId().getOrganizationId()).collect(Collectors.toList());
-
-        List<Organization> organizations = organizationRepository.findAllById(organizationIds);
-
-        return organizations.stream().map(this::convertToDTO).collect(Collectors.toList());
+        List<OrganizationDto> organizations =
+                organizationMemberRepository.findOrganizationMemberByUserUserId(managerId)
+                        .stream()
+                        .filter(member -> member.getMemberRole() == OrganizationMemberRole.Manager || member.getMemberRole() == OrganizationMemberRole.CEO)
+                        .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
+                                .orElseThrow(() -> new RuntimeException("Organization not found")))
+                        .map(organization -> convertToDTO(organization))
+                        .toList();
+        return organizations;
     }
 
     public OrganizationDto getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
-        UUID managerRoleId = roleRepository.findByName("Manager").orElseThrow(() -> new RuntimeException("Role Manager not found"))
-                .getRoleId();
-
-        boolean isManager = organizationUserRoleRepository.existsByIdUserIdAndIdOrganizationIdAndRoleId(userId, organizationId, managerRoleId);
-
-        if (!isManager) {
+        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserUserIdAndOrganizationOrganizationId(userId, organizationId);
+        if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.Member) {
             return null;
         }
 

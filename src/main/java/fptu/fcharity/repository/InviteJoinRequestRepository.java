@@ -9,13 +9,13 @@ import java.util.UUID;
 
 @Repository
 public interface InviteJoinRequestRepository extends JpaRepository<InviteJoinRequest, UUID> {
-    List<InviteJoinRequest> findByOrganizationIdAndRequestType(UUID organizationId, String requestType);
+    List<InviteJoinRequest> findByOrganizationIdAndRequestType(UUID organizationId, InviteJoinRequest.RequestType requestType);
 
-    List<InviteJoinRequest> findByUserUserIdAndRequestType(UUID userId, String requestType);
+    List<InviteJoinRequest> findByUserUserIdAndRequestType(UUID userId, InviteJoinRequest.RequestType requestType);
 
-    List<InviteJoinRequest> findByOrganizationIdAndStatusAndRequestType(UUID organizationId, String status, String requestType);
+    List<InviteJoinRequest> findByOrganizationIdAndStatusAndRequestType(UUID organizationId, InviteJoinRequest.RequestStatus status, InviteJoinRequest.RequestType requestType);
 
-    List<InviteJoinRequest> findByUserUserIdAndStatusAndRequestType(UUID userId, String status, String requestType);
+    List<InviteJoinRequest> findByUserUserIdAndStatusAndRequestType(UUID userId, InviteJoinRequest.RequestStatus status, InviteJoinRequest.RequestType requestType);
 
     InviteJoinRequest findByInviteJoinRequestId(UUID inviteJoinRequestId);
 
