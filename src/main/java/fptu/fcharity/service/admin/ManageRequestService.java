@@ -86,7 +86,7 @@ public class ManageRequestService {
         dto.setCreationDate(request.getCreationDate());
         dto.setPhone(request.getPhone());
         dto.setEmail(request.getEmail());
-        dto.setLocation(request.getLocation());
+        dto.setFullAddress(request.getLocation());
         dto.setEmergency(request.getIsEmergency() != null ? request.getIsEmergency() : false);
         dto.setCategoryId(request.getCategory() != null ? request.getCategory().getId() : null);
         dto.setStatus(request.getStatus());

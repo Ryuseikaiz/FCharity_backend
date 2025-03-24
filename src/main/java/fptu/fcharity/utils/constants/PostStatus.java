@@ -8,4 +8,3 @@ public class PostStatus {
 //admin x
     public static String    HIDDEN = "HIDDEN";
 }
-
