@@ -50,6 +50,18 @@ public class ManageRequestService {
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
     }
+    @Transactional
+    public void rejectRequest(UUID requestId) {
+        HelpRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
+
+        if (!RequestStatus.PENDING.equals(request.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be reject.");
+        }
+
+        request.setStatus(RequestStatus.REJECTED);
+        requestRepository.save(request);
+    }
 
     @Transactional
     public void hideRequest(UUID requestId) {
