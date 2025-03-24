@@ -9,9 +9,10 @@ import org.hibernate.annotations.Nationalized;
 @Getter
 @Setter
 @Entity
-@Table(name = "proof_images")
-public class ProofImage {
+@Table(name = "to_project_donation_images")
+public class ToProjectDonationImage {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "image_id", nullable = false, length = 36)
     private String imageId;
@@ -19,14 +20,6 @@ public class ProofImage {
     @Nationalized
     @Column(name = "image_url")
     private String imageUrl;
-
-    @Nationalized
-    @Column(name = "image_type", length = 20)
-    private String imageType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_project_allocation_id")
-    private ToProjectAllocation toProjectAllocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_project_donation_id")

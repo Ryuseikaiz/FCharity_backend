@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "comments")
 public class Comment {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "comment_id", nullable = false)
     private UUID id;
@@ -27,7 +28,11 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "vote")
+    private Integer vote;
+
     @Nationalized
+    @Lob
     @Column(name = "content")
     private String content;
 
@@ -36,5 +41,9 @@ public class Comment {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
 
 }

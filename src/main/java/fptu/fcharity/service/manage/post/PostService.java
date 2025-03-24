@@ -2,9 +2,12 @@ package fptu.fcharity.service.manage.post;
 
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.entity.Post;
+import fptu.fcharity.entity.PostVote;
+import fptu.fcharity.entity.PostVoteId;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.repository.TagRepository;
+import fptu.fcharity.repository.manage.post.PostVoteRepository;
 import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
@@ -14,8 +17,11 @@ import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -26,10 +32,6 @@ public class PostService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private TagRepository tagRepository;
-    @Autowired
-    private TaggableRepository taggableRepository;
 
     @Autowired
     private TaggableService taggableService;
@@ -104,6 +106,10 @@ public class PostService {
         objectAttachmentService.clearAttachments(postId, TaggableType.POST);
         postRepository.deleteById(postId);
     }
+
+
+
+
 
 
 }

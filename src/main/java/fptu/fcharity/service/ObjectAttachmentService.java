@@ -30,19 +30,13 @@ private final ProjectRepository projectRepository;
         this.postRepository = postRepository;
     }
 
-    public void takeObject(ObjectAttachment objectAttachment,UUID objectId, String type) {
+    public void takeObject(ObjectAttachment objectAttachment, UUID objectId, String type) {
         switch (type){
             case "REQUEST":
-                objectAttachment.setRequest(requestRepository.findById(objectId).orElse(null));
-                break;
-            case "PROJECT":
-                objectAttachment.setProject(projectRepository.findById(objectId).orElse(null));
+                objectAttachment.setHelpRequest(requestRepository.findById(objectId).orElse(null));
                 break;
             case "POST":
                 objectAttachment.setPost(postRepository.findById(objectId).orElse(null));
-                break;
-            case "ORGANIZATION":
-//                objectAttachment.setOrganization(organizationRepository.findById(objectId).orElse(null));
                 break;
             case "PHASE":
 //                objectAttachment.setPhase(requestRepository.findById(objectId).orElse(null));
@@ -73,11 +67,7 @@ private final ProjectRepository projectRepository;
     private List<ObjectAttachment> getAttachmentsByObjectType(UUID objectId, String objectType) {
         switch (objectType) {
             case "REQUEST":
-                return objectAttachmentRepository.findByRequestId(objectId);
-            case "PROJECT":
-                return objectAttachmentRepository.findByProjectId(objectId);
-            case "ORGANIZATION":
-                return objectAttachmentRepository.findByOrganizationId(objectId);
+                return objectAttachmentRepository.findByHelpRequestId(objectId);
             case "PHASE":
                 return objectAttachmentRepository.findByPhaseId(objectId);
             case "POST":

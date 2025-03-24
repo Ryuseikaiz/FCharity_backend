@@ -2,7 +2,6 @@ package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

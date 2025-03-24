@@ -13,8 +13,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "requests")
-public class Request {
+@Table(name = "help_requests")
+public class HelpRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
@@ -58,13 +58,13 @@ public class Request {
     @Nationalized
     @Column(name = "status", length = 50)
     private String status;
-    public Request() {
+    public HelpRequest() {
     }
-    public Request( User user, String title,
-                    String content,
-                    String phone, String email, String location,
-                    Boolean isEmergency,
-                    Category category
+    public HelpRequest(User user, String title,
+                       String content,
+                       String phone, String email, String location,
+                       Boolean isEmergency,
+                       Category category
     ) {
         this.user = user;
         this.title = title;

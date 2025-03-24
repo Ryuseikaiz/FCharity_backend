@@ -2,8 +2,6 @@ package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.service.manage.organization.OrganizationMemberService;
-import fptu.fcharity.service.manage.organization.OrganizationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 

@@ -65,16 +65,13 @@ public class ProjectMemberService {
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);
     }
-    //đồng ý yêu cầu tham gia
+    //user đồng ý/ko đồng ý yêu cầu tham gia
     public void reviewInvitation(UUID memberId,String objectType,String decision) {
         if(objectType.equals(ObjectType.PROJECT)){
             ProjectMember member = projectMemberRepository.findById(memberId).orElseThrow(() -> new ApiRequestException("Member not found"));
-            if(decision.equals(RequestStatus.APPROVED)) {
-                member.setMemberRole(ProjectMemberRole.MEMBER);
-                projectMemberRepository.save(member);
-            }else{
-                projectMemberRepository.delete(member);
-            }
+            member.setMemberRole(ProjectMemberRole.MEMBER);
+            projectMemberRepository.save(member);
+
         }
     }
     //rời nhóm

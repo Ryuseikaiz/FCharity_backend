@@ -12,30 +12,27 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "timeline")
-public class Timeline {
+@Table(name = "project_reports")
+public class ProjectReport {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
-    @Column(name = "phase_id", nullable = false)
+    @Column(name = "report_id", nullable = false)
     private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reporter_id")
+    private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
 
     @Nationalized
-    @Column(name = "title")
-    private String title;
+    @Column(name = "reason")
+    private String reason;
 
-    @Column(name = "start_time")
-    private Instant startTime;
-
-    @Column(name = "end_time")
-    private Instant endTime;
-
-    @Nationalized
-    @Column(name = "content")
-    private String content;
+    @Column(name = "report_date")
+    private Instant reportDate;
 
 }
