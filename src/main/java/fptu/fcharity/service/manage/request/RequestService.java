@@ -72,7 +72,7 @@ public class RequestService {
            HelpRequest helpRequest = new HelpRequest(
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
-                   requestDTO.getLocation(),
+                   requestDTO.getFullAddress(),
                    requestDTO.isEmergency(), category);
            requestRepository.save(helpRequest);
            taggableService.addTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
@@ -101,7 +101,7 @@ public class RequestService {
             helpRequest.setContent(requestDTO.getContent() != null ? requestDTO.getContent() : helpRequest.getContent());
             helpRequest.setPhone(requestDTO.getPhone() != null ? requestDTO.getPhone() : helpRequest.getPhone());
             helpRequest.setEmail(requestDTO.getEmail() != null ? requestDTO.getEmail() : helpRequest.getEmail());
-            helpRequest.setLocation(requestDTO.getLocation() != null ? requestDTO.getLocation() : helpRequest.getLocation());
+            helpRequest.setLocation(requestDTO.getFullAddress() != null ? requestDTO.getFullAddress() : request.getLocation());
             helpRequest.setIsEmergency(requestDTO.isEmergency());
             helpRequest.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : helpRequest.getStatus());
             if (requestDTO.getTagIds() != null) {

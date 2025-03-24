@@ -43,8 +43,8 @@ public class ManageRequestService {
         HelpRequest helpRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
-        if (RequestStatus.APPROVED.equals(helpRequest.getStatus())) {
-            throw new ApiRequestException("Request is already approved.");
+        if (!RequestStatus.PENDING.equals(helpRequest.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be approve.");
         }
 
         helpRequest.setStatus(RequestStatus.APPROVED);
@@ -73,7 +73,7 @@ public class ManageRequestService {
         dto.setCreationDate(helpRequest.getCreationDate());
         dto.setPhone(helpRequest.getPhone());
         dto.setEmail(helpRequest.getEmail());
-        dto.setLocation(helpRequest.getLocation());
+        dto.setFullAddress(helpRequest.getLocation());
         dto.setEmergency(helpRequest.getIsEmergency() != null ? helpRequest.getIsEmergency() : false);
         dto.setCategoryId(helpRequest.getCategory() != null ? helpRequest.getCategory().getId() : null);
         dto.setStatus(helpRequest.getStatus());

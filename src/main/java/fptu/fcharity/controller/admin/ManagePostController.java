@@ -31,16 +31,27 @@ public class ManagePostController {
         return ResponseEntity.ok("Post deleted successfully.");
     }
 
-    @PutMapping("/approve/{postId}")
-    public ResponseEntity<String> approvePost(@PathVariable UUID postId) {
-        postService.approvePost(postId);
-        return ResponseEntity.ok("Post has been approved successfully.");
+    @PutMapping("/unban/{postId}")
+    public ResponseEntity<String> unbanPost(@PathVariable UUID postId) {
+        postService.unbanPost(postId);
+        return ResponseEntity.ok("Post has been unbanned successfully.");
     }
 
-    @PutMapping("/hide/{postId}")
-    public ResponseEntity<String> hidePost(@PathVariable UUID postId) {
-        postService.hidePost(postId);
-        return ResponseEntity.ok("Post has been hidden successfully.");
+    @PutMapping("/ban/{postId}")
+    public ResponseEntity<String> banPost(@PathVariable UUID postId) {
+        postService.banPost(postId);
+        return ResponseEntity.ok("Post has been banned successfully.");
     }
 
+    @PutMapping("/activate/{postId}")
+    public ResponseEntity<String> activatePost(@PathVariable UUID postId) {
+        postService.activatePost(postId);
+        return ResponseEntity.ok("Post has been activated successfully.");
+    }
+
+    @PutMapping("/reject/{postId}")
+    public ResponseEntity<String> rejectPost(@PathVariable UUID postId) {
+        postService.rejectPost(postId);
+        return ResponseEntity.ok("Post has been rejected successfully.");
+    }
 }
