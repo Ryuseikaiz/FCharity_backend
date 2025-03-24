@@ -3,6 +3,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.admindashboard.ProjectDTO;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.utils.constants.ProjectStatus;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -35,30 +36,44 @@ public class ManageProjectService {
         projectRepository.delete(project);
     }
 
+//    @Transactional
+//    public void approveProject(UUID projectId) {
+//        Project project = projectRepository.findById(projectId)
+//                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+//
+//        if (!RequestStatus.PENDING.equals(project.getProjectStatus())) {
+//            throw new ApiRequestException("Project is not in PENDING status");
+//        }
+//
+//        project.setProjectStatus(RequestStatus.APPROVED);
+//        projectRepository.save(project);
+//    }
+//    @Transactional
+//    public void hideProject(UUID projectId) {
+//        Project project = projectRepository.findById(projectId)
+//                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
+//
+//        if (!RequestStatus.APPROVED.equals(project.getProjectStatus())) {
+//            throw new ApiRequestException("Only approved projects can be hidden.");
+//        }
+//
+//        project.setProjectStatus(RequestStatus.HIDDEN);
+//        projectRepository.save(project);
+//    }
+
     @Transactional
-    public void approveProject(UUID projectId) {
+    public void banProject(UUID projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
 
-        if (!RequestStatus.PENDING.equals(project.getProjectStatus())) {
-            throw new ApiRequestException("Project is not in PENDING status");
+        if (ProjectStatus.BANNED.equals(project.getProjectStatus())) {
+            throw new ApiRequestException("Project is already banned.");
         }
 
-        project.setProjectStatus(RequestStatus.APPROVED);
+        project.setProjectStatus(ProjectStatus.BANNED);
         projectRepository.save(project);
     }
-    @Transactional
-    public void hideProject(UUID projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiRequestException("Project not found with ID: " + projectId));
 
-        if (!RequestStatus.APPROVED.equals(project.getProjectStatus())) {
-            throw new ApiRequestException("Only approved projects can be hidden.");
-        }
-
-        project.setProjectStatus(RequestStatus.HIDDEN);
-        projectRepository.save(project);
-    }
 
     private ProjectDTO convertToDTO(Project project) {
         return new ProjectDTO(
