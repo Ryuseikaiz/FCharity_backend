@@ -31,16 +31,32 @@ public class ManageOrganizationController {
         return ResponseEntity.ok("Organization deleted successfully.");
     }
 
-    @PutMapping("/approve/{orgId}")
-    public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
-        manageOrganizationService.approveOrganization(orgId);
-        return ResponseEntity.ok("Organization has been approved successfully.");
+//    @PutMapping("/approve/{orgId}")
+//    public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
+//        manageOrganizationService.approveOrganization(orgId);
+//        return ResponseEntity.ok("Organization has been approved successfully.");
+//    }
+    @PutMapping("/unban/{orgId}")
+    public ResponseEntity<String> unbanOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.unbanOrganization(orgId);
+        return ResponseEntity.ok("Organization has been unbanned successfully.");
     }
 
-    @PutMapping("/hide/{orgId}")
-    public ResponseEntity<String> hideOrganization(@PathVariable UUID orgId) {
-        manageOrganizationService.hideOrganization(orgId);
-        return ResponseEntity.ok("Organization has been hidden successfully.");
+    @PutMapping("/ban/{orgId}")
+    public ResponseEntity<String> banOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.banOrganization(orgId);
+        return ResponseEntity.ok("Organization has been banned successfully.");
     }
 
+    @PutMapping("/activate/{orgId}")
+    public ResponseEntity<String> activateOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.activateOrganization(orgId);
+        return ResponseEntity.ok("Organization has been activated successfully.");
+    }
+
+    @PutMapping("/reject/{orgId}")
+    public ResponseEntity<String> rejectOrganization(@PathVariable UUID orgId) {
+        manageOrganizationService.rejectOrganization(orgId);
+        return ResponseEntity.ok("Organization has been rejected successfully.");
+    }
 }
