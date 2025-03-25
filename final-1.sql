@@ -11,7 +11,6 @@ create table tags(
 	tag_name NVARCHAR(255),
 )
 
-
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
 	balance NVARCHAR(255)
@@ -49,17 +48,32 @@ CREATE TABLE organizations (
 	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
 
--- Table: organization_members
+-- Table: organization_members--edited
 CREATE TABLE organization_members (
 	membership_id  UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     organization_id UNIQUEIDENTIFIER,
     join_date DATETIME, 
     leave_date DATETIME,
+	member_role NVARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
+--new
+CREATE TABLE organization_requests (
+	organization_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+	user_id UNIQUEIDENTIFIER NOT NULL,
+	organization_id UNIQUEIDENTIFIER NOT NULL,
 
+	request_type NVARCHAR(50), -- CHECK (request_type IN ('Request', 'Invitation')) DEFAULT 'Request',
+    status NVARCHAR(50), -- CHECK (status IN ('Pending', 'Approved', 'Rejected')) DEFAULT 'Pending',
+
+	created_at DATETIME DEFAULT GETDATE(),
+	updated_at DATETIME DEFAULT GETDATE(),
+
+	FOREIGN KEY (user_id) REFERENCES users(user_id),
+	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+);
 
 -- Table: projects
 CREATE TABLE projects (
@@ -84,7 +98,21 @@ CREATE TABLE projects (
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
 );
+--new
+CREATE TABLE project_requests (
+	project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+	user_id UNIQUEIDENTIFIER NOT NULL,
+	project_id UNIQUEIDENTIFIER NOT NULL,
 
+	request_type NVARCHAR(50), -- CHECK (request_type IN ('Request', 'Invitation')) DEFAULT 'Request',
+    status NVARCHAR(50), -- CHECK (status IN ('Pending', 'Approved', 'Rejected')) DEFAULT 'Pending',
+
+	created_at DATETIME DEFAULT GETDATE(),
+	updated_at DATETIME DEFAULT GETDATE(),
+
+	FOREIGN KEY (user_id) REFERENCES users(user_id),
+	FOREIGN KEY (project_id) REFERENCES projects(project_id)
+);
 
 -- Table: project_members
 CREATE TABLE project_members (
@@ -109,8 +137,8 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Table: requests
-CREATE TABLE requests (
+-- Table: requests--edited
+CREATE TABLE help_requests (
     request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     title NVARCHAR(255),
@@ -138,23 +166,27 @@ CREATE TABLE timeline (
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
--- Table: object_images
-CREATE TABLE object_attachments (
-    image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    url NVARCHAR(255),
-    request_id UNIQUEIDENTIFIER,
-    project_id UNIQUEIDENTIFIER,
+--new
+CREATE TABLE organization_images (
+	organization_image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
 	organization_id UNIQUEIDENTIFIER,
-    phase_id UNIQUEIDENTIFIER,
-    post_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (request_id) REFERENCES requests(request_id),
-    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
-    FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+
+	image_url NVARCHAR(255),
+	image_type NVARCHAR(255),
+	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
 );
-ALTER TABLE object_attachments ADD comment_id UNIQUEIDENTIFIER;
-ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
+--new
+CREATE TABLE project_images (
+	project_image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+	project_id UNIQUEIDENTIFIER,
+	image_url NVARCHAR(255),
+	image_type NVARCHAR(255),
+	FOREIGN KEY (project_id) REFERENCES projects(project_id)
+);
+
+-- ALTER TABLE object_attachments ADD comment_id UNIQUEIDENTIFIER;
+-- ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
+ALTER TABLE comments ADD vote int;
 -- Table: task_plan
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -186,8 +218,6 @@ CREATE TABLE sub_tasks (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (task_plan_id) REFERENCES task_plan(task_plan_id)
 );
-
-
 
 -- Table: to_project_allocations
 CREATE TABLE to_project_allocations (
@@ -230,15 +260,25 @@ CREATE TABLE posts (
     post_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
     title NVARCHAR(255),
-    content NVARCHAR(255),
+    content NVARCHAR(MAX),
     vote INT,
     created_at DATETIME,
     updated_at DATETIME,
 	post_status NVARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+--new
+CREATE TABLE post_votes (
+    post_id     UNIQUEIDENTIFIER,
+    user_id     UNIQUEIDENTIFIER,
+    vote        INT CHECK (vote IN (-1, 0, 1)), -- -1: Downvote, 0: Bỏ vote, 1: Upvote
+    created_at  DATETIME DEFAULT GETDATE(),
+    updated_at  DATETIME DEFAULT GETDATE(),
+    PRIMARY KEY (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts(post_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
 
--- Junction table for many-to-many relationship
 CREATE TABLE taggable (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     tag_id UNIQUEIDENTIFIER NOT NULL,
@@ -247,7 +287,7 @@ CREATE TABLE taggable (
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
 );
 
--- Table: comments
+-- Table: comments---edited
 CREATE TABLE comments (
     comment_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     post_id UNIQUEIDENTIFIER,
@@ -255,31 +295,61 @@ CREATE TABLE comments (
     content NVARCHAR(255),
     created_at DATETIME,
     updated_at DATETIME,
+	parent_comment_id UNIQUEIDENTIFIER,
     FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+	FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id)
 );
-
+-- Table: object_attachments --edited
+CREATE TABLE object_attachments (
+    image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    url NVARCHAR(255),
+    request_id UNIQUEIDENTIFIER,
+    phase_id UNIQUEIDENTIFIER,
+    post_id UNIQUEIDENTIFIER,
+    comment_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (request_id) REFERENCES requests(request_id),
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
+    FOREIGN KEY (post_id) REFERENCES posts(post_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+);
 -- Table: reports
-CREATE TABLE reports (
+---new
+CREATE TABLE post_reports (
     report_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     reporter_id UNIQUEIDENTIFIER,
-    project_id UNIQUEIDENTIFIER,
 	post_id UNIQUEIDENTIFIER,
     reason NVARCHAR(255),
     report_date DATETIME,
     FOREIGN KEY (reporter_id) REFERENCES users(user_id),
 	FOREIGN KEY (post_id) REFERENCES posts(post_id),
+);
+CREATE TABLE project_reports (
+    report_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    reporter_id UNIQUEIDENTIFIER,
+    project_id UNIQUEIDENTIFIER,
+    reason NVARCHAR(255),
+    report_date DATETIME,
+    FOREIGN KEY (reporter_id) REFERENCES users(user_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
-
-CREATE TABLE proof_images (
+CREATE TABLE to_project_allocation_images (
     image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
     image_url NVARCHAR(255),
-    image_type NVARCHAR(20),
     to_project_allocation_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (to_project_allocation_id) REFERENCES to_project_allocations(allocation_id)
+);
+CREATE TABLE to_organization_donation_images (
+    image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
+    image_url NVARCHAR(255),
+    to_organization_donation_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (to_organization_donation_id) REFERENCES to_organization_donations(donation_id),
+);
+CREATE TABLE to_project_donation_images (
+    image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
+    image_url NVARCHAR(255),
     to_project_donation_id UNIQUEIDENTIFIER,
     FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id),
-    FOREIGN KEY (to_project_allocation_id) REFERENCES to_project_allocations(allocation_id)
 );
 
 -- Inserting categories into the database
