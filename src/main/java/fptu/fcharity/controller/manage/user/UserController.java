@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
+import fptu.fcharity.dto.user.UpdateProfileDto;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
@@ -23,8 +24,8 @@ public class UserController {
         this.userResponseMapper = userResponseMapper;
     }
 
-    @GetMapping("/current-user")
-    public ResponseEntity<?> authenticatedUser() {
+    @GetMapping("/my-profile")
+    public ResponseEntity<?> viewMyProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
@@ -44,4 +45,15 @@ public class UserController {
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileDto updateProfileDto) {
+        // Lấy người dùng hiện tại từ context security
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+        User updatedUser = userService.updateProfile(currentUser.getId(), updateProfileDto);
+        return ResponseEntity.ok(userResponseMapper.toDTO(updatedUser));
+    }
+
 }
