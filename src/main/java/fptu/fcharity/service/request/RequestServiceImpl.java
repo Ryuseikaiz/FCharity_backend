@@ -1,7 +1,6 @@
 package fptu.fcharity.service.request;
 
-import fptu.fcharity.entity.Request;
-
+import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,25 +20,25 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Request> getAll() {
+    public List<HelpRequest> getAll() {
         return requestRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Request> getById(UUID id) {
+    public Optional<HelpRequest> getById(UUID id) {
         return requestRepository.findById(id);
     }
 
     @Override
     @Transactional
-    public Request save(Request request) {
+    public HelpRequest save(HelpRequest request) {
         return requestRepository.save(request);
     }
 
     @Override
     @Transactional
-    public Request update(Request request) {
+    public HelpRequest update(HelpRequest request) {
         return requestRepository.save(request);
     }
 

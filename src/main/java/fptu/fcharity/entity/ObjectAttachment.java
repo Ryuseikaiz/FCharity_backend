@@ -28,17 +28,9 @@ public class ObjectAttachment {
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "request_id")
+    @JoinColumn(name = "help_request_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Request request;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    private Project project;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    private HelpRequest request;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "phase_id")
@@ -48,4 +40,7 @@ public class ObjectAttachment {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @ManyToOne
+    @JoinColumn(name = "comment_id", referencedColumnName = "comment_id")
+    private Comment comment;
 }

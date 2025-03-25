@@ -1,6 +1,6 @@
 package fptu.fcharity.repository.manage.request;
 
-import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.HelpRequest;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface RequestRepository extends JpaRepository<Request, UUID> {
+public interface RequestRepository extends JpaRepository<HelpRequest, UUID> {
     @EntityGraph(attributePaths = {"category","user"})
-    Request findWithIncludeById(UUID id);
+    HelpRequest findWithIncludeById(UUID id);
     @EntityGraph(attributePaths = {"category","user"})
-    @Query("SELECT r FROM Request r")
-    List<Request> findAllWithInclude();
-    @Query("SELECT r FROM Request r WHERE r.user.userId = :userId")
+    @Query("SELECT r FROM HelpRequest r")
+    List<HelpRequest> findAllWithInclude();
+    @Query("SELECT r FROM HelpRequest r WHERE r.user.userId = :userId")
     @EntityGraph(attributePaths = {"category","user"})
-    List<Request> findByUserId(@Param("userId") UUID userId);
+    List<HelpRequest> findByUserId(@Param("userId") UUID userId);
 }

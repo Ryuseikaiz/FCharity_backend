@@ -36,7 +36,7 @@ private final ProjectRepository projectRepository;
                 objectAttachment.setRequest(requestRepository.findById(objectId).orElse(null));
                 break;
             case "PROJECT":
-                objectAttachment.setProject(projectRepository.findById(objectId).orElse(null));
+//                objectAttachment.setProject(projectRepository.findById(objectId).orElse(null));
                 break;
             case "POST":
                 objectAttachment.setPost(postRepository.findById(objectId).orElse(null));
@@ -75,9 +75,9 @@ private final ProjectRepository projectRepository;
             case "REQUEST":
                 return objectAttachmentRepository.findByRequestId(objectId);
             case "PROJECT":
-                return objectAttachmentRepository.findByProjectId(objectId);
+//                return objectAttachmentRepository.findByProjectId(objectId);
             case "ORGANIZATION":
-                return objectAttachmentRepository.findObjectAttachmentByOrganizationOrganizationId(objectId);
+//                return objectAttachmentRepository.findObjectAttachmentByOrganizationOrganizationId(objectId);
             case "PHASE":
                 return objectAttachmentRepository.findByPhaseId(objectId);
             case "POST":

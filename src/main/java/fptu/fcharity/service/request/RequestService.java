@@ -1,15 +1,15 @@
 package fptu.fcharity.service.request;
 
-import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.HelpRequest;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface RequestService {
-    List<Request> getAll();
-    Optional<Request> getById(UUID id);
-    Request save(Request request);
-    Request update(Request request);
+    List<HelpRequest> getAll();
+    Optional<HelpRequest> getById(UUID id);
+    HelpRequest save(HelpRequest request);
+    HelpRequest update(HelpRequest request);
     void delete(UUID id);
 }

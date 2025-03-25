@@ -40,7 +40,7 @@ public class RequestService {
     }
 
     public List<RequestFinalResponse> getAllRequests() {
-        List<Request> requestList =  requestRepository.findAllWithInclude();
+        List<HelpRequest> requestList =  requestRepository.findAllWithInclude();
         return  requestList.stream()
                 .map(request -> new RequestFinalResponse(request,
                         taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
@@ -50,7 +50,7 @@ public class RequestService {
     }
 
     public RequestFinalResponse getRequestById(UUID requestId) {
-        Request request =  requestRepository.findWithIncludeById(requestId);
+        HelpRequest request =  requestRepository.findWithIncludeById(requestId);
         if(request == null){
             throw new ApiRequestException("Request not found");
         }
@@ -69,7 +69,7 @@ public class RequestService {
             Category category = categoryRepository.findById(requestDTO.getCategoryId())
                     .orElseThrow(() -> new ApiRequestException("Category not found"));
 
-           Request request = new Request(
+           HelpRequest request = new HelpRequest(
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
                    requestDTO.getFullAddress(),
@@ -89,7 +89,7 @@ public class RequestService {
     }
 
     public RequestFinalResponse updateRequest(UUID requestId, RequestDto requestDTO) {
-        Request request = requestRepository.findWithIncludeById(requestId);
+        HelpRequest request = requestRepository.findWithIncludeById(requestId);
         if (request != null) {
             if (requestDTO.getCategoryId() != null) {
                 Category category = categoryRepository.findById(requestDTO.getCategoryId()).get();
@@ -102,7 +102,7 @@ public class RequestService {
             request.setPhone(requestDTO.getPhone() != null ? requestDTO.getPhone() : request.getPhone());
             request.setEmail(requestDTO.getEmail() != null ? requestDTO.getEmail() : request.getEmail());
             request.setLocation(requestDTO.getFullAddress() != null ? requestDTO.getFullAddress() : request.getLocation());
-            request.setEmergency(requestDTO.isEmergency());
+            request.setIsEmergency(requestDTO.isEmergency());
             request.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : request.getStatus());
             if (requestDTO.getTagIds() != null) {
                 taggableService.updateTaggables(request.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
@@ -133,7 +133,7 @@ public class RequestService {
     }
 
     public List<RequestFinalResponse> getActiveRequests() {
-        List<Request> requestList =  requestRepository.findAllWithInclude();
+        List<HelpRequest> requestList =  requestRepository.findAllWithInclude();
         return  requestList.stream()
                 .filter(request -> request.getStatus().equals("ACTIVE"))
                 .map(request -> new RequestFinalResponse(request,
@@ -144,7 +144,7 @@ public class RequestService {
     }
 
     public List<RequestFinalResponse> getRequestsByUserId(UUID userId) {
-        List<Request> requests = requestRepository.findByUserId(userId);
+        List<HelpRequest> requests = requestRepository.findByUserId(userId);
         return requests.stream()
                 .map(request -> new RequestFinalResponse(
                         request,

@@ -2,7 +2,7 @@ package fptu.fcharity.service.admin;
 
 
 import fptu.fcharity.dto.request.RequestDto;
-import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -26,21 +26,21 @@ public class ManageRequestService {
     }
 
     public RequestDto getRequestById(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
         return convertToDTO(request);
     }
 
     @Transactional
     public void deleteRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
         requestRepository.delete(request);
     }
 
     @Transactional
     public void approveRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
         if (RequestStatus.APPROVED.equals(request.getStatus())) {
@@ -53,7 +53,7 @@ public class ManageRequestService {
 
     @Transactional
     public void hideRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
         if (!RequestStatus.APPROVED.equals(request.getStatus())) {
@@ -64,7 +64,7 @@ public class ManageRequestService {
         requestRepository.save(request);
     }
 
-    private RequestDto convertToDTO(Request request) {
+    private RequestDto convertToDTO(HelpRequest request) {
         RequestDto dto = new RequestDto();
         dto.setId(request.getId());
         dto.setUserId(request.getUser() != null ? request.getUser().getUserId(): null);
@@ -74,7 +74,7 @@ public class ManageRequestService {
         dto.setPhone(request.getPhone());
         dto.setEmail(request.getEmail());
         dto.setFullAddress(request.getLocation());
-        dto.setEmergency(request.isEmergency());
+        dto.setEmergency(request.getIsEmergency());
         dto.setCategoryId(request.getCategory() != null ? request.getCategory().getId() : null);
         dto.setStatus(request.getStatus());
 

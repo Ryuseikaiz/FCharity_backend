@@ -27,6 +27,9 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "vote")
+    private int vote;
+
     @Nationalized
     @Column(name = "content")
     private String content;
@@ -37,4 +40,6 @@ public class Comment {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Column(name = "parent_comment_id")
+    private UUID parentCommentId;
 }

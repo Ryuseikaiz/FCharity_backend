@@ -1,21 +1,21 @@
 package fptu.fcharity.dto.request;
 
-import fptu.fcharity.entity.InviteJoinRequest;
+import fptu.fcharity.entity.OrganizationRequest;
 import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
 
 @Data
-public class InviteJoinRequestDto {
+public class OrganizationRequestDto {
     private UUID inviteJoinRequestId;
     private UUID userId;
     private UUID organizationId;
     private String title;
     private String content;
     private String cvLocation;
-    private InviteJoinRequest.RequestType requestType;
-    private InviteJoinRequest.RequestStatus status;
+    private OrganizationRequest.OrganizationRequestType requestType;
+    private OrganizationRequest.OrganizationRequestStatus status;
     private Date createdAt;
     private Date updatedAt;
 }
