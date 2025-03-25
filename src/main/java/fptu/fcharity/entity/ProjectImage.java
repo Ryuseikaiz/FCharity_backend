@@ -6,18 +6,17 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "timeline")
-public class Timeline {
+@Table(name = "project_images")
+public class ProjectImage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
-    @Column(name = "phase_id", nullable = false)
+    @Column(name = "project_image_id", nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,17 +24,11 @@ public class Timeline {
     private Project project;
 
     @Nationalized
-    @Column(name = "title")
-    private String title;
-
-    @Column(name = "start_time")
-    private Instant startTime;
-
-    @Column(name = "end_time")
-    private Instant endTime;
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Nationalized
-    @Column(name = "content")
-    private String content;
+    @Column(name = "image_type")
+    private String imageType;
 
 }

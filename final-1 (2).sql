@@ -1,6 +1,6 @@
-﻿--CREATE DATABASE fcharity_database;
+--CREATE DATABASE fcharity_database;
 --USE fcharity_database;
-
+--drop database fcharity_database;
 -- Table: users
 Create table categories(
 	category_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -9,12 +9,12 @@ Create table categories(
 create table tags(
 	tag_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
 	tag_name NVARCHAR(255),
-);
+)
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
 	balance NVARCHAR(255)
-);
+)
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
     full_name NVARCHAR(255),
@@ -235,6 +235,7 @@ CREATE TABLE to_project_allocations (
 CREATE TABLE to_project_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
     project_id UNIQUEIDENTIFIER,
+    amount DECIMAL(18, 2),
     user_id UNIQUEIDENTIFIER,
     donation_status NVARCHAR(50),
     donation_time DATETIME,
@@ -248,6 +249,7 @@ CREATE TABLE to_organization_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
     user_id UNIQUEIDENTIFIER,
     organization_id UNIQUEIDENTIFIER,
+    amount DECIMAL(18, 2),
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
@@ -284,7 +286,7 @@ CREATE TABLE comments (
     post_id UNIQUEIDENTIFIER,
     user_id UNIQUEIDENTIFIER,
 	vote int,
-    content NVARCHAR(255),
+    content NVARCHAR(MAX),
     created_at DATETIME,
     updated_at DATETIME,
 	parent_comment_id UNIQUEIDENTIFIER,

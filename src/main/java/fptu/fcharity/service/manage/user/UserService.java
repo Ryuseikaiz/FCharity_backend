@@ -12,7 +12,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import fptu.fcharity.dto.user.UpdateProfileDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,4 +48,14 @@ public class UserService {
         return user;
     }
 
+    public User updateProfile(UUID userId, UpdateProfileDto updateProfileDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+        // Cập nhật các trường
+        user.setFullName(updateProfileDto.getFullName());
+        user.setPhoneNumber(updateProfileDto.getPhoneNumber());
+        user.setAddress(updateProfileDto.getFullAddress());
+        user.setAvatar(updateProfileDto.getAvatar());
+        return userRepository.save(user);
+    }
 }

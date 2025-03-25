@@ -1,6 +1,5 @@
 package fptu.fcharity.repository.manage.project;
 
-import fptu.fcharity.entity.ObjectAttachment;
 import fptu.fcharity.entity.TaskPlan;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

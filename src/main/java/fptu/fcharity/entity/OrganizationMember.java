@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "organization_members")
 public class OrganizationMember {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "membership_id", nullable = false)
     private UUID id;
@@ -31,5 +33,9 @@ public class OrganizationMember {
 
     @Column(name = "leave_date")
     private Instant leaveDate;
+
+    @Nationalized
+    @Column(name = "member_role", length = 50)
+    private String memberRole;
 
 }

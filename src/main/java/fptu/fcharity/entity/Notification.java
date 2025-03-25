@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "notifications")
 public class Notification {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "notification_id", nullable = false)
     private UUID id;

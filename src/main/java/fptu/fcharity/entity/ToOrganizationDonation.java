@@ -14,6 +14,7 @@ import java.util.UUID;
 @Table(name = "to_organization_donations")
 public class ToOrganizationDonation {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "donation_id", nullable = false)
     private UUID id;
 
