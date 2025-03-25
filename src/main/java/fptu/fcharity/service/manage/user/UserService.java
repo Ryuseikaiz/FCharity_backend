@@ -1,12 +1,7 @@
 package fptu.fcharity.service.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
-import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
-import fptu.fcharity.utils.constants.ObjectType;
-import fptu.fcharity.utils.constants.ProjectMemberRole;
-import fptu.fcharity.utils.constants.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserService {

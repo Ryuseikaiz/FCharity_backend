@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-//import static fptu.fcharity.utils.constants.RequestStatus.APPROVED;
-//import static fptu.fcharity.utils.constants.RequestStatus.HIDDEN;
+//import static fptu.fcharity.utils.constants.request.RequestStatus.APPROVED;
+//import static fptu.fcharity.utils.constants.request.RequestStatus.HIDDEN;
 import static fptu.fcharity.utils.constants.PostStatus.*;
 
 @Service

@@ -1,4 +1,4 @@
-package fptu.fcharity.utils.constants;
+package fptu.fcharity.utils.constants.request;
 
 public class RequestStatus {
      public static String    PENDING = "PENDING";

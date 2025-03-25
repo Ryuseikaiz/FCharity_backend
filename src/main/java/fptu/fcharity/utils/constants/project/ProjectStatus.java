@@ -1,4 +1,4 @@
-package fptu.fcharity.utils.constants;
+package fptu.fcharity.utils.constants.project;
 
 public class  ProjectStatus {
     public static String    DONATING = "DONATING";

@@ -1,6 +1,6 @@
 package fptu.fcharity.entity;
 
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

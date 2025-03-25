@@ -1,5 +1,6 @@
 package fptu.fcharity.response.project;
 
+import fptu.fcharity.dto.project.ProjectImageDto;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.entity.Taggable;
 import lombok.AllArgsConstructor;
@@ -13,5 +14,5 @@ import java.util.List;
 public class ProjectFinalResponse {
     private Project project;
     private List<Taggable> projectTags;
-    private List<String> attachments;
+    private List<ProjectImageDto> attachments;
 }

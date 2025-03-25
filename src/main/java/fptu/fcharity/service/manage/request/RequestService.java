@@ -8,7 +8,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import jakarta.transaction.Transactional;

@@ -4,7 +4,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

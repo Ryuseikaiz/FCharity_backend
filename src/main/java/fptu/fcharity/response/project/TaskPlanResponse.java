@@ -1,13 +1,7 @@
 package fptu.fcharity.response.project;
 
-import fptu.fcharity.entity.Project;
-import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

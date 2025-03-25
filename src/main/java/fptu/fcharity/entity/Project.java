@@ -1,7 +1,7 @@
 package fptu.fcharity.entity;
 
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -77,9 +77,9 @@ public class Project {
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
-    public Project(){}
-    public Project(String projectName, Organization organization, User leader, String email, String phoneNumber, String projectDescription, String projectStatus, String reportFile, Instant plannedStartTime, Instant plannedEndTime, Instant actualStartTime, Instant actualEndTime,
-                   String shutdownReason, Category category, Wallet walletAddress) {
+    public Project( ) {
+    }
+    public Project(String projectName, Organization organization, User leader, String email, String phoneNumber, String projectDescription, String projectStatus, String reportFile, Instant plannedStartTime, Instant plannedEndTime, Instant actualStartTime, Instant actualEndTime, String shutdownReason, Category category, Wallet walletAddress) {
         this.projectName = projectName;
         this.organization = organization;
         this.leader = leader;
