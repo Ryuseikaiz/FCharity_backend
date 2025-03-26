@@ -62,7 +62,7 @@ public class ManageUserService {
 
     private UserDTO convertToDTO(User user) {
         return new UserDTO(
-                user.getId(),
+                user.getUserId(),
                 user.getFullName(),
                 user.getEmail(),
                 user.getPhoneNumber(),

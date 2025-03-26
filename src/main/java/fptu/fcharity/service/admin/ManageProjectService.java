@@ -78,8 +78,8 @@ public class ManageProjectService {
         return new ProjectDTO(
                 project.getId(),
                 project.getProjectName(),
-                project.getOrganization() != null ? project.getOrganization().getId() : null,
-                project.getLeader() != null ? project.getLeader().getId() : null,
+                project.getOrganization() != null ? project.getOrganization().getOrganizationId() : null,
+                project.getLeader() != null ? project.getLeader().getUserId() : null,
                 project.getEmail(),
                 project.getPhoneNumber(),
                 project.getProjectDescription(),

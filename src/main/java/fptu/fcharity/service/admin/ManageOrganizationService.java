@@ -110,7 +110,7 @@ public class ManageOrganizationService {
 
     private OrganizationDTO convertToDTO(Organization organization) {
         return new OrganizationDTO(
-                organization.getId(),
+                organization.getOrganizationId(),
                 organization.getOrganizationName(),
                 organization.getEmail(),
                 organization.getPhoneNumber(),
@@ -119,7 +119,7 @@ public class ManageOrganizationService {
                 organization.getStartTime(),
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
-                organization.getCeo() != null ? organization.getCeo().getId() : null
+                organization.getCeo() != null ? organization.getCeo().getUserId() : null
         );
     }
 }

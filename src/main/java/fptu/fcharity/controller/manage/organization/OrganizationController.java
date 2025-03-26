@@ -3,7 +3,6 @@ package fptu.fcharity.controller.manage.organization;
 import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.service.manage.organization.OrganizationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

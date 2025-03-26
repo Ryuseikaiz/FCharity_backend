@@ -6,11 +6,16 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "comment_votes")
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Data
 public class CommentVote {
     @EmbeddedId
     private CommentVoteId id;

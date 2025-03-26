@@ -1,41 +1,46 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Entity
+@Table(name="organization_members")
 @Getter
 @Setter
-@Entity
-@Table(name = "organization_members")
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class OrganizationMember {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
     @ColumnDefault("newid()")
-    @Column(name = "membership_id", nullable = false)
-    private UUID id;
+    @Column(name="membership_id", unique = true, updatable = false, nullable = false)
+    private UUID membershipId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
+    @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_role")
+    private OrganizationMemberRole memberRole;
+
     @Column(name = "join_date")
-    private Instant joinDate;
+    private LocalDateTime joinDate;
 
     @Column(name = "leave_date")
-    private Instant leaveDate;
+    private LocalDateTime leaveDate;
 
-    @Nationalized
-    @Column(name = "member_role", length = 50)
-    private String memberRole;
-
+    public enum OrganizationMemberRole {
+        CEO, Manager, Member
+    }
 }

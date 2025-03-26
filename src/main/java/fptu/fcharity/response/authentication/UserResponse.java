@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class UserResponse {
-    private UUID id;
+    private UUID userId;
 
     private String fullName;
 
@@ -38,7 +38,10 @@ public class UserResponse {
 
     private String verificationCode;
 
+    private Instant verificationCodeExpiresAt;
+
     private Wallet walletAddress;
+
     public enum UserStatus {
         Unverified,
         Verified,
@@ -46,6 +49,7 @@ public class UserResponse {
     }
     public enum UserRole {
         Admin,
+        Manager,
         User,
     }
 }
