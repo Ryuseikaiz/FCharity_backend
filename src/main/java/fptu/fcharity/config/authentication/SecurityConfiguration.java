@@ -34,6 +34,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/auth/**", "/oauth2/**", "/requests/active").permitAll()
                         .requestMatchers("/auth/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
@@ -55,13 +56,8 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "https://app-backend.com",
-                "http://localhost:8080",
-                "http://localhost:3001")
-        ); //TODO: update backend url
-
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:3001", "http://localhost:3002")); // Thêm frontend URL
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả headers
         configuration.setAllowCredentials(true); // Cho phép gửi cookie/token (nếu cần)
 

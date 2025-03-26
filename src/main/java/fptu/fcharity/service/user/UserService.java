@@ -1,7 +1,7 @@
 package fptu.fcharity.service.user;
 
 import fptu.fcharity.entity.User;
-import fptu.fcharity.exception.ApiRequestException;
+import fptu.fcharity.utils.exception.ApiRequestException;
 
 import java.util.List;
 import java.util.Optional;

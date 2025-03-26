@@ -1,20 +1,28 @@
 package fptu.fcharity.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.UUID;
 
-@Entity
-@Table(name = "categories")
 @Getter
 @Setter
+@Entity
+@Table(name = "categories")
 public class Category {
     @Id
-    @Column(name = "category_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID categoryId;
+    @ColumnDefault("newid()")
+    @Column(name = "category_id", nullable = false)
+    private UUID id;
 
-    @Column(nullable = false)
+    @Nationalized
+    @Column(name = "category_name")
     private String categoryName;
+
 }

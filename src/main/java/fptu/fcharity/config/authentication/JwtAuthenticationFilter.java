@@ -5,6 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -56,7 +58,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             request.setAttribute("userEmail", userEmail);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+            if (authentication == null) {
+                System.out.println("Authentication is null");
+            }
+            System.out.println("Authentication is not null: "+authentication);
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
@@ -74,7 +79,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
+            System.out.println("Authentication is not null: "+exception);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             handlerExceptionResolver.resolveException(request, response, null, exception);
+//            return;
+//            handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }
 }

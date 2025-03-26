@@ -1,9 +1,11 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Nationalized;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,81 +13,56 @@ import java.util.UUID;
 @Table(name = "organizations")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Organization {
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name="organization_id", unique = true, updatable = false, nullable = false)
+    @ColumnDefault("newid()")
     private UUID organizationId;
 
+    @Nationalized
     @Column(name = "organization_name", nullable = false)
     private String organizationName;
 
+    @Nationalized
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Nationalized
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
+    @Nationalized
     @Column(name="address")
     private String address;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
+    @Nationalized
     @Column(name="organization_description")
     private String organizationDescription;
 
-    @Column(name = "pictures")
-    private String pictures;
+//    @Column(name = "pictures")
+//    private String pictures;
 
     @Column(name = "start_time")
-    private LocalDateTime startTime;
+    private Instant startTime;
 
     @Column(name = "shutdown_day")
-    private LocalDateTime shutdownDay;
+    private Instant shutdownDay;
 
-    @Column(name="organization_status")
+    @Nationalized
+    @Column(name="organization_status", length = 50)
     private String organizationStatus;
 
-    @ManyToOne
+    // TODO: ceo id -> object
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ceo_id")
-    private User ceoId;
-
-    public Organization() {
-    }
-
-    public Organization(UUID organizationId, String organizationName, String email, String phoneNumber, String address, Wallet walletAddress, String organizationDescription, String pictures, LocalDateTime startTime, LocalDateTime shutdownDay, String organizationStatus, User ceo) {
-        this.organizationId = organizationId;
-        this.organizationName = organizationName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.walletAddress = walletAddress;
-        this.organizationDescription = organizationDescription;
-        this.pictures = pictures;
-        this.startTime = startTime;
-        this.shutdownDay = shutdownDay;
-        this.organizationStatus = organizationStatus;
-        this.ceoId = ceoId;
-    }
-
-    @Override
-    public String toString() {
-        return "Organization{" +
-                "organizationId=" + organizationId +
-                ", organizationName='" + organizationName + '\'' +
-                ", email='" + email + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", address='" + address + '\'' +
-                ", walletAddress=" + walletAddress +
-                ", organizationDescription='" + organizationDescription + '\'' +
-                ", pictures='" + pictures + '\'' +
-                ", startTime=" + startTime +
-                ", shutdownDay=" + shutdownDay +
-                ", organizationStatus='" + organizationStatus + '\'' +
-                ", ceoId=" + ceoId +
-                '}';
-    }
+    private User ceo;
 }
 

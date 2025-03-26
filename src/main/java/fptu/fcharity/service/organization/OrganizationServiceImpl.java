@@ -1,14 +1,13 @@
 package fptu.fcharity.service.organization;
 
-import fptu.fcharity.dao.OrganizationDAO;
-import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
-import fptu.fcharity.entity.OrganizationUserRole;
+import fptu.fcharity.entity.OrganizationMember;
+import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.OrganizationRepository;
-import fptu.fcharity.repository.OrganizationUserRoleRepository;
-import fptu.fcharity.repository.RoleRepository;
-import fptu.fcharity.repository.UserRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.filestorage.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,13 +17,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final OrganizationUserRoleRepository organizationUserRoleRepository;
-    private final RoleRepository roleRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
 
@@ -32,16 +29,14 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationServiceImpl(
             OrganizationRepository organizationRepository,
             UserRepository userRepository,
-            OrganizationUserRoleRepository organizationUserRoleRepository,
             FileStorageService fileStorageService,
-            RoleRepository roleRepository
+            OrganizationMemberRepository organizationMemberRepository
     )
     {
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
-        this.organizationUserRoleRepository = organizationUserRoleRepository;
-        this.roleRepository = roleRepository;
+        this.organizationMemberRepository = organizationMemberRepository;
     }
 
     @Override
@@ -60,15 +55,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional
     public Organization createOrganization(Organization organization) throws IOException {
 // Xử lý ảnh nếu có
-        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
-            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
-            organization.setPictures(imagePath);
-        }
+//        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
+//            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
+//            organization.setPictures(imagePath);
+//        }
 
         // Gán CEO nếu có ceoId
-        if (organization.getCeoId() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeoId().getUserId());
-            ceo.ifPresent(organization::setCeoId);
+        if (organization.getCeo() != null) {
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+            ceo.ifPresent(organization::setCeo);
         }
 
         return organizationRepository.save(organization);
@@ -78,7 +73,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional
     public Organization updateOrganization(Organization organization) throws IOException {
         Optional<Organization> existingOrg = organizationRepository.findById(organization.getOrganizationId());
-        if (!existingOrg.isPresent()) {
+        if (existingOrg.isEmpty()) {
             throw new RuntimeException("Organization not found");
         }
 
@@ -91,17 +86,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         orgToUpdate.setOrganizationDescription(organization.getOrganizationDescription());
 
 
-        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
-            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
-            orgToUpdate.setPictures(imagePath);
-        } else if (organization.getPictures() == null || organization.getPictures().isEmpty()) {
-            orgToUpdate.setPictures(null); // Xóa ảnh nếu frontend gửi rỗng
-        }
+//        if (organization.getPictures() != null && organization.getPictures().startsWith("data:image")) {
+//            String imagePath = fileStorageService.storeBase64Image(organization.getPictures());
+//            orgToUpdate.setPictures(imagePath);
+//        } else if (organization.getPictures() == null || organization.getPictures().isEmpty()) {
+//            orgToUpdate.setPictures(null); // Xóa ảnh nếu frontend gửi rỗng
+//        }
 
 
-        if (organization.getCeoId() != null && organization.getCeoId().getUserId() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeoId().getUserId());
-            ceo.ifPresent(orgToUpdate::setCeoId);
+        if (organization.getCeo() != null && organization.getCeo().getUserId() != null) {
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+            ceo.ifPresent(orgToUpdate::setCeo);
         }
 
         return organizationRepository.save(orgToUpdate);
@@ -115,27 +110,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationDTO> getOrganizationsByManager(UUID managerId) {
-        UUID managerRoleId = roleRepository.findByName("Manager")
-                .orElseThrow(() -> new RuntimeException("Role Manager not found"))
-                .getRoleId();
+    public List<OrganizationDto> getOrganizationsByManager(UUID managerId) {
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByUserUserId(managerId);
 
-        List<OrganizationUserRole> roles = organizationUserRoleRepository.findByIdUserIdAndRoleId(managerId, managerRoleId);
-
-        List<UUID> organizationIds = roles.stream().map(role -> role.getId().getOrganizationId()).collect(Collectors.toList());
-
-        List<Organization> organizations = organizationRepository.findAllById(organizationIds);
-
-        return organizations.stream().map(this::convertToDTO).collect(Collectors.toList());
+        List<OrganizationDto> organizations =
+                organizationMemberRepository.findOrganizationMemberByUserUserId(managerId)
+                        .stream()
+                        .filter(member -> member.getMemberRole() == OrganizationMemberRole.Manager || member.getMemberRole() == OrganizationMemberRole.CEO)
+                        .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
+                                .orElseThrow(() -> new RuntimeException("Organization not found")))
+                        .map(this::convertToDTO)
+                        .toList();
+        return organizations;
     }
 
-    public OrganizationDTO getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
-        UUID managerRoleId = roleRepository.findByName("Manager").orElseThrow(() -> new RuntimeException("Role Manager not found"))
-                .getRoleId();
-
-        boolean isManager = organizationUserRoleRepository.existsByIdUserIdAndIdOrganizationIdAndRoleId(userId, organizationId, managerRoleId);
-
-        if (!isManager) {
+    public OrganizationDto getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
+        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserUserIdAndOrganizationOrganizationId(userId, organizationId);
+        if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.Member) {
             return null;
         }
 
@@ -144,15 +135,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         return convertToDTO(organization);
     }
 
-    private OrganizationDTO convertToDTO(Organization organization) {
-        OrganizationDTO dto = new OrganizationDTO();
-        dto.setOrganizationId(organization.getOrganizationId().toString());
+    private OrganizationDto convertToDTO(Organization organization) {
+        OrganizationDto dto = new OrganizationDto();
+        dto.setId(organization.getOrganizationId());
         dto.setOrganizationName(organization.getOrganizationName());
         dto.setEmail(organization.getEmail());
         dto.setPhoneNumber(organization.getPhoneNumber());
         dto.setAddress(organization.getAddress());
         dto.setOrganizationDescription(organization.getOrganizationDescription());
-        dto.setPictures(organization.getPictures());
         dto.setOrganizationStatus(organization.getOrganizationStatus());
         return dto;
     }
