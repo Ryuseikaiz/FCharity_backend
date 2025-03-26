@@ -119,7 +119,7 @@ public class ManageOrganizationService {
                 organization.getStartTime(),
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
-                organization.getCeo() != null ? organization.getCeo().getUserId() : null
+                organization.getCeo() != null ? organization.getCeo().getId() : null
         );
     }
 }

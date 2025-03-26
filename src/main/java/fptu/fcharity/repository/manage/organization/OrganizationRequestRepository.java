@@ -11,13 +11,13 @@ import java.util.UUID;
 public interface OrganizationRequestRepository extends JpaRepository<OrganizationRequest, UUID> {
     List<OrganizationRequest> findByOrganizationOrganizationIdAndRequestType(UUID organizationId, OrganizationRequest.OrganizationRequestType requestType);
 
-    List<OrganizationRequest> findByUserUserIdAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestType requestType);
+    List<OrganizationRequest> findByUserIdAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestType requestType);
 
     List<OrganizationRequest> findByOrganizationOrganizationIdAndStatusAndRequestType(UUID organizationId, OrganizationRequest.OrganizationRequestStatus status, OrganizationRequest.OrganizationRequestType requestType);
 
-    List<OrganizationRequest> findByUserUserIdAndStatusAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestStatus status, OrganizationRequest.OrganizationRequestType requestType);
+    List<OrganizationRequest> findByUserIdAndStatusAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestStatus status, OrganizationRequest.OrganizationRequestType requestType);
 
     OrganizationRequest findByOrganizationRequestId(UUID inviteJoinRequestId);
 
-    OrganizationRequest findByUserUserIdAndOrganizationOrganizationId(UUID userId, UUID organizationId);
+    OrganizationRequest findByUserIdAndOrganizationOrganizationId(UUID userId, UUID organizationId);
 }

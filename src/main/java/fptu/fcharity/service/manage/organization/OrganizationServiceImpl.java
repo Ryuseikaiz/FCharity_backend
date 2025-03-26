@@ -1,4 +1,4 @@
-package fptu.fcharity.service.organization;
+package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
@@ -8,7 +8,6 @@ import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
-import fptu.fcharity.service.filestorage.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,19 +22,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
-    private final FileStorageService fileStorageService;
 
     @Autowired
     public OrganizationServiceImpl(
             OrganizationRepository organizationRepository,
             UserRepository userRepository,
-            FileStorageService fileStorageService,
             OrganizationMemberRepository organizationMemberRepository
     )
     {
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
-        this.fileStorageService = fileStorageService;
         this.organizationMemberRepository = organizationMemberRepository;
     }
 
@@ -62,7 +58,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         // Gán CEO nếu có ceoId
         if (organization.getCeo() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getId());
             ceo.ifPresent(organization::setCeo);
         }
 
@@ -94,8 +90,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        }
 
 
-        if (organization.getCeo() != null && organization.getCeo().getUserId() != null) {
-            Optional<User> ceo = userRepository.findById(organization.getCeo().getUserId());
+        if (organization.getCeo() != null && organization.getCeo().getId() != null) {
+            Optional<User> ceo = userRepository.findById(organization.getCeo().getId());
             ceo.ifPresent(orgToUpdate::setCeo);
         }
 
@@ -111,10 +107,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationDto> getOrganizationsByManager(UUID managerId) {
-        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByUserUserId(managerId);
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByUserId(managerId);
 
         List<OrganizationDto> organizations =
-                organizationMemberRepository.findOrganizationMemberByUserUserId(managerId)
+                organizationMemberRepository.findOrganizationMemberByUserId(managerId)
                         .stream()
                         .filter(member -> member.getMemberRole() == OrganizationMemberRole.Manager || member.getMemberRole() == OrganizationMemberRole.CEO)
                         .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
@@ -125,7 +121,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     public OrganizationDto getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
-        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserUserIdAndOrganizationOrganizationId(userId, organizationId);
+        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(userId, organizationId);
         if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.Member) {
             return null;
         }

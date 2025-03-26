@@ -90,7 +90,7 @@ public class ManagePostService {
     private PostDTO convertToDTO(Post post) {
         return new PostDTO(
                 post.getId(),
-                post.getUser() != null ? post.getUser().getUserId() : null,
+                post.getUser() != null ? post.getUser().getId() : null,
                 post.getTitle(),
                 post.getContent(),
                 post.getVote(),

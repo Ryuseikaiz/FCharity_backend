@@ -1,14 +1,12 @@
-package fptu.fcharity.controller.manage.request;
+package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.request.OrganizationRequestDto;
 
-import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.entity.OrganizationRequest;
-import fptu.fcharity.service.organization.OrganizationMemberService;
-import fptu.fcharity.service.organization.OrganizationService;
-import fptu.fcharity.service.request.OrganizationRequestService;
-import fptu.fcharity.service.request.RequestService;
-import fptu.fcharity.service.user.UserService;
+import fptu.fcharity.service.manage.organization.OrganizationMemberService;
+import fptu.fcharity.service.manage.organization.OrganizationService;
+import fptu.fcharity.service.manage.organization.request.OrganizationRequestService;
+import fptu.fcharity.service.manage.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,41 +22,15 @@ public class OrganizationRequestRestController {
     private final OrganizationMemberService organizationMemberService;
     private final OrganizationService organizationService;
     private final UserService userService;
-    private final RequestService requestService;
 
     @Autowired
-    public OrganizationRequestRestController(OrganizationRequestService OrganizationRequestService, OrganizationMemberService organizationMemberService, UserService userService, OrganizationService organizationService, RequestService requestService) {
+    public OrganizationRequestRestController(OrganizationRequestService OrganizationRequestService, OrganizationMemberService organizationMemberService, UserService userService, OrganizationService organizationService) {
         this.OrganizationRequestService = OrganizationRequestService;
         this.organizationMemberService = organizationMemberService;
         this.userService = userService;
         this.organizationService = organizationService;
-        this.requestService = requestService;
     }
 
-    @GetMapping("/requests")
-    public List<HelpRequest> getRequests() {
-        return requestService.getAll();
-    }
-
-    @GetMapping("/requests/{request_id}")
-    public Optional<HelpRequest> getRequest(@PathVariable UUID request_id) {
-        return requestService.getById(request_id);
-    }
-
-    @PostMapping("/requests")
-    public HelpRequest createRequest(@RequestBody HelpRequest request) {
-        return requestService.save(request);
-    }
-
-    @PutMapping("/requests")
-    public HelpRequest updateRequest(@RequestBody HelpRequest request) {
-        return requestService.update(request);
-    }
-
-    @DeleteMapping("/requests/{request_id}")
-    public void deleteRequest(@PathVariable UUID request_id) {
-        requestService.delete(request_id);
-    }
 
     @PostMapping("/join-requests")
     public OrganizationRequest createJoinRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {

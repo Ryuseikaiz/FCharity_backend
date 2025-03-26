@@ -3,9 +3,10 @@ package fptu.fcharity.controller.manage.organization;
 import fptu.fcharity.dto.organization.OrganizationMemberDTO;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.service.organization.OrganizationMemberService;
-import fptu.fcharity.service.organization.OrganizationService;
-import fptu.fcharity.service.user.UserService;
+import fptu.fcharity.service.manage.organization.OrganizationMemberService;
+import fptu.fcharity.service.manage.organization.OrganizationService;
+import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -45,7 +45,7 @@ public class OrganizationMemberRestController {
     public OrganizationMember createOrganizationMember(@RequestBody OrganizationMemberDTO organizationMemberDTO) {
         OrganizationMember organizationMember = new OrganizationMember();
         organizationMember.setOrganization(organizationService.getById(organizationMemberDTO.getOrganizationId()));
-        organizationMember.setUser(userService.getById(organizationMemberDTO.getUserId()).orElseThrow(() -> new RuntimeException("User not found")));
+        organizationMember.setUser(userService.getById(organizationMemberDTO.getUserId()).orElseThrow(() -> new ApiRequestException("User not found")));
         System.out.println(organizationMember);
 
         return organizationMemberService.save(organizationMember);
@@ -53,11 +53,11 @@ public class OrganizationMemberRestController {
 
     @PutMapping("/organization_members")
     public ResponseEntity<?> updateOrganizationMember(@RequestBody OrganizationMember organizationMember, Authentication authentication) {
-        OrganizationMember currentOrganizationMemberInfo = organizationMemberService.findById(organizationMember.getMembershipId()).orElseThrow(()-> new RuntimeException("Member not found"));
-        User authUser  = userService.findUserByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("Auth user not found"));
+        OrganizationMember currentOrganizationMemberInfo = organizationMemberService.findById(organizationMember.getMembershipId()).orElseThrow(()-> new ApiRequestException("Member not found"));
+        User authUser  = userService.findUserByEmail(authentication.getName());
 
         if (!Objects.equals(organizationMember.getMemberRole(), currentOrganizationMemberInfo.getMemberRole())) {
-            OrganizationMemberRole authRole = organizationMemberService.findUserRoleInOrganization(authUser.getUserId(), organizationMember.getOrganization().getOrganizationId());
+            OrganizationMemberRole authRole = organizationMemberService.findUserRoleInOrganization(authUser.getId(), organizationMember.getOrganization().getOrganizationId());
             if (authRole == OrganizationMemberRole.CEO || authRole == OrganizationMemberRole.Manager) {
 
             } else {

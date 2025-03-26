@@ -1,4 +1,4 @@
-package fptu.fcharity.service.organization;
+package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationMember;
@@ -35,7 +35,7 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
 
     @Override
     public OrganizationMemberRole findUserRoleInOrganization(UUID userId, UUID organizationId) {
-        return  organizationMemberRepository.findOrganizationMemberByUserUserIdAndOrganizationOrganizationId(userId, organizationId).getMemberRole();
+        return  organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(userId, organizationId).getMemberRole();
     }
 
     @Override

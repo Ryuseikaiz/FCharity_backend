@@ -14,6 +14,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
     Optional<User> findByVerificationCode(String verificationCode);
     @EntityGraph(attributePaths = {"walletAddress"}) // Load thêm các quan hệ nếu cần
-    @Query("SELECT u FROM User u WHERE u.userId = :id")
+    @Query("SELECT u FROM User u WHERE u.id = :id")
     User findWithDetailsById(UUID id);
 }

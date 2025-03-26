@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequestMapping("/users")
 @RestController
@@ -40,5 +41,9 @@ public class UserController {
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         return ResponseEntity.ok(userService.changePassword(changePasswordDto));
+    }
+    @GetMapping("/users/{organizationId}")
+    public List<User> getUser(@PathVariable UUID organizationId) {
+        return userService.getAllUsersNotInOrganization(organizationId);
     }
 }

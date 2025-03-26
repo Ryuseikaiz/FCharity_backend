@@ -22,10 +22,10 @@ import java.util.UUID;
 @ToString
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
-    private UUID userId;
+    private UUID id;
 
     @Nationalized
     @Column(name = "full_name", nullable = false)
@@ -73,12 +73,6 @@ public class User implements UserDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
-
-    @PrePersist
-    public void generateUUID() {
-        if (userId == null)
-            userId = UUID.randomUUID();
-    }
 
     // Constructor for creating an unverified user
     public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, UserRole userRole, Instant createdDate, UserStatus userStatus) {

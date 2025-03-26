@@ -1,4 +1,4 @@
-package fptu.fcharity.service.request;
+package fptu.fcharity.service.manage.organization.request;
 
 import fptu.fcharity.dto.request.OrganizationRequestDto;
 import fptu.fcharity.entity.OrganizationRequest;

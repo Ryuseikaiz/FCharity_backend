@@ -5,7 +5,7 @@ import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.User;
 
 import fptu.fcharity.repository.manage.user.UserRepository;
-import fptu.fcharity.service.organization.OrganizationService;
+import fptu.fcharity.service.manage.organization.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +63,7 @@ public class OrganizationRestController {
         Optional<User> currentUser  = userRepository.findByEmail(authentication.getName()); // email
 
         if (currentUser.isPresent()) {
-            UUID currentUserId = currentUser.get().getUserId();
+            UUID currentUserId = currentUser.get().getId();
             List<OrganizationDto> organizations = organizationService.getOrganizationsByManager(currentUserId);
             System.out.println("🦔 organizations: " + organizations);
             if (organizations == null) {
