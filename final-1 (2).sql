@@ -190,7 +190,7 @@ CREATE TABLE project_images (
 -- Table: task_plan
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    project_id UNIQUEIDENTIFIER,
+    phase_id UNIQUEIDENTIFIER,
     user_id UNIQUEIDENTIFIER,
     task_name NVARCHAR(255),
     task_plan_description NVARCHAR(255),
@@ -199,25 +199,12 @@ CREATE TABLE task_plan (
     task_plan_status NVARCHAR(50),
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    parent_task_id UNIQUEIDENTIFIER,  -- Task cha (nếu có)
+    FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE NO ACTION,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE
 );
 
--- Table: sub_tasks
-CREATE TABLE sub_tasks (
-    sub_task_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    task_plan_id UNIQUEIDENTIFIER,
-    sub_task_name NVARCHAR(255),
-    user_id UNIQUEIDENTIFIER,
-    sub_task_description NVARCHAR(255),
-    start_time DATETIME,
-    end_time DATETIME,
-    sub_task_status NVARCHAR(50),
-    created_at DATETIME,
-    updated_at DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (task_plan_id) REFERENCES task_plan(task_plan_id)
-);
 
 -- Table: to_project_allocations
 CREATE TABLE to_project_allocations (
