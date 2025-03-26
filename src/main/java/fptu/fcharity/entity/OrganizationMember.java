@@ -30,6 +30,7 @@ public class OrganizationMember {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "member_role")
     private OrganizationMemberRole memberRole;
 

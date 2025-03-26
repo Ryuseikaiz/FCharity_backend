@@ -41,8 +41,10 @@ public class OrganizationRestController {
     }
 
     @PostMapping("/organizations")
-    public Organization postOrganization(@RequestBody Organization organization) throws IOException {
+    public Organization postOrganization(@RequestBody Organization organization, Authentication authentication) throws IOException {
         System.out.println("creating organization: " + organization);
+        User ceo = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
+        organization.setCeo(ceo);
         return organizationService.createOrganization(organization);
     }
 
@@ -63,6 +65,7 @@ public class OrganizationRestController {
         if (currentUser.isPresent()) {
             UUID currentUserId = currentUser.get().getUserId();
             List<OrganizationDto> organizations = organizationService.getOrganizationsByManager(currentUserId);
+            System.out.println("🦔 organizations: " + organizations);
             if (organizations == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }

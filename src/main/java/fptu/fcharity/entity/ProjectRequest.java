@@ -28,9 +28,11 @@ public class ProjectRequest {
     @JoinColumn(name = "project_id", referencedColumnName = "project_id")
     private Project project;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "request_type")
     private ProjectRequestType requestType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ProjectRequestStatus status;
 

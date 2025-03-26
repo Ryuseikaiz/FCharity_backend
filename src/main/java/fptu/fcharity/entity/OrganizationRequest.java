@@ -28,9 +28,12 @@ public class OrganizationRequest {
     @JoinColumn(name = "organization_id", referencedColumnName = "organization_id")
     private Organization organization;
 
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "request_type")
     private OrganizationRequestType requestType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private OrganizationRequestStatus status;
 

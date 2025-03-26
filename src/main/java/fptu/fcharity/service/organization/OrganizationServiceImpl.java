@@ -111,13 +111,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public List<OrganizationDto> getOrganizationsByManager(UUID managerId) {
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByUserUserId(managerId);
+
         List<OrganizationDto> organizations =
                 organizationMemberRepository.findOrganizationMemberByUserUserId(managerId)
                         .stream()
                         .filter(member -> member.getMemberRole() == OrganizationMemberRole.Manager || member.getMemberRole() == OrganizationMemberRole.CEO)
                         .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
                                 .orElseThrow(() -> new RuntimeException("Organization not found")))
-                        .map(organization -> convertToDTO(organization))
+                        .map(this::convertToDTO)
                         .toList();
         return organizations;
     }
