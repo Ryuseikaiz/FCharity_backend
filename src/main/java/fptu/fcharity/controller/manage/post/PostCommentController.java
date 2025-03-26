@@ -1,7 +1,7 @@
 package fptu.fcharity.controller.manage.post;
 
 import fptu.fcharity.dto.post.CommentDTO;
-import fptu.fcharity.service.manage.post.CommentService;
+import fptu.fcharity.service.manage.post.commentService;
 import fptu.fcharity.service.authentication.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
