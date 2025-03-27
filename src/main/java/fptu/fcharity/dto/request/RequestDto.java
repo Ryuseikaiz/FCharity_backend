@@ -18,7 +18,7 @@ public class RequestDto {
     private Instant creationDate;
     private String phone;
     private String email;
-    private String location;
+    private String fullAddress;
     private boolean isEmergency;
     private UUID categoryId;
     private List<UUID> tagIds;
