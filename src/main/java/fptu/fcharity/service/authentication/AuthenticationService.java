@@ -246,4 +246,20 @@ public class AuthenticationService {
 
         return user;
     }
+
+    public User loginAdmin(LoginUserDto input) {
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+
+        if (!user.isEnabled()) {
+            throw new ApiRequestException("Account not verified. Please verify your account.");
+        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        input.getEmail(),
+                        input.getPassword()
+                )
+        );
+        return user;
+    }
 }
