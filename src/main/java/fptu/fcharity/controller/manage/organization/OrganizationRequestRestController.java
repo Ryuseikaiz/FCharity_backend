@@ -52,24 +52,24 @@ public class OrganizationRequestRestController {
         return OrganizationRequestService.getAllJoinRequests();
     }
 
-    @GetMapping("/join-requests/organizations/{organization_id}")
-    public List<OrganizationRequest> getJoinRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
+    @GetMapping("/join-requests/organizations/{organizationId}")
+    public List<OrganizationRequest> getJoinRequestsByOrganizationId(@PathVariable("organizationId") UUID organizationId) {
         System.out.println("getJoinRequestsByOrganizationId " + organizationId);
         return OrganizationRequestService.getAllJoinRequestsByOrganizationId(organizationId);
     }
 
-    @GetMapping("/join-requests/{request_id}")
-    public Optional<OrganizationRequest> getJoinRequest(@PathVariable("request_id") UUID request_id) {
-        return OrganizationRequestService.getJoinRequestById(request_id);
+    @GetMapping("/join-requests/{requestId}")
+    public Optional<OrganizationRequest> getJoinRequest(@PathVariable("requestId") UUID requestId) {
+        return OrganizationRequestService.getJoinRequestById(requestId);
     }
 
-    @GetMapping("/join-requests/users/{user_id}")
-    public List<OrganizationRequest> getJoinRequestsByUserId(@PathVariable("user_id") UUID user_id) {
-        return OrganizationRequestService.getAllJoinRequestsByUserId(user_id);
+    @GetMapping("/join-requests/users/{userId}")
+    public List<OrganizationRequest> getJoinRequestsByUserId(@PathVariable("userId") UUID userId) {
+        return OrganizationRequestService.getAllJoinRequestsByUserId(userId);
     }
 
-    @GetMapping("/invite-requests/organizations/{organization_id}")
-    public List<OrganizationRequest> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
+    @GetMapping("/invite-requests/organizations/{organizationId}")
+    public List<OrganizationRequest> getInviteRequestsByOrganizationId(@PathVariable("organizationId") UUID organizationId) {
         return OrganizationRequestService.getAllInviteRequestsByOrganizationId(organizationId);
     }
 
@@ -84,8 +84,8 @@ public class OrganizationRequestRestController {
         return ResponseEntity.ok(OrganizationRequestService.updateInviteRequest(OrganizationRequestDto));
     }
 
-    @DeleteMapping("/invite-requests/{inviteRequest_id}")
-    public void deleteInviteRequest(@PathVariable("inviteRequest_id") UUID inviteRequestId) {
+    @DeleteMapping("/invite-requests/{inviteRequestId}")
+    public void deleteInviteRequest(@PathVariable("inviteRequestId") UUID inviteRequestId) {
         OrganizationRequestService.deleteInviteRequest(inviteRequestId);
     }
 

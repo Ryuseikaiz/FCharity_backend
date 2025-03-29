@@ -188,6 +188,11 @@ CREATE TABLE project_images (
 -- ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
 --ALTER TABLE comments ADD vote int;
 -- Table: task_plan
+
+CREATE TABLE task_plan_status(
+       status_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+       status_name NVARCHAR(255)
+)
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     phase_id UNIQUEIDENTIFIER,
@@ -196,13 +201,14 @@ CREATE TABLE task_plan (
     task_plan_description NVARCHAR(255),
     start_time DATETIME,
     end_time DATETIME,
-    task_plan_status NVARCHAR(50),
+    status_id UNIQUEIDENTIFIER,
     created_at DATETIME,
     updated_at DATETIME,
     parent_task_id UNIQUEIDENTIFIER,  -- Task cha (nếu có)
     FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE NO ACTION,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE,
+    FOREIGN KEY (status_id) REFERENCES task_plan_status(status_id) ON DELETE CASCADE
 );
 
 
@@ -354,6 +360,15 @@ CREATE TABLE to_project_donation_images (
     to_project_donation_id UNIQUEIDENTIFIER,
     FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id),
 );
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'TODO');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'IN PROGRESS');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'DONE');
+
 
 -- Inserting categories into the database
 INSERT INTO categories (category_name)

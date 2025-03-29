@@ -27,7 +27,7 @@ public class TaskPlan {
     @JoinColumn(name = "phase_id")
     private Timeline phase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -45,9 +45,10 @@ public class TaskPlan {
     @Column(name = "end_time")
     private Instant endTime;
 
-    @Nationalized
-    @Column(name = "task_plan_status", length = 50)
-    private String taskPlanStatus;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "status_id")
+    private TaskPlanStatus status;
 
     @Column(name = "created_at")
     private Instant createdAt;
@@ -55,7 +56,7 @@ public class TaskPlan {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "parent_task_id")
     private TaskPlan parentTask;
 

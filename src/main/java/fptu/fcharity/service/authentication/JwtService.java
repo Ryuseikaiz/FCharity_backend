@@ -1,5 +1,7 @@
 package fptu.fcharity.service.authentication;
 
+import fptu.fcharity.utils.exception.ApiException;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -99,8 +101,7 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            System.err.println("Lỗi khi trích xuất claims: " + e.getMessage());
-            throw e; // Hoặc xử lý tuỳ trường hợp
+           throw new ApiRequestException("Token expired: " + e.getMessage());
         }
     }
 

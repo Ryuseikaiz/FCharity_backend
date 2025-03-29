@@ -1,7 +1,11 @@
 package fptu.fcharity.controller.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
+import fptu.fcharity.dto.project.ProjectRequestDto;
+import fptu.fcharity.entity.ProjectRequest;
+import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.manage.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +46,21 @@ public class UserController {
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
-    @GetMapping("/users/{organizationId}")
-    public List<User> getUser(@PathVariable UUID organizationId) {
-        return userService.getAllUsersNotInOrganization(organizationId);
+    @GetMapping("/organizations/{organization_id}")
+    public ResponseEntity<?> getUser(@PathVariable UUID organization_id) {
+        return ResponseEntity.ok(userService.getAllUsersNotInOrganization(organization_id));
+    }
+    @GetMapping("/{user_id}/invitations")
+    public ResponseEntity<?> getInvitationsOfUser(@PathVariable UUID user_id) {
+        List<ProjectRequestResponse> projectRequests = userService.getInvitationsOfUserId(user_id);
+        return ResponseEntity.ok(projectRequests);
+    }
+    @GetMapping("/{user_id}/task-plans")
+    public ResponseEntity<?> getTaskPlansOfUser(@PathVariable UUID user_id) {
+        return ResponseEntity.ok(userService.getTasksOfUserId(user_id));
+    }
+    @GetMapping("/{project_id}/task-plans")
+    public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
+        return ResponseEntity.ok(userService.getTasksOfProjectId(project_id));
     }
 }

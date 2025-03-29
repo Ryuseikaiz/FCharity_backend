@@ -21,13 +21,4 @@ public class TimelineDto {
     private Instant startTime;
     private Instant endTime;
     private String content;
-
-    public TimelineDto(Timeline t){
-        this.id = t.getId();
-        this.projectId = t.getProject().getId();
-        this.title = t.getTitle();
-        this.startTime = t.getStartTime();
-        this.endTime = t.getEndTime();
-        this.content = t.getContent();
-    }
 }

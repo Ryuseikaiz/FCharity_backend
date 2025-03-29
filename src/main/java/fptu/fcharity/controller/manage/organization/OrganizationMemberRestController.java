@@ -36,7 +36,7 @@ public class OrganizationMemberRestController {
         return organizationMemberService.findAll();
     }
 
-    @GetMapping("/organization-members/{organization_id}")
+    @GetMapping("/organization-members/{organizationId}")
     public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organization_id) {
         return organizationMemberService.findOrganizationMemberByOrganization(organizationService.getById(organization_id));
     }
@@ -68,8 +68,8 @@ public class OrganizationMemberRestController {
         return ResponseEntity.ok(updatedOrganizationMember);
     }
 
-    @DeleteMapping("/organization-members/{organization_member_id}")
-    public void deleteOrganizationMember(@PathVariable UUID organization_member_id) {
-        organizationMemberService.delete(organization_member_id);
+    @DeleteMapping("/organization-members/{organizationMemberId}")
+    public void deleteOrganizationMember(@PathVariable UUID organizationMemberId) {
+        organizationMemberService.delete(organizationMemberId);
     }
 }

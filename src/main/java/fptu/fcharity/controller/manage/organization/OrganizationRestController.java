@@ -34,10 +34,10 @@ public class OrganizationRestController {
         return organizationService.getAllOrganizations();
     }
 
-    @GetMapping("/organizations/{organization_id}")
-    public Organization getOrganizationById(@PathVariable("organization_id") UUID organization_id) {
-        System.out.println("Get organization by id: " + organization_id);
-        return organizationService.getById(organization_id);
+    @GetMapping("/organizations/{organizationId}")
+    public Organization getOrganizationById(@PathVariable("organizationId") UUID organizationId) {
+        System.out.println("Get organization by id: " + organizationId);
+        return organizationService.getById(organizationId);
     }
 
     @PostMapping("/organizations")
@@ -53,9 +53,9 @@ public class OrganizationRestController {
         return organizationService.updateOrganization(organization);
     }
 
-    @DeleteMapping("/organizations/{organization_id}")
-    public void deleteOrganization(@PathVariable UUID organization_id) {
-        organizationService.deleteOrganization(organization_id);
+    @DeleteMapping("/organizations/{organizationId}")
+    public void deleteOrganization(@PathVariable UUID organizationId) {
+        organizationService.deleteOrganization(organizationId);
     }
 
     @GetMapping("/organizations/managed")

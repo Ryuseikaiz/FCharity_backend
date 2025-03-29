@@ -14,9 +14,16 @@ import java.util.UUID;
 public class ProjectMemberController {
     @Autowired
     private ProjectMemberService projectMemberService;
+    //--OKAY
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getMembersOfProject(@PathVariable UUID projectId) {
-       List<ProjectMemberResponse> projectMembers = projectMemberService.getMembersOfProject(projectId);
+        List<ProjectMemberResponse> projectMembers = projectMemberService.getMembersOfProject(projectId);
+        return ResponseEntity.ok(projectMembers);
+    }
+    //--OKAY
+    @GetMapping("/{projectId}/active")
+    public ResponseEntity<?> getActiveMembersOfProject(@PathVariable UUID projectId) {
+       List<ProjectMemberResponse> projectMembers = projectMemberService.getActiveMembersOfProject(projectId);
         return ResponseEntity.ok(projectMembers);
     }
     @PostMapping("/move-out/{memberId}")
