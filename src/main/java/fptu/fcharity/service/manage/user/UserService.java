@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import fptu.fcharity.dto.user.UpdateProfileDto;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -94,5 +95,15 @@ public class UserService {
     }
     public List<TaskPlan> getTasksOfProjectId(UUID userId) {
         return taskPlanRepository.findTaskPlanByProject(userId);
+    }
+    public User updateProfile(UUID userId, UpdateProfileDto updateProfileDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+        // Cập nhật các trường
+        user.setFullName(updateProfileDto.getFullName());
+        user.setPhoneNumber(updateProfileDto.getPhoneNumber());
+        user.setAddress(updateProfileDto.getFullAddress());
+        user.setAvatar(updateProfileDto.getAvatar());
+        return userRepository.save(user);
     }
 }
