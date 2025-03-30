@@ -17,5 +17,5 @@ public interface OrganizationService {
     void deleteOrganization(UUID id);
     List<OrganizationDto> getOrganizationsByCeoOrManager(UUID ceoManagerId);
     OrganizationDto getOrganizationByOrganizationIdAndCeoOrManager(UUID id, UUID ceoManagerId);
-    Organization getMyOrganization(UUID userId);
+    OrganizationDto getMyOrganization(UUID userId);
 }

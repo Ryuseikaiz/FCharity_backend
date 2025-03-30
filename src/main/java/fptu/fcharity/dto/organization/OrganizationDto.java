@@ -10,7 +10,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @ToString
 public class OrganizationDto {
-    private UUID id;
+    private UUID organizationId;
     private String organizationName;
     private String email;
     private String phoneNumber;

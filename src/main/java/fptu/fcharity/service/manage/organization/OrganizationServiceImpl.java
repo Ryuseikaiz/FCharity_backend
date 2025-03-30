@@ -93,7 +93,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationMemberRepository.save(organizationMember);
 
-        organizationDto.setId(organizationSaved.getOrganizationId());
+        organizationDto.setOrganizationId(organizationSaved.getOrganizationId());
 
         return organizationDto;
     }
@@ -117,7 +117,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if (userRole == OrganizationMemberRole.CEO || userRole == OrganizationMemberRole.MANAGER) {
             if (organizationDto.getAvatarUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getId(), OrganizationImage.OrganizationImageType.Avatar);
+                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getOrganizationId(), OrganizationImage.OrganizationImageType.Avatar);
 
                 if (organizationImage != null && !organizationImage.isEmpty()) {
                     OrganizationImage image = organizationImage.getFirst();
@@ -125,7 +125,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationImageRepository.save(image);
                 } else {
                     OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDto.getId());
+                    image.setOrganizationId(organizationDto.getOrganizationId());
                     image.setImageUrl(organizationDto.getAvatarUrl());
                     image.setImageType(OrganizationImage.OrganizationImageType.Avatar);
                     organizationImageRepository.save(image);
@@ -133,7 +133,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 
             if (organizationDto.getBackgroundUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getId(), OrganizationImage.OrganizationImageType.Background);
+                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getOrganizationId(), OrganizationImage.OrganizationImageType.Background);
 
                 if (organizationImage != null && !organizationImage.isEmpty()) {
                     OrganizationImage image = organizationImage.getFirst();
@@ -141,7 +141,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                     organizationImageRepository.save(image);
                 } else {
                     OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDto.getId());
+                    image.setOrganizationId(organizationDto.getOrganizationId());
                     image.setImageUrl(organizationDto.getBackgroundUrl());
                     image.setImageType(OrganizationImage.OrganizationImageType.Background);
                     organizationImageRepository.save(image);
@@ -188,14 +188,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public Organization getMyOrganization(UUID userId) {
-        return organizationRepository.findOrganizationByUserId(userId);
+    public OrganizationDto getMyOrganization(UUID userId) {
+        Organization organization = organizationRepository.findOrganizationByUserId(userId);
+        return convertToDTO(organization);
     }
 
     private OrganizationDto convertToDTO(Organization organization) {
         OrganizationDto dto = new OrganizationDto();
 
-        dto.setId(organization.getOrganizationId());
+        dto.setOrganizationId(organization.getOrganizationId());
         dto.setOrganizationName(organization.getOrganizationName());
         dto.setEmail(organization.getEmail());
         dto.setPhoneNumber(organization.getPhoneNumber());
@@ -228,8 +229,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     private Organization convertToEntity(OrganizationDto dto) {
         Organization organization = new Organization();
 
-        if (dto.getId() != null) {
-            organization.setOrganizationId(dto.getId());
+        if (dto.getOrganizationId() != null) {
+            organization.setOrganizationId(dto.getOrganizationId());
         }
         if (dto.getCeoId() != null) {
             organization.setCeo(userRepository.findById(dto.getCeoId()).orElseThrow(() -> new RuntimeException("Ceo not found")));

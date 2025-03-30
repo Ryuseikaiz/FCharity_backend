@@ -84,7 +84,7 @@ public class OrganizationRestController {
 
     @GetMapping("/organizations/my-organization/{userId}")
     public ResponseEntity<?> getMyOrganization(@PathVariable UUID userId) {
-        Organization organization = organizationService.getMyOrganization(userId);
+        OrganizationDto organization = organizationService.getMyOrganization(userId);
         return ResponseEntity.ok(organization);
     }
 }
