@@ -20,4 +20,6 @@ public interface OrganizationRequestRepository extends JpaRepository<Organizatio
     OrganizationRequest findByOrganizationRequestId(UUID inviteJoinRequestId);
 
     OrganizationRequest findByUserUserIdAndOrganizationOrganizationId(UUID userId, UUID organizationId);
+
+    OrganizationRequest findByUserUserIdAndOrganizationOrganizationIdAndRequestType(UUID userUserId, UUID organizationOrganizationId, OrganizationRequest.OrganizationRequestType requestType);
 }

@@ -3,6 +3,7 @@ package fptu.fcharity.service.user;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
 
+import fptu.fcharity.repository.OrganizationRequestRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
@@ -23,24 +24,20 @@ public class UserServiceImpl implements UserService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final OrganizationRepository organizationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrganizationRequestRepository organizationRequestRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, OrganizationMemberRepository organizationMemberRepository, OrganizationRepository organizationRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, OrganizationMemberRepository organizationMemberRepository, OrganizationRepository organizationRepository, OrganizationRequestRepository organizationRequestRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.organizationMemberRepository = organizationMemberRepository;
         this.organizationRepository = organizationRepository;
+        this.organizationRequestRepository = organizationRequestRepository;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> findAllUsers() {
-        return List.of();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<User> findUserByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
@@ -62,28 +59,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<User> getById(UUID id) {
+    public Optional<User> findById(UUID id) {
         return userRepository.findById(id);
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 
     @Override
-    public List<User> getAllUsersNotInOrganization(UUID organizationId) {
+    public List<User> findAllUsersNotInOrganization(UUID organizationId) {
         List<User> allUsers = userRepository.findAll();
         List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByOrganization(organizationRepository.findById(organizationId).orElseThrow(() -> new RuntimeException("Organization not found")));
 
-        return allUsers.stream().filter(user -> {
+        List<User> result =  allUsers.stream().filter(user -> {
             for (OrganizationMember organizationMember : organizationMembers) {
                 if (organizationMember.getUser().getUserId() == user.getUserId()) {
                     return false;
                 }
             }
             return true;
+        }).filter(user -> {
+            return organizationRequestRepository.findByUserUserIdAndOrganizationOrganizationId(user.getUserId(), organizationId) == null;
         }).toList();
+
+        return result;
     }
 }

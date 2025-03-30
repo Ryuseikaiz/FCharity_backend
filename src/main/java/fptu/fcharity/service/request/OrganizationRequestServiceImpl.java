@@ -13,6 +13,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -132,21 +133,23 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
     }
 
     @Override
-    public OrganizationRequest createInviteRequest(OrganizationRequestDto OrganizationRequestDto) {
+    public OrganizationRequest createInviteRequest(OrganizationRequestDto organizationRequestDto) {
+
+        System.out.println("creating new invite request: " + organizationRequestDto);
+
         OrganizationRequest OrganizationRequest = new OrganizationRequest();
-        User user = userRepository.findById(OrganizationRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + OrganizationRequestDto.getUserId()));
-        System.out.println("creating new invite request: ");
+        User user = userRepository.findById(organizationRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + organizationRequestDto.getUserId()));
 
-        Organization organization = organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId()));
+        Organization organization = organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId()));
 
 
-       if (OrganizationRequestRepository.findByUserUserIdAndOrganizationOrganizationId(user.getUserId(), OrganizationRequest.getOrganization().getOrganizationId()) != null) {
-           System.out.println("OrganizationRequest already exists with ID: " + OrganizationRequestDto.getUserId());
+       if (OrganizationRequestRepository.findByUserUserIdAndOrganizationOrganizationId(user.getUserId(), organization.getOrganizationId()) != null) {
+           System.out.println("OrganizationRequest already exists with ID: " + organizationRequestDto.getUserId());
            throw new IllegalArgumentException("Invite request already exists");
        }
 
        OrganizationRequest.setUser(user);
-       OrganizationRequest.setOrganization(organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId())));
+       OrganizationRequest.setOrganization(organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId())));
        OrganizationRequest.setRequestType(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation);
        OrganizationRequest.setStatus(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Pending);
        return OrganizationRequestRepository.save(OrganizationRequest);
@@ -157,7 +160,15 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
         User user = userRepository.findById(OrganizationRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + OrganizationRequestDto.getUserId()));
         Organization organization = organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId()));
 
-        OrganizationRequest OrganizationRequest = OrganizationRequestRepository.findByUserUserIdAndOrganizationOrganizationId(user.getUserId(), organization.getOrganizationId());
+        System.out.println("updating invite request: " + organization);
+
+        OrganizationRequest OrganizationRequest = OrganizationRequestRepository
+                .findByUserUserIdAndOrganizationOrganizationIdAndRequestType(
+                        user.getUserId(),
+                        organization.getOrganizationId(),
+                        fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation
+                );
+
         if (OrganizationRequest == null)
             throw new IllegalArgumentException("Invite request does not exist");
 
@@ -168,6 +179,8 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
                 OrganizationMember newMember = new OrganizationMember();
                 newMember.setUser(user);
                 newMember.setOrganization(organization);
+                newMember.setMemberRole(OrganizationMember.OrganizationMemberRole.Member);
+                newMember.setJoinDate(Instant.now());
 
                 System.out.println(organizationMemberRepository.save(newMember));
                 break;

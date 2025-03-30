@@ -20,7 +20,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/current-user")
+    @GetMapping("/my-profile")
     public ResponseEntity<?> authenticatedUser(Authentication authentication) {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();

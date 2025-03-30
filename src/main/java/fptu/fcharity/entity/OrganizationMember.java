@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,11 +23,11 @@ public class OrganizationMember {
     @Column(name="membership_id", unique = true, updatable = false, nullable = false)
     private UUID membershipId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
@@ -35,10 +36,10 @@ public class OrganizationMember {
     private OrganizationMemberRole memberRole;
 
     @Column(name = "join_date")
-    private LocalDateTime joinDate;
+    private Instant joinDate;
 
     @Column(name = "leave_date")
-    private LocalDateTime leaveDate;
+    private Instant leaveDate;
 
     public enum OrganizationMemberRole {
         CEO, Manager, Member

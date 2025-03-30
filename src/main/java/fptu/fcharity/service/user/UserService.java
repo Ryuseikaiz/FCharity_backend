@@ -8,10 +8,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
-    List<User> findAllUsers();
-    Optional<User> findUserByEmail(String email);
+    List<User> findAll();
+    List<User> findAllUsersNotInOrganization(UUID organizationId);
+
+    Optional<User> findById(UUID id);
+    Optional<User> findByEmail(String email);
+
     User updatePassword(String email, String newPassword, String oldPassword) throws ApiRequestException;
-    Optional<User> getById(UUID id);
-    List<User> getAllUsers();
-    List<User> getAllUsersNotInOrganization(UUID organizationId);
+
 }

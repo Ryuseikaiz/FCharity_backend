@@ -22,17 +22,17 @@ public class UserRestController {
     @GetMapping("/users/me")
     public Optional<User> me(@RequestAttribute("userEmail") String email) {
         System.out.println("call get me: " + email);
-        System.out.println("result: " + userService.findUserByEmail(email));
-        return userService.findUserByEmail(email);
+        System.out.println("result: " + userService.findByEmail(email));
+        return userService.findByEmail(email);
     }
 
     @GetMapping("/users")
     public List<User> users() {
-        return userService.getAllUsers();
+        return userService.findAll();
     }
 
-    @GetMapping("/users/{organizationId}")
+    @GetMapping("/users/outside/{organizationId}")
     public List<User> getUser(@PathVariable UUID organizationId) {
-        return userService.getAllUsersNotInOrganization(organizationId);
+        return userService.findAllUsersNotInOrganization(organizationId);
     }
 }

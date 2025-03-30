@@ -2,17 +2,25 @@ package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.Organization;
+import fptu.fcharity.entity.OrganizationImage;
 import fptu.fcharity.entity.User;
 
+import fptu.fcharity.entity.Wallet;
+import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.service.organization.OrganizationImageService;
 import fptu.fcharity.service.organization.OrganizationService;
+import fptu.fcharity.service.user.UserService;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,50 +29,49 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class OrganizationRestController {
     private final OrganizationService organizationService;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public OrganizationRestController(OrganizationService organizationService, UserRepository userRepository) {
+    public OrganizationRestController(OrganizationService organizationService, UserService userService) {
         this.organizationService = organizationService;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/organizations")
-    public List<Organization> getOrganization() {
-        return organizationService.getAllOrganizations();
+    public List<OrganizationDto> getOrganization() {
+        return organizationService.findAll();
     }
 
     @GetMapping("/organizations/{organization_id}")
-    public Organization getOrganizationById(@PathVariable("organization_id") UUID organization_id) {
+    public OrganizationDto getOrganizationById(@PathVariable("organization_id") UUID organization_id) {
         System.out.println("Get organization by id: " + organization_id);
-        return organizationService.getById(organization_id);
+        return organizationService.findById(organization_id);
     }
 
-    @PostMapping("/organizations")
-    public Organization postOrganization(@RequestBody Organization organization, Authentication authentication) throws IOException {
-        System.out.println("creating organization: " + organization);
-        User ceo = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
-        organization.setCeo(ceo);
-        return organizationService.createOrganization(organization);
+    @PostMapping("/organizations")  // OK
+    public OrganizationDto postOrganization(@RequestBody OrganizationDto organizationDto) throws IOException {
+        System.out.println("🤖🤖🤖creating organization: " + organizationDto);
+        return organizationService.createOrganization(organizationDto);
     }
 
-    @PutMapping("/organizations")
-    public Organization putOrganization(@RequestBody Organization organization) throws IOException {
-        return organizationService.updateOrganization(organization);
+    @PutMapping("/organizations")   // OK
+    public OrganizationDto putOrganization(@RequestBody OrganizationDto organizationDto) throws IOException {
+        return organizationService.updateOrganization(organizationDto);
     }
 
     @DeleteMapping("/organizations/{organization_id}")
-    public void deleteOrganization(@PathVariable UUID organization_id) {
-        organizationService.deleteOrganization(organization_id);
+    public void deleteOrganization(@PathVariable UUID organizationId) {
+        organizationService.deleteOrganization(organizationId);
     }
 
     @GetMapping("/organizations/managed")
-    public ResponseEntity<List<OrganizationDto>> getManagedOrganizations(Authentication authentication) {
-        Optional<User> currentUser  = userRepository.findByEmail(authentication.getName()); // email
+    public ResponseEntity<List<OrganizationDto>> getManagedOrganizations() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Optional<User> currentUser  = userService.findByEmail(authentication.getName()); // email
 
         if (currentUser.isPresent()) {
             UUID currentUserId = currentUser.get().getUserId();
-            List<OrganizationDto> organizations = organizationService.getOrganizationsByManager(currentUserId);
+            List<OrganizationDto> organizations = organizationService.getOrganizationsByCeoOrManager(currentUserId);
             System.out.println("🦔 organizations: " + organizations);
             if (organizations == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
