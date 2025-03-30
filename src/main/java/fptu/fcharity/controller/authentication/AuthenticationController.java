@@ -116,4 +116,13 @@ public class AuthenticationController {
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
         return ResponseEntity.ok(userService.changePassword(changePasswordDto));
     }
+
+    @PostMapping("/loginAdmin")
+    public ResponseEntity<?> authenticateAdmin(@RequestBody LoginUserDto loginUserDto){
+        User authenticatedUser = authenticationService.loginAdmin(loginUserDto);
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+        String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
+        LoginResponse loginResponse = new LoginResponse(jwtToken,refreshToken);
+        return ResponseEntity.ok(loginResponse);
+    }
 }
