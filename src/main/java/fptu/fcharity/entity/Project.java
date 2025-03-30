@@ -30,6 +30,10 @@ public class Project {
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private HelpRequest request;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id")
     private User leader;
 

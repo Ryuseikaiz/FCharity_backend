@@ -94,10 +94,12 @@ CREATE TABLE projects (
     shutdown_reason NVARCHAR(255),
 	category_id UNIQUEIDENTIFIER,
 	wallet_address UNIQUEIDENTIFIER,
+    request_id UNIQUEIDENTIFIER,
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id),
     FOREIGN KEY (leader_id) REFERENCES users(user_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
+        FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
 );
 
 --new

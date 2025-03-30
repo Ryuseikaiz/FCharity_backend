@@ -6,6 +6,7 @@ import fptu.fcharity.repository.*;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.project.ProjectImageRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
@@ -33,6 +34,7 @@ public class ProjectService {
     private final OrganizationRepository organizationRepository;
     private final TaggableService taggableService;
     private final ProjectImageService projectImageService;
+    private final RequestRepository requestRepository;
 
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
@@ -43,6 +45,7 @@ public class ProjectService {
                           TaggableService taggableService,
                           RequestService requestService,
                           WalletService walletService,
+                          RequestRepository requestRepository,
                           ProjectImageService projectImageService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
@@ -53,6 +56,7 @@ public class ProjectService {
         this.taggableService = taggableService;
         this.projectImageService = projectImageService;
         this.walletService = walletService;
+        this.requestRepository = requestRepository;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -88,6 +92,10 @@ public class ProjectService {
             Organization organization = organizationRepository.findById(projectDto.getOrganizationId())
                     .orElseThrow(() -> new ApiRequestException("Không tìm thấy Organization"));
             project.setOrganization(organization);
+        }
+        if (projectDto.getRequestId() != null) {
+            HelpRequest r = requestRepository.findWithIncludeById(projectDto.getRequestId());
+            project.setRequest(r);
         }
     }
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
