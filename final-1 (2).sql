@@ -84,6 +84,7 @@ CREATE TABLE projects (
     email NVARCHAR(255),
     phone_number NVARCHAR(15),
     project_description NVARCHAR(255),
+    location NVARCHAR(255),
     project_status NVARCHAR(50),
     report_file NVARCHAR(255),
     planned_start_time DATETIME,
@@ -98,6 +99,7 @@ CREATE TABLE projects (
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
 );
+
 --new
 CREATE TABLE project_requests (
 	project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),

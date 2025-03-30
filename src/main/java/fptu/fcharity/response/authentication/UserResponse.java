@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class UserResponse {
-    private UUID userId;
+    private UUID id;
 
     private String fullName;
 

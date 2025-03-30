@@ -50,6 +50,10 @@ public class Project {
     private String projectStatus;
 
     @Nationalized
+    @Column(name = "location")
+    private String location;
+
+    @Nationalized
     @Column(name = "report_file")
     private String reportFile;
 
