@@ -47,9 +47,6 @@ public class Organization {
     @Column(name="organization_description")
     private String organizationDescription;
 
-//    @Column(name = "pictures")
-//    private String pictures;
-
     @Column(name = "start_time")
     private Instant startTime;
 

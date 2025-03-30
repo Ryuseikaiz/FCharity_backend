@@ -2,11 +2,16 @@ package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.request.OrganizationRequestDto;
 
+import fptu.fcharity.entity.HelpRequest;
+import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationRequest;
+import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
 import fptu.fcharity.service.manage.organization.OrganizationMemberService;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.organization.request.OrganizationRequestService;
 import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +24,17 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class OrganizationRequestRestController {
     private final OrganizationRequestService OrganizationRequestService;
-    private final OrganizationMemberService organizationMemberService;
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final OrganizationRequestRepository organizationRequestRepository;
 
     @Autowired
-    public OrganizationRequestRestController(OrganizationRequestService OrganizationRequestService, OrganizationMemberService organizationMemberService, UserService userService, OrganizationService organizationService) {
+    public OrganizationRequestRestController(OrganizationRequestService OrganizationRequestService, OrganizationMemberService organizationMemberService, UserService userService, OrganizationService organizationService, OrganizationRequestRepository organizationRequestRepository) {
         this.OrganizationRequestService = OrganizationRequestService;
-        this.organizationMemberService = organizationMemberService;
         this.userService = userService;
         this.organizationService = organizationService;
+        this.organizationRequestRepository = organizationRequestRepository;
     }
-
 
     @PostMapping("/join-requests")
     public OrganizationRequest createJoinRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
@@ -68,13 +72,31 @@ public class OrganizationRequestRestController {
         return OrganizationRequestService.getAllJoinRequestsByUserId(userId);
     }
 
-    @GetMapping("/invite-requests/organizations/{organizationId}")
-    public List<OrganizationRequest> getInviteRequestsByOrganizationId(@PathVariable("organizationId") UUID organizationId) {
+    @GetMapping("/invite-requests/request-id/{organizationId}/{userId}")
+    public UUID getInviteRequestId(@PathVariable UUID userId, @PathVariable UUID organizationId) {
+        System.out.println("🍎🍎🍎 getInviteRequestId " + userId + " " + organizationId);
+        User user = userService.getById(userId).orElseThrow(() -> new ApiRequestException("user not found"));
+        Organization organization = organizationService.findEntityById(organizationId);
+
+        UUID result = organizationRequestRepository
+                .findByUserIdAndOrganizationOrganizationIdAndRequestType(
+                        user.getId(),
+                        organization.getOrganizationId(),
+                        OrganizationRequest.OrganizationRequestType.Invitation
+                ).getOrganizationRequestId();
+        System.out.println("result 🍎🍎🍎" + result);
+        return result;
+    }
+
+
+    @GetMapping("/invite-requests/organizations/{organization_id}")
+    public List<OrganizationRequest> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
         return OrganizationRequestService.getAllInviteRequestsByOrganizationId(organizationId);
     }
 
-    @PostMapping("/invite-requests")
+    @PostMapping("/invite-requests")  // In progress
     public ResponseEntity<OrganizationRequest> createInviteRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
+        System.out.println("createInviteRequest 🍎🍎🍎🍎 " + OrganizationRequestDto);
         OrganizationRequest OrganizationRequest = OrganizationRequestService.createInviteRequest(OrganizationRequestDto);
         return ResponseEntity.ok(OrganizationRequest);
     }
@@ -85,8 +107,8 @@ public class OrganizationRequestRestController {
     }
 
     @DeleteMapping("/invite-requests/{inviteRequestId}")
-    public void deleteInviteRequest(@PathVariable("inviteRequestId") UUID inviteRequestId) {
+    public void deleteInviteRequest(@PathVariable UUID inviteRequestId) {
+        System.out.println("deleteInviteRequest 🍎🍎🍎" + inviteRequestId);
         OrganizationRequestService.deleteInviteRequest(inviteRequestId);
     }
-
 }

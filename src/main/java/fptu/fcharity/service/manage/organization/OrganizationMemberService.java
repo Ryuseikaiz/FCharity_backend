@@ -11,7 +11,7 @@ public interface OrganizationMemberService {
     Optional<OrganizationMember> findById(UUID id);
     OrganizationMemberRole findUserRoleInOrganization(UUID userId, UUID organizationId);
     List<OrganizationMember> findOrganizationMemberByOrganization(Organization organization);
-
+    List<OrganizationMember> findOrganizationMemberByOrganizationId(UUID organizationId);
     OrganizationMember save(OrganizationMember organizationMember);
     OrganizationMember update(OrganizationMember organizationMember);
     void delete(UUID id);

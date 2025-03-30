@@ -1,4 +1,4 @@
-package fptu.fcharity.repository;
+package fptu.fcharity.repository.manage.organization;
 
 import fptu.fcharity.entity.OrganizationRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +20,6 @@ public interface OrganizationRequestRepository extends JpaRepository<Organizatio
     OrganizationRequest findByOrganizationRequestId(UUID inviteJoinRequestId);
 
     OrganizationRequest findByUserIdAndOrganizationOrganizationId(UUID userId, UUID organizationId);
+
+    OrganizationRequest findByUserIdAndOrganizationOrganizationIdAndRequestType(UUID userUserId, UUID organizationOrganizationId, OrganizationRequest.OrganizationRequestType requestType);
 }

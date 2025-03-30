@@ -7,6 +7,11 @@ import java.util.Date;
 import java.util.UUID;
 
 @Data
+@Getter
+@Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganizationRequestDto {
     private UUID inviteJoinRequestId;
     private UUID userId;

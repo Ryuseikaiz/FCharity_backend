@@ -38,14 +38,14 @@ public class OrganizationMemberRestController {
 
     @GetMapping("/organization-members/{organizationId}")
     public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organizationId) {
-        List<OrganizationMember> organizationMembers = organizationMemberService.findOrganizationMemberByOrganization(organizationService.getById(organizationId));
+        List<OrganizationMember> organizationMembers = organizationMemberService.findOrganizationMemberByOrganization(organizationService.findEntityById(organizationId));
         return organizationMembers;
     }
 
     @PostMapping("/organization_members")
     public OrganizationMember createOrganizationMember(@RequestBody OrganizationMemberDTO organizationMemberDTO) {
         OrganizationMember organizationMember = new OrganizationMember();
-        organizationMember.setOrganization(organizationService.getById(organizationMemberDTO.getOrganizationId()));
+        organizationMember.setOrganization(organizationService.findEntityById(organizationMemberDTO.getOrganizationId()));
         organizationMember.setUser(userService.getById(organizationMemberDTO.getUserId()).orElseThrow(() -> new ApiRequestException("User not found")));
         System.out.println(organizationMember);
 
