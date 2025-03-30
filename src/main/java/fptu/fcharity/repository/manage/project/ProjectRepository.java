@@ -21,4 +21,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @EntityGraph(attributePaths = {"category","leader","organization"})
     @Query("SELECT r FROM Project r")
     List<Project> findAllWithInclude();
+    @EntityGraph(attributePaths = {"category","leader","organization"})
+    @Query("SELECT r FROM Project r where r.leader.id = :userId")
+    Project findMyOwnerProject(UUID userId);
 }

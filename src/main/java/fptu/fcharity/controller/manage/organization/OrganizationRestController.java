@@ -74,4 +74,11 @@ public class OrganizationRestController {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    @GetMapping("/organizations/my-organization/{userId}")
+    public ResponseEntity<?> getMyOrganization(@PathVariable UUID userId) {
+
+        Organization organization = organizationService.getMyOrganization(userId);
+        return ResponseEntity.ok(organization);
+    }
 }

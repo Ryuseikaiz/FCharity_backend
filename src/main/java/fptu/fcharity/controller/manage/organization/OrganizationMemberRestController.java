@@ -37,8 +37,9 @@ public class OrganizationMemberRestController {
     }
 
     @GetMapping("/organization-members/{organizationId}")
-    public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organization_id) {
-        return organizationMemberService.findOrganizationMemberByOrganization(organizationService.getById(organization_id));
+    public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organizationId) {
+        List<OrganizationMember> organizationMembers = organizationMemberService.findOrganizationMemberByOrganization(organizationService.getById(organizationId));
+        return organizationMembers;
     }
 
     @PostMapping("/organization_members")
@@ -58,7 +59,7 @@ public class OrganizationMemberRestController {
 
         if (!Objects.equals(organizationMember.getMemberRole(), currentOrganizationMemberInfo.getMemberRole())) {
             OrganizationMemberRole authRole = organizationMemberService.findUserRoleInOrganization(authUser.getId(), organizationMember.getOrganization().getOrganizationId());
-            if (authRole == OrganizationMemberRole.CEO || authRole == OrganizationMemberRole.Manager) {
+            if (authRole == OrganizationMemberRole.CEO || authRole == OrganizationMemberRole.MANAGER) {
 
             } else {
                 return ResponseEntity.badRequest().body("Invalid role");

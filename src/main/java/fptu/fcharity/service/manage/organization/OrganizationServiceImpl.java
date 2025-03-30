@@ -112,7 +112,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         List<OrganizationDto> organizations =
                 organizationMemberRepository.findOrganizationMemberByUserId(managerId)
                         .stream()
-                        .filter(member -> member.getMemberRole() == OrganizationMemberRole.Manager || member.getMemberRole() == OrganizationMemberRole.CEO)
+                        .filter(member -> member.getMemberRole() == OrganizationMemberRole.MANAGER || member.getMemberRole() == OrganizationMemberRole.CEO)
                         .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
                                 .orElseThrow(() -> new RuntimeException("Organization not found")))
                         .map(this::convertToDTO)
@@ -122,7 +122,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     public OrganizationDto getOrganizationByIdAndManager(UUID organizationId, UUID userId) {
         OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(userId, organizationId);
-        if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.Member) {
+        if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.MEMBER) {
             return null;
         }
 
@@ -141,5 +141,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         dto.setOrganizationDescription(organization.getOrganizationDescription());
         dto.setOrganizationStatus(organization.getOrganizationStatus());
         return dto;
+    }
+    public Organization getMyOrganization(UUID userId) {
+        return organizationRepository.findOrganizationByUserId(userId);
     }
 }

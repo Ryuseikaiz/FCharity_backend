@@ -18,6 +18,6 @@ public class Wallet {
 
     @Nationalized
     @Column(name = "balance")
-    private String balance;
+    private int balance;
 
 }

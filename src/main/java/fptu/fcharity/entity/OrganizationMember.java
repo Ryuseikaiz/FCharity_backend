@@ -41,6 +41,6 @@ public class OrganizationMember {
     private LocalDateTime leaveDate;
 
     public enum OrganizationMemberRole {
-        CEO, Manager, Member
+        CEO, MANAGER, MEMBER
     }
 }
