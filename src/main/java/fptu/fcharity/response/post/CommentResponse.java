@@ -1,6 +1,7 @@
 package fptu.fcharity.response.post;
 
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.authentication.UserResponse;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class CommentResponse {
     private UUID commentId;
     private UUID postId;
-    private User user;
+    private UserResponse user;
     private String userName;
     private String userAvatar;
     private String content;

@@ -6,7 +6,9 @@ import fptu.fcharity.repository.manage.post.CommentRepository;
 import fptu.fcharity.repository.manage.post.CommentVoteRepository;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.post.CommentResponse;
+import fptu.fcharity.utils.mapper.UserResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +35,14 @@ public class CommentService {
     @Autowired
     private CommentVoteRepository commentVoteRepository;
 
+    @Autowired
+    private UserResponseMapper userResponseMapper;
     public CommentResponse createComment(CommentDTO commentDTO) {
         Comment comment = convertToEntity(commentDTO);
         comment = commentRepository.save(comment);
-        return convertToResponse(comment);
+        Comment e = commentRepository.findEssentialById(comment.getCommentId());
+        CommentResponse commentResponse = convertToResponse(e);
+        return commentResponse;
     }
 
     public List<CommentResponse> getCommentsByPost(UUID postId, int page, int size) {
@@ -122,7 +128,7 @@ public class CommentService {
         return CommentResponse.builder()
                 .commentId(comment.getCommentId())
                 .postId(comment.getPost().getId())
-                .user(comment.getUser())
+                .user(userResponseMapper.toDTO(comment.getUser()))
                 .content(comment.getContent())
                 .vote(comment.getVote())
                 .createdAt(comment.getCreatedAt())

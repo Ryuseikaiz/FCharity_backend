@@ -23,7 +23,8 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(@RequestBody CommentDTO commentDTO) {
-        return ResponseEntity.ok(commentService.createComment(commentDTO));
+        CommentResponse r = commentService.createComment(commentDTO);
+        return ResponseEntity.ok(r);
     }
 
     @GetMapping("/post/{postId}")
