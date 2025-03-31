@@ -13,7 +13,6 @@ public class WalletService {
     private WalletRepository walletRepository;
     public Wallet save() {
         Wallet wallet = new Wallet();
-        wallet.setId(UUID.randomUUID());
         wallet.setBalance(0);
         return walletRepository.save(wallet);
     }
