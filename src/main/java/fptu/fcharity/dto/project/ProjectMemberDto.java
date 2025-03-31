@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class ProjectMemberDto {
     private UUID id;
     private UUID userId;

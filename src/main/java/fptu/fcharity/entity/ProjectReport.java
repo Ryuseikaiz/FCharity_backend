@@ -12,9 +12,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "reports")
-public class Report {
+@Table(name = "project_reports")
+public class ProjectReport {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "report_id", nullable = false)
     private UUID id;
@@ -26,10 +27,6 @@ public class Report {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
 
     @Nationalized
     @Column(name = "reason")

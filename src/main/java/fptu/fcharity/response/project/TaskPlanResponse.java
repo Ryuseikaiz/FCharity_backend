@@ -1,55 +1,40 @@
 package fptu.fcharity.response.project;
 
-import fptu.fcharity.entity.Project;
-import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.TaskPlan;
-import fptu.fcharity.entity.User;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
 import java.util.UUID;
 @Getter
 @Setter
-@AllArgsConstructor
 public class TaskPlanResponse {
     private UUID id;
-
-    private UUID projectId;
-
-    private User user;
-
-    @Nationalized
+    private UUID phaseId;
+    private UUID userId;
     private String taskName;
-
-    @Nationalized
     private String taskPlanDescription;
-
     private Instant startTime;
-
     private Instant endTime;
-
-    private String taskPlanStatus;
-
+    private UUID taskPlanStatusId;
     private Instant createdAt;
-
     private Instant updatedAt;
-    public TaskPlanResponse(TaskPlan taskPlan) {
-        this.id =taskPlan.getId();
-        this.user = taskPlan.getUser();
-        this.projectId = taskPlan.getProject().getId();
-        this.taskName = taskPlan.getTaskName();
-        this.taskPlanDescription = taskPlan.getTaskPlanDescription();
-        this.startTime = taskPlan.getStartTime();
-        this.endTime = taskPlan.getEndTime();
-        this.taskPlanStatus = taskPlan.getTaskPlanStatus();
-        this.createdAt = Instant.now();
-        this.updatedAt = taskPlan.getUpdatedAt();
+    private UUID parentTaskId;
+    public TaskPlanResponse(TaskPlan t){
+        this.id = t.getId();
+        this.phaseId = t.getPhase().getId();
+        if(t.getUser() != null){
+            this.userId = t.getUser().getId();
+        }
+        this.taskName = t.getTaskName();
+        this.taskPlanDescription = t.getTaskPlanDescription();
+        this.startTime = t.getStartTime();
+        this.endTime = t.getEndTime();
+        this.taskPlanStatusId = t.getStatus().getId();
+        this.createdAt = t.getCreatedAt();
+        this.updatedAt = t.getUpdatedAt();
+        if(t.getParentTask() != null){
+            this.parentTaskId = t.getParentTask().getId();
+        }
     }
 }

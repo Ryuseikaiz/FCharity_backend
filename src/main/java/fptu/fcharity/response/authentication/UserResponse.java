@@ -38,7 +38,10 @@ public class UserResponse {
 
     private String verificationCode;
 
+    private Instant verificationCodeExpiresAt;
+
     private Wallet walletAddress;
+
     public enum UserStatus {
         Unverified,
         Verified,
@@ -46,6 +49,8 @@ public class UserResponse {
     }
     public enum UserRole {
         Admin,
+        Manager,
         User,
+        Leader
     }
 }

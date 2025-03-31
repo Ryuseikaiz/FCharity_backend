@@ -1,4 +1,5 @@
-----USE fcharity_database;
+--CREATE DATABASE fcharity_database;
+--USE fcharity_database;
 --drop database fcharity_database;
 -- Table: users
 Create table categories(
@@ -12,7 +13,7 @@ create table tags(
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
-	balance NVARCHAR(255)
+	balance int
 )
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
@@ -83,6 +84,7 @@ CREATE TABLE projects (
     email NVARCHAR(255),
     phone_number NVARCHAR(15),
     project_description NVARCHAR(255),
+    location NVARCHAR(255),
     project_status NVARCHAR(50),
     report_file NVARCHAR(255),
     planned_start_time DATETIME,
@@ -92,11 +94,14 @@ CREATE TABLE projects (
     shutdown_reason NVARCHAR(255),
 	category_id UNIQUEIDENTIFIER,
 	wallet_address UNIQUEIDENTIFIER,
+    request_id UNIQUEIDENTIFIER,
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id),
     FOREIGN KEY (leader_id) REFERENCES users(user_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
+        FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
 );
+
 --new
 CREATE TABLE project_requests (
 	project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -187,36 +192,29 @@ CREATE TABLE project_images (
 -- ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
 --ALTER TABLE comments ADD vote int;
 -- Table: task_plan
+
+CREATE TABLE task_plan_status(
+       status_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+       status_name NVARCHAR(255)
+)
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    project_id UNIQUEIDENTIFIER,
+    phase_id UNIQUEIDENTIFIER,
     user_id UNIQUEIDENTIFIER,
     task_name NVARCHAR(255),
     task_plan_description NVARCHAR(255),
     start_time DATETIME,
     end_time DATETIME,
-    task_plan_status NVARCHAR(50),
+    status_id UNIQUEIDENTIFIER,
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    parent_task_id UNIQUEIDENTIFIER,  -- Task cha (nếu có)
+    FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE NO ACTION,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE,
+    FOREIGN KEY (status_id) REFERENCES task_plan_status(status_id) ON DELETE CASCADE
 );
 
--- Table: sub_tasks
-CREATE TABLE sub_tasks (
-    sub_task_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    task_plan_id UNIQUEIDENTIFIER,
-    sub_task_name NVARCHAR(255),
-    user_id UNIQUEIDENTIFIER,
-    sub_task_description NVARCHAR(255),
-    start_time DATETIME,
-    end_time DATETIME,
-    sub_task_status NVARCHAR(50),
-    created_at DATETIME,
-    updated_at DATETIME,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (task_plan_id) REFERENCES task_plan(task_plan_id)
-);
 
 -- Table: to_project_allocations
 CREATE TABLE to_project_allocations (
@@ -366,6 +364,15 @@ CREATE TABLE to_project_donation_images (
     to_project_donation_id UNIQUEIDENTIFIER,
     FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id),
 );
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'TODO');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'IN PROGRESS');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'DONE');
+
 
 -- Inserting categories into the database
 INSERT INTO categories (category_name)
@@ -410,22 +417,11 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
-SELECT * FROM comments WHERE post_id = '99B8EA9A-7757-4A6A-8B22-613F1D557C3A';
-CREATE TRIGGER UpdateCommentVotes
-    ON comment_votes
-    AFTER INSERT, UPDATE, DELETE
-    AS
-BEGIN
-    UPDATE c
-    SET vote = COALESCE((
-                            SELECT SUM(vote)
-                            FROM comment_votes
-                            WHERE comment_id = c.comment_id
-                        ), 0)
-    FROM comments c
-    WHERE c.comment_id IN (
-        SELECT comment_id FROM inserted
-        UNION
-        SELECT comment_id FROM deleted
-    );
-END;
+
+
+
+
+insert into organization_members (membership_id, user_id, organization_id, join_date, leave_date, member_role)
+values (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7B', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'CEO'),
+(NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7E', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER'),
+(NEWID(), 'A3F8D2B9-4C6E-43F1-9B27-8D5C6A1E2F78', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER');

@@ -1,16 +1,20 @@
 package fptu.fcharity.service.manage.project;
 
-import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.project.ProjectImageRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
-import fptu.fcharity.utils.constants.ProjectStatus;
+import fptu.fcharity.service.WalletService;
+import fptu.fcharity.service.manage.request.RequestService;
+import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.ProjectMapper;
@@ -26,9 +30,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    private final WalletService walletService;
     private final OrganizationRepository organizationRepository;
     private final TaggableService taggableService;
-    private final ObjectAttachmentService objectAttachmentService;
+    private final ProjectImageService projectImageService;
+    private final RequestRepository requestRepository;
 
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
@@ -37,7 +43,10 @@ public class ProjectService {
                           WalletRepository walletRepository,
                           OrganizationRepository organizationRepository,
                           TaggableService taggableService,
-                          ObjectAttachmentService objectAttachmentService) {
+                          RequestService requestService,
+                          WalletService walletService,
+                          RequestRepository requestRepository,
+                          ProjectImageService projectImageService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -45,13 +54,15 @@ public class ProjectService {
         this.walletRepository = walletRepository;
         this.organizationRepository = organizationRepository;
         this.taggableService = taggableService;
-        this.objectAttachmentService = objectAttachmentService;
+        this.projectImageService = projectImageService;
+        this.walletService = walletService;
+        this.requestRepository = requestRepository;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
         return projects.stream().map(project -> new ProjectFinalResponse(project,
                 taggableService.getTagsOfObject(project.getId(),TaggableType.PROJECT),
-                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT))
+                projectImageService.getProjectImages(project.getId()))
         ).toList();
     }
     public void takeObject(Project project, ProjectDto projectDto) {
@@ -82,20 +93,23 @@ public class ProjectService {
                     .orElseThrow(() -> new ApiRequestException("Không tìm thấy Organization"));
             project.setOrganization(organization);
         }
+        if (projectDto.getRequestId() != null) {
+            HelpRequest r = requestRepository.findWithIncludeById(projectDto.getRequestId());
+            project.setRequest(r);
+        }
     }
-
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
         Project project = projectMapper.toEntity( projectDto );
         project.setProjectStatus(ProjectStatus.DONATING);
+        project.setWalletAddress(walletService.save());
         takeObject(project, projectDto);
         projectRepository.save(project);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
-        objectAttachmentService.saveAttachments(project.getId(), projectDto.getImageUrls(), TaggableType.PROJECT);
-        objectAttachmentService.saveAttachments(project.getId(), projectDto.getVideoUrls(), TaggableType.PROJECT);
-
+        projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
+        projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());
         return new ProjectFinalResponse(project,
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
-                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
+                projectImageService.getProjectImages(project.getId()));
     }
 
     public ProjectFinalResponse getProjectById(UUID id) {
@@ -105,7 +119,7 @@ public class ProjectService {
         }
         return new ProjectFinalResponse(project,
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
-                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
+                projectImageService.getProjectImages(project.getId()));
     }
 
     public ProjectFinalResponse updateProject(ProjectDto projectDto) {
@@ -117,25 +131,34 @@ public class ProjectService {
         } else {
             taggableService.updateTaggables(project.getId(), new ArrayList<>(),TaggableType.PROJECT);
         }
-        objectAttachmentService.clearAttachments(project.getId(), TaggableType.PROJECT);
-        objectAttachmentService.saveAttachments(project.getId(), projectDto.getImageUrls(), TaggableType.PROJECT);
-        objectAttachmentService.saveAttachments(project.getId(), projectDto.getVideoUrls(), TaggableType.PROJECT);
-
+        projectImageService.clearProjectImages(project.getId());
+        projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
+        projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());
         projectRepository.save(project);
         return new ProjectFinalResponse(project,
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
-                objectAttachmentService.getAttachmentsOfObject(project.getId(),TaggableType.PROJECT));
+                projectImageService.getProjectImages(project.getId()));
     }
 
     public void deleteProject(UUID projectId) {
         try
         {
-            objectAttachmentService.clearAttachments(projectId, TaggableType.PROJECT);
+            projectImageService.clearProjectImages(projectId);
             projectRepository.deleteById(projectId);
         }
         catch (Exception e)
         {
             throw new ApiRequestException("Error: "+ e.getMessage());
         }
+    }
+
+    public ProjectFinalResponse getMyOwnerProject(UUID userId) {
+        Project project =  projectRepository.findMyOwnerProject(userId);
+        if(project == null ){
+            throw new ApiRequestException("Project not found");
+        }
+        return new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()));
     }
 }

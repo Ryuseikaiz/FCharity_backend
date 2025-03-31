@@ -2,9 +2,9 @@ package fptu.fcharity.service.admin;
 
 
 import fptu.fcharity.dto.request.RequestDto;
-import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,57 +26,69 @@ public class ManageRequestService {
     }
 
     public RequestDto getRequestById(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest helpRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
-        return convertToDTO(request);
+        return convertToDTO(helpRequest);
     }
 
     @Transactional
     public void deleteRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest helpRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
-        requestRepository.delete(request);
+        requestRepository.delete(helpRequest);
     }
 
     @Transactional
     public void approveRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest helpRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
-        if (RequestStatus.APPROVED.equals(request.getStatus())) {
-            throw new ApiRequestException("Request is already approved.");
+        if (!RequestStatus.PENDING.equals(helpRequest.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be approve.");
         }
 
-        request.setStatus(RequestStatus.APPROVED);
+        helpRequest.setStatus(RequestStatus.APPROVED);
+        requestRepository.save(helpRequest);
+    }
+    @Transactional
+    public void rejectRequest(UUID requestId) {
+        HelpRequest request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
+
+        if (!RequestStatus.PENDING.equals(request.getStatus())) {
+            throw new ApiRequestException("Only pending requests can be reject.");
+        }
+
+        request.setStatus(RequestStatus.REJECTED);
         requestRepository.save(request);
     }
 
     @Transactional
     public void hideRequest(UUID requestId) {
-        Request request = requestRepository.findById(requestId)
+        HelpRequest helpRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
-        if (!RequestStatus.APPROVED.equals(request.getStatus())) {
+        if (!RequestStatus.APPROVED.equals(helpRequest.getStatus())) {
             throw new ApiRequestException("Only approved requests can be hidden.");
         }
 
-        request.setStatus(RequestStatus.HIDDEN);
-        requestRepository.save(request);
+        helpRequest.setStatus(RequestStatus.HIDDEN);
+        requestRepository.save(helpRequest);
     }
 
-    private RequestDto convertToDTO(Request request) {
+    private RequestDto convertToDTO(HelpRequest helpRequest) {
         RequestDto dto = new RequestDto();
-        dto.setId(request.getId());
-        dto.setUserId(request.getUser() != null ? request.getUser().getId() : null);
-        dto.setTitle(request.getTitle());
-        dto.setContent(request.getContent());
-        dto.setCreationDate(request.getCreationDate());
-        dto.setPhone(request.getPhone());
-        dto.setEmail(request.getEmail());
-        dto.setLocation(request.getLocation());
-        dto.setEmergency(request.getIsEmergency() != null ? request.getIsEmergency() : false);
-        dto.setCategoryId(request.getCategory() != null ? request.getCategory().getId() : null);
-        dto.setStatus(request.getStatus());
+        dto.setId(helpRequest.getId());
+        dto.setUserId(helpRequest.getUser() != null ? helpRequest.getUser().getId() : null);
+        dto.setTitle(helpRequest.getTitle());
+        dto.setContent(helpRequest.getContent());
+        dto.setCreationDate(helpRequest.getCreationDate());
+        dto.setPhone(helpRequest.getPhone());
+        dto.setEmail(helpRequest.getEmail());
+        dto.setFullAddress(helpRequest.getLocation());
+        dto.setEmergency(helpRequest.getIsEmergency() != null ? helpRequest.getIsEmergency() : false);
+        dto.setCategoryId(helpRequest.getCategory() != null ? helpRequest.getCategory().getId() : null);
+        dto.setStatus(helpRequest.getStatus());
 
         dto.setTagIds(null);
         dto.setImageUrls(null);

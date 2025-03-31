@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "to_organization_donations")
 public class ToOrganizationDonation {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "donation_id", nullable = false)
     private UUID id;
 
@@ -24,6 +26,9 @@ public class ToOrganizationDonation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
+
+    @Column(name = "amount", precision = 18, scale = 2)
+    private BigDecimal amount;
 
     @Nationalized
     @Column(name = "donation_status", length = 50)

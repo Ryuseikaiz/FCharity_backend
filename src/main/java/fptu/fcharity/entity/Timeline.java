@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "timeline")
 public class Timeline {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "phase_id", nullable = false)
     private UUID id;

@@ -1,5 +1,7 @@
 package fptu.fcharity.service.authentication;
 
+import fptu.fcharity.utils.exception.ApiException;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -68,12 +70,15 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
+        Date now = new Date(System.currentTimeMillis());
+        Date expirationDate = new Date(System.currentTimeMillis() + expiration);
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setIssuedAt(now)
+                .setExpiration(expirationDate)
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -92,12 +97,17 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .setAllowedClockSkewSeconds(60)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+           throw new ApiRequestException("Token expired: " + e.getMessage());
+        }
     }
 
     private Key getSignInKey() {

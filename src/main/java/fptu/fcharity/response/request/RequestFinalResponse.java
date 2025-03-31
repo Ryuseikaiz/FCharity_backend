@@ -1,6 +1,6 @@
 package fptu.fcharity.response.request;
 
-import fptu.fcharity.entity.Request;
+import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.entity.Taggable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class RequestFinalResponse {
-    private Request request;
+    private HelpRequest helpRequest;
     private List<Taggable> requestTags;
     private List<String> attachments;
 }

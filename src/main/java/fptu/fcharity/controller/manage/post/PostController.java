@@ -4,6 +4,7 @@ import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.service.manage.post.PostService;
+import fptu.fcharity.service.manage.post.PostVoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,8 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+    @Autowired
+    private PostVoteService postVoteService;
 
     // Lấy tất cả Post
     @GetMapping
@@ -60,5 +63,22 @@ public class PostController {
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @PostMapping("/{postId}/upvote/{userId}")
+    public ResponseEntity<String> upvote(@PathVariable UUID postId, @PathVariable UUID userId) {
+        postVoteService.votePost(postId, userId, 1);
+        return ResponseEntity.ok("Upvoted successfully!");
+    }
+
+    @PostMapping("/{postId}/downvote/{userId}")
+    public ResponseEntity<String> downvote(@PathVariable UUID postId, @PathVariable UUID userId) {
+        postVoteService.votePost(postId, userId, -1);
+        return ResponseEntity.ok("Downvoted successfully!");
+    }
+
+    @DeleteMapping("/{postId}/unvote/{userId}")
+    public ResponseEntity<String> unvote(@PathVariable UUID postId, @PathVariable UUID userId) {
+        postVoteService.unvotePost(postId, userId);
+        return ResponseEntity.ok("Vote removed successfully!");
     }
 }
