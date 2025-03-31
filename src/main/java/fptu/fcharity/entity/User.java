@@ -145,5 +145,6 @@ public class User implements UserDetails {
         Admin,
         Manager,
         User,
+        Leader
     }
 }

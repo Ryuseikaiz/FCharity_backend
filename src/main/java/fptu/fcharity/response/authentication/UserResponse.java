@@ -51,5 +51,6 @@ public class UserResponse {
         Admin,
         Manager,
         User,
+        Leader
     }
 }
