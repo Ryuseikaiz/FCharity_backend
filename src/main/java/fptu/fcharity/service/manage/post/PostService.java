@@ -11,6 +11,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.repository.TaggableRepository;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
+import fptu.fcharity.utils.constants.PostStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,26 +39,30 @@ public class PostService {
     private ObjectAttachmentService objectAttachmentService;
 
 
-    // Lấy tất cả các Post
+    // Lấy tất cả các Post có trạng thái ACTIVE
     public List<PostResponse> getAllPosts() {
-        List<Post> posts = postRepository.findAllWithInclude();
+        List<Post> posts = postRepository.findAllWithInclude()
+                .stream()
+                .filter(post -> PostStatus.ACTIVE.equals(post.getPostStatus()))
+                .toList();
         return posts.stream().map(post -> new PostResponse(post,
-                taggableService.getTagsOfObject(post.getId(),TaggableType.POST),
-                objectAttachmentService.getAttachmentsOfObject(post.getId(),TaggableType.POST))
-                ).toList();
+                        taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                        objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST)))
+                .toList();
     }
 
-    // Lấy Post theo ID
+
+    // Lấy Post theo ID nếu có trạng thái ACTIVE
     public PostResponse getPostById(UUID postId) {
         Post post = postRepository.findWithIncludeById(postId);
-        if(post == null){
-            throw new ApiRequestException("Post not found");
+        if (post == null || !PostStatus.ACTIVE.equals(post.getPostStatus())) {
+            throw new ApiRequestException("Post not found or not active");
         }
         return new PostResponse(post,
                 taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
-                objectAttachmentService.getAttachmentsOfObject(post.getId(),TaggableType.POST));
+                objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST));
     }
-    // Tạo mới Post
+
     public PostResponse createPost(PostRequestDTO postRequestDTO) {
         // Lấy đối tượng User từ DB theo userId từ DTO
         Optional<User> optionalUser = userRepository.findById(postRequestDTO.getUserId());
@@ -65,17 +70,23 @@ public class PostService {
             throw new RuntimeException("User not found with id: " + postRequestDTO.getUserId());
         }
         User user = optionalUser.get();
-        Post post = new Post(user, postRequestDTO.getTitle(),postRequestDTO.getContent());
+
+        // Tạo post với trạng thái PENDING
+        Post post = new Post(user, postRequestDTO.getTitle(), postRequestDTO.getContent());
+        post.setPostStatus(PostStatus.PENDING); // Đảm bảo trạng thái là PENDING
 
         Post savedPost = postRepository.save(post);
-        taggableService.addTaggables(post.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(post.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(post.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
+
+        // Lưu tag và đính kèm hình ảnh/video
+        taggableService.addTaggables(savedPost.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
+        objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
+        objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
 
         return new PostResponse(savedPost,
                 taggableService.getTagsOfObject(savedPost.getId(), TaggableType.POST),
-                objectAttachmentService.getAttachmentsOfObject(savedPost.getId(),TaggableType.POST));
+                objectAttachmentService.getAttachmentsOfObject(savedPost.getId(), TaggableType.POST));
     }
+
 
     public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
         Post post = postRepository.findWithIncludeById(postId);

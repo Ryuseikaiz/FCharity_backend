@@ -1,9 +1,9 @@
-package fptu.fcharity.dto.post;
+package fptu.fcharity.response.post;
 
+import fptu.fcharity.entity.User;
 import lombok.*;
-
 import java.time.LocalDateTime;
-import java.util.List;
+
 import java.util.UUID;
 
 @Getter
@@ -11,14 +11,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CommentDTO {
+public class CommentResponse {
     private UUID commentId;
     private UUID postId;
-    private UUID userId;
+    private User user;
+    private String userName;
+    private String userAvatar;
     private String content;
     private int vote;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UUID parentCommentId;
-    private List<CommentDTO> replies;
 }

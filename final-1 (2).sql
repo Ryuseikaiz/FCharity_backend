@@ -1,6 +1,5 @@
-﻿--CREATE DATABASE fcharity_database;
---USE fcharity_database;
-
+----USE fcharity_database;
+--drop database fcharity_database;
 -- Table: users
 Create table categories(
 	category_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -137,7 +136,7 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
--- Table: requests--edited
+-- Table: helpRequests--edited
 CREATE TABLE help_requests (
     request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER,
@@ -153,7 +152,7 @@ CREATE TABLE help_requests (
 	FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
---ALTER TABLE requests ALTER COLUMN content NVARCHAR(MAX);
+--ALTER TABLE helpRequests ALTER COLUMN content NVARCHAR(MAX);
 
 -- Table: timeline
 CREATE TABLE timeline (
@@ -186,7 +185,7 @@ CREATE TABLE project_images (
 
 -- ALTER TABLE object_attachments ADD comment_id UNIQUEIDENTIFIER;
 -- ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
-ALTER TABLE comments ADD vote int;
+--ALTER TABLE comments ADD vote int;
 -- Table: task_plan
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -235,6 +234,7 @@ CREATE TABLE to_project_allocations (
 CREATE TABLE to_project_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
     project_id UNIQUEIDENTIFIER,
+    amount DECIMAL(18, 2),
     user_id UNIQUEIDENTIFIER,
     donation_status NVARCHAR(50),
     donation_time DATETIME,
@@ -248,6 +248,7 @@ CREATE TABLE to_organization_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
     user_id UNIQUEIDENTIFIER,
     organization_id UNIQUEIDENTIFIER,
+    amount DECIMAL(18, 2),
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
@@ -278,6 +279,32 @@ CREATE TABLE post_votes (
     FOREIGN KEY (post_id) REFERENCES posts(post_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+-- Table: comments---edited
+CREATE TABLE comments (
+    comment_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    post_id UNIQUEIDENTIFIER,
+    user_id UNIQUEIDENTIFIER,
+	vote int,
+    content NVARCHAR(MAX),
+    created_at DATETIME,
+    updated_at DATETIME,
+	parent_comment_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (post_id) REFERENCES posts(post_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+	FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id)
+);
+--new 
+CREATE TABLE comment_votes (
+    comment_id     UNIQUEIDENTIFIER,
+    user_id     UNIQUEIDENTIFIER,
+    vote        INT CHECK (vote IN (-1, 0, 1)), -- -1: Downvote, 0: Bỏ vote, 1: Upvote
+    created_at  DATETIME DEFAULT GETDATE(),
+    updated_at  DATETIME DEFAULT GETDATE(),
+    PRIMARY KEY (comment_id, user_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 
 CREATE TABLE taggable (
     id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -287,28 +314,16 @@ CREATE TABLE taggable (
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
 );
 
--- Table: comments---edited
-CREATE TABLE comments (
-    comment_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    post_id UNIQUEIDENTIFIER,
-    user_id UNIQUEIDENTIFIER,
-    content NVARCHAR(255),
-    created_at DATETIME,
-    updated_at DATETIME,
-	parent_comment_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-	FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id)
-);
+
 -- Table: object_attachments --edited
 CREATE TABLE object_attachments (
     image_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     url NVARCHAR(255),
-    request_id UNIQUEIDENTIFIER,
+    help_request_id UNIQUEIDENTIFIER,
     phase_id UNIQUEIDENTIFIER,
     post_id UNIQUEIDENTIFIER,
     comment_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (request_id) REFERENCES requests(request_id),
+    FOREIGN KEY (help_request_id) REFERENCES help_requests(request_id),
     FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
     FOREIGN KEY (post_id) REFERENCES posts(post_id),
     FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
@@ -395,3 +410,22 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
+SELECT * FROM comments WHERE post_id = '99B8EA9A-7757-4A6A-8B22-613F1D557C3A';
+CREATE TRIGGER UpdateCommentVotes
+    ON comment_votes
+    AFTER INSERT, UPDATE, DELETE
+    AS
+BEGIN
+    UPDATE c
+    SET vote = COALESCE((
+                            SELECT SUM(vote)
+                            FROM comment_votes
+                            WHERE comment_id = c.comment_id
+                        ), 0)
+    FROM comments c
+    WHERE c.comment_id IN (
+        SELECT comment_id FROM inserted
+        UNION
+        SELECT comment_id FROM deleted
+    );
+END;
