@@ -93,7 +93,7 @@ public class AuthenticationController {
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         if (refreshToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Refresh token is required");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token is required");
         }
 
         try {

@@ -2,6 +2,7 @@ package fptu.fcharity.response.project;
 
 import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.authentication.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public class ProjectMemberResponse {
     private UUID id;
 
-    private User user;
+    private UserResponse user;
 
     private UUID projectId;
 
@@ -25,7 +26,7 @@ public class ProjectMemberResponse {
     private String memberRole;
     public ProjectMemberResponse(ProjectMember projectMember) {
         this.id =projectMember.getId();
-        this.user = projectMember.getUser();
+        this.user = new UserResponse(projectMember.getUser());
         this.projectId = projectMember.getProject().getId();
         this.joinDate = projectMember.getJoinDate();
         this.leaveDate = projectMember.getLeaveDate();
