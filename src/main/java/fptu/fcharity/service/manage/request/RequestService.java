@@ -12,6 +12,8 @@ import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
     private final TaggableService taggableService;
     private final ObjectAttachmentService objectAttachmentService;
 
@@ -78,6 +82,7 @@ public class RequestService {
            taggableService.addTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
+           simpMessagingTemplate.convertAndSend("/topic/notifications", "User " + user.getEmail() + " has created a new request");
 
            return new RequestFinalResponse(helpRequest,
                    taggableService.getTagsOfObject(helpRequest.getId(),TaggableType.REQUEST),
