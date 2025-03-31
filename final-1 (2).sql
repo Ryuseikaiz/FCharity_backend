@@ -177,7 +177,7 @@ CREATE TABLE organization_images (
 
 	image_url NVARCHAR(255),
 	image_type NVARCHAR(255),
-	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
 --new
 CREATE TABLE project_images (
@@ -185,7 +185,7 @@ CREATE TABLE project_images (
 	project_id UNIQUEIDENTIFIER,
 	image_url NVARCHAR(255),
 	image_type NVARCHAR(255),
-	FOREIGN KEY (project_id) REFERENCES projects(project_id)
+	FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 
 -- ALTER TABLE object_attachments ADD comment_id UNIQUEIDENTIFIER;

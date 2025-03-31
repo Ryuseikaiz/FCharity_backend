@@ -2,42 +2,31 @@ package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
-import java.time.Instant;
+import java.io.Serializable;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "comment_votes")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Data
+@Builder
 public class CommentVote {
     @EmbeddedId
     private CommentVoteId id;
 
+    @ManyToOne
     @MapsId("commentId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "comment_id", nullable = false)
-    private fptu.fcharity.entity.Comment comment;
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
+    @ManyToOne
     @MapsId("userId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "vote")
-    private Integer vote;
-
-    @ColumnDefault("getdate()")
-    @Column(name = "created_at")
-    private Instant createdAt;
-
-    @ColumnDefault("getdate()")
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
+    @Column(nullable = false)
+    private int vote; // +1 or -1
 }

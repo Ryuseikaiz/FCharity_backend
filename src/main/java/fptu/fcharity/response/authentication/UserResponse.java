@@ -51,5 +51,23 @@ public class UserResponse {
         Admin,
         Manager,
         User,
+        Leader
+    }
+    public UserResponse() {
+    }
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.fullName = user.getFullName();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.phoneNumber = user.getPhoneNumber();
+        this.address = user.getAddress();
+        this.avatar = user.getAvatar();
+        this.userRole = user.getUserRole();
+        this.createdDate = user.getCreatedDate();
+        this.userStatus = user.getUserStatus();
+        this.verificationCode = user.getVerificationCode();
+        this.verificationCodeExpiresAt = user.getVerificationCodeExpiresAt();
+        this.walletAddress = user.getWalletAddress();
     }
 }
