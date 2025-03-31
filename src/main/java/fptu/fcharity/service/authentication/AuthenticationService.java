@@ -53,6 +53,7 @@ public class AuthenticationService {
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
         user.setEnabled(false);
+        user.setCreatedDate(Instant.now());
         userRepository.save(user);
         sendVerificationEmail(user,"Verify your email address");
         return userRepository.findByEmail(user.getEmail()).get();

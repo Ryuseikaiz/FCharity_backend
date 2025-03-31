@@ -9,6 +9,7 @@ import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.response.project.ProjectResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
@@ -16,10 +17,12 @@ import fptu.fcharity.service.WalletService;
 import fptu.fcharity.service.manage.request.RequestService;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.ProjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +63,7 @@ public class ProjectService {
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
-        return projects.stream().map(project -> new ProjectFinalResponse(project,
+        return projects.stream().map(project -> new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(),TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()))
         ).toList();
@@ -99,15 +102,25 @@ public class ProjectService {
         }
     }
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
+        Wallet newWallet = walletService.save();
         Project project = projectMapper.toEntity( projectDto );
         project.setProjectStatus(ProjectStatus.DONATING);
-        project.setWalletAddress(walletService.save());
+        project.setWalletAddress(newWallet);
         takeObject(project, projectDto);
+        // Set status of request to REGISTERED
+        project.getRequest().setStatus(RequestStatus.REGISTERED);
+        requestRepository.save(project.getRequest());
+        //set user to leader
+        User u = userRepository.findWithDetailsById(project.getLeader().getId());
+        u.setCreatedDate(Instant.now());
+        u.setUserRole(User.UserRole.Leader);
+        userRepository.save(u);
+        //save project
         projectRepository.save(project);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
         projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
         projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());
-        return new ProjectFinalResponse(project,
+        return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
     }
@@ -117,7 +130,7 @@ public class ProjectService {
         if(project == null ){
             throw new ApiRequestException("Project not found");
         }
-        return new ProjectFinalResponse(project,
+        return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
     }
@@ -135,7 +148,7 @@ public class ProjectService {
         projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
         projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());
         projectRepository.save(project);
-        return new ProjectFinalResponse(project,
+        return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
     }
@@ -157,7 +170,7 @@ public class ProjectService {
         if(project == null ){
             throw new ApiRequestException("Project not found");
         }
-        return new ProjectFinalResponse(project,
+        return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
     }

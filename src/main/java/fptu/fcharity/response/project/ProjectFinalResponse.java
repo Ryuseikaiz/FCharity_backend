@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class ProjectFinalResponse {
-    private Project project;
+    private ProjectResponse project;
     private List<Taggable> projectTags;
     private List<ProjectImageDto> attachments;
 }

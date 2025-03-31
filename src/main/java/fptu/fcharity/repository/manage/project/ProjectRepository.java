@@ -18,7 +18,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @Query("SELECT p FROM Project p WHERE p.id = :id")
     Project findWithEssentialById(@Param("id") UUID id);
 
-    @EntityGraph(attributePaths = {"category","leader","organization","request"})
+    @EntityGraph(attributePaths = {"category","leader","organization","request","walletAddress"})
     @Query("SELECT r FROM Project r")
     List<Project> findAllWithInclude();
     @EntityGraph(attributePaths = {"category","leader","organization","request"})
