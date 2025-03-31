@@ -51,7 +51,9 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional(readOnly = true)  // OK
     public List<OrganizationDto> findAll() {
         List<Organization> organizations = organizationRepository.findAll();
-        return organizations.stream().map(this::convertToDTO).toList();
+        List<OrganizationDto>  dtos =  organizations.stream().map(this::convertToDTO).toList();
+        return dtos;
+
     }
 
     @Override  // OK
