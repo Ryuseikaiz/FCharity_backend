@@ -53,6 +53,8 @@ public class UserResponse {
         User,
         Leader
     }
+    public UserResponse() {
+    }
     public UserResponse(User user) {
         this.id = user.getId();
         this.fullName = user.getFullName();

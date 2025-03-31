@@ -7,6 +7,9 @@ import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +22,17 @@ import java.util.stream.Collectors;
 public class ManageRequestService {
     private final RequestRepository requestRepository;
 
-    public List<RequestDto> getAllRequests() {
-        return requestRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+//    public List<RequestDto> getAllRequests() {
+//        return requestRepository.findAll().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+public List<RequestDto> getAllRequests() {
+    Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "creationDate"));
+    return requestRepository.findAll(pageable).stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+}
 
     public RequestDto getRequestById(UUID requestId) {
         HelpRequest helpRequest = requestRepository.findById(requestId)
