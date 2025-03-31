@@ -409,3 +409,7 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
+
+ALTER TABLE notifications
+ADD notification_updatedate DATETIME NULL,
+    ismarked BIT DEFAULT 0;
