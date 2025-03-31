@@ -90,8 +90,9 @@ public class OrganizationRequestRestController {
 
 
     @GetMapping("/invite-requests/organizations/{organization_id}")
-    public List<OrganizationRequest> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
-        return OrganizationRequestService.getAllInviteRequestsByOrganizationId(organizationId);
+    public ResponseEntity<List<OrganizationRequest>> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
+        List<OrganizationRequest> r =  OrganizationRequestService.getAllInviteRequestsByOrganizationId(organizationId);
+        return ResponseEntity.ok(r);
     }
 
     @PostMapping("/invite-requests")  // In progress

@@ -2,12 +2,10 @@ package fptu.fcharity.service.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.dto.project.ProjectRequestDto;
-import fptu.fcharity.entity.OrganizationMember;
-import fptu.fcharity.entity.ProjectRequest;
-import fptu.fcharity.entity.TaskPlan;
-import fptu.fcharity.entity.User;
+import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ProjectRequestRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
@@ -40,6 +38,8 @@ public class UserService {
     private TaskPlanRepository taskPlanRepository;
     @Autowired
     private ProjectRequestRepository projectRequestRepository;
+    @Autowired
+    private OrganizationRequestRepository organizationRequestRepository;
 
     public List<User> allUsers() {
         return userRepository.findAll();
@@ -71,11 +71,16 @@ public class UserService {
     }
     public List<User> getAllUsersNotInOrganization(UUID organizationId) {
         List<User> allUsers = userRepository.findAll();
-        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByOrganization(organizationRepository.findById(organizationId).orElseThrow(() -> new RuntimeException("Organization not found")));
-
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findAllOrganizationMemberByOrganization(organizationId);
+        List<OrganizationRequest> organizationRequests = organizationRequestRepository.findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Invitation).stream().filter(organizationRequest -> organizationRequest.getStatus() != OrganizationRequest.OrganizationRequestStatus.Rejected).toList();
         return allUsers.stream().filter(user -> {
             for (OrganizationMember organizationMember : organizationMembers) {
                 if (organizationMember.getUser().getId() == user.getId()) {
+                    return false;
+                }
+            }
+            for(OrganizationRequest organizationRequest : organizationRequests) {
+                if (organizationRequest.getUser().getId() == user.getId()) {
                     return false;
                 }
             }

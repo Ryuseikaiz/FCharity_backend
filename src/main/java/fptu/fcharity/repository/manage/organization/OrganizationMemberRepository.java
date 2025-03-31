@@ -23,4 +23,7 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
 
 //    List<OrganizationMember> findOrganizationMemberByOrganization(Organization organization);
     List<OrganizationMember> findOrganizationMemberByUserId(UUID managerId);
+    @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT om FROM OrganizationMember om WHERE om.organization.organizationId = :id")
+    List<OrganizationMember> findAllOrganizationMemberByOrganization(UUID id);
 }

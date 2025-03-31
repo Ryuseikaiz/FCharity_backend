@@ -8,6 +8,7 @@ import fptu.fcharity.repository.manage.organization.OrganizationImageRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.utils.constants.OrganizationStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -243,7 +244,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (dto.getWalletId() != null) {
             organization.setWalletAddress(walletRepository.findById(dto.getWalletId()).orElseThrow(() -> new RuntimeException("Wallet not found")));
         }
-        organization.setOrganizationStatus(dto.getOrganizationStatus());
+        organization.setOrganizationStatus(OrganizationStatus.PENDING);
         organization.setStartTime(dto.getStartTime());
         organization.setShutdownDay(dto.getShutdownDay());
         return organization;
