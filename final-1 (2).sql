@@ -13,7 +13,7 @@ create table tags(
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
-	balance NVARCHAR(255)
+	balance int
 )
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
@@ -84,6 +84,7 @@ CREATE TABLE projects (
     email NVARCHAR(255),
     phone_number NVARCHAR(15),
     project_description NVARCHAR(255),
+    location NVARCHAR(255),
     project_status NVARCHAR(50),
     report_file NVARCHAR(255),
     planned_start_time DATETIME,
@@ -93,11 +94,14 @@ CREATE TABLE projects (
     shutdown_reason NVARCHAR(255),
 	category_id UNIQUEIDENTIFIER,
 	wallet_address UNIQUEIDENTIFIER,
+    request_id UNIQUEIDENTIFIER,
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id),
     FOREIGN KEY (leader_id) REFERENCES users(user_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
 	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
+        FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
 );
+
 --new
 CREATE TABLE project_requests (
 	project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -188,6 +192,11 @@ CREATE TABLE project_images (
 -- ALTER TABLE object_attachments ADD FOREIGN KEY (comment_id) REFERENCES comments(comment_id);
 --ALTER TABLE comments ADD vote int;
 -- Table: task_plan
+
+CREATE TABLE task_plan_status(
+       status_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+       status_name NVARCHAR(255)
+)
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     phase_id UNIQUEIDENTIFIER,
@@ -196,13 +205,14 @@ CREATE TABLE task_plan (
     task_plan_description NVARCHAR(255),
     start_time DATETIME,
     end_time DATETIME,
-    task_plan_status NVARCHAR(50),
+    status_id UNIQUEIDENTIFIER,
     created_at DATETIME,
     updated_at DATETIME,
     parent_task_id UNIQUEIDENTIFIER,  -- Task cha (nếu có)
     FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE NO ACTION,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE,
+    FOREIGN KEY (status_id) REFERENCES task_plan_status(status_id) ON DELETE CASCADE
 );
 
 
@@ -354,6 +364,15 @@ CREATE TABLE to_project_donation_images (
     to_project_donation_id UNIQUEIDENTIFIER,
     FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id),
 );
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'TODO');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'IN PROGRESS');
+
+INSERT INTO task_plan_status (status_id, status_name)
+VALUES (NEWID(), N'DONE');
+
 
 -- Inserting categories into the database
 INSERT INTO categories (category_name)
@@ -398,3 +417,11 @@ VALUES
     ('Community Crisis'),
     ('Education Support'),
     ('Infrastructure Damage');
+
+
+
+
+insert into organization_members (membership_id, user_id, organization_id, join_date, leave_date, member_role)
+values (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7B', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'CEO'),
+(NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7E', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER'),
+(NEWID(), 'A3F8D2B9-4C6E-43F1-9B27-8D5C6A1E2F78', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER');

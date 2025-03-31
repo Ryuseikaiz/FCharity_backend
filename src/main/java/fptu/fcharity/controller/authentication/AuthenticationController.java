@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RequestMapping("/auth")
 @RestController
@@ -109,5 +110,19 @@ public class AuthenticationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
+        return ResponseEntity.ok(userService.changePassword(changePasswordDto));
+    }
+
+    @PostMapping("/loginAdmin")
+    public ResponseEntity<?> authenticateAdmin(@RequestBody LoginUserDto loginUserDto){
+        User authenticatedUser = authenticationService.loginAdmin(loginUserDto);
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+        String refreshToken = jwtService.generateRefreshToken(authenticatedUser);
+        LoginResponse loginResponse = new LoginResponse(jwtToken,refreshToken);
+        return ResponseEntity.ok(loginResponse);
     }
 }

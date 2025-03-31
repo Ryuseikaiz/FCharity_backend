@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.manage.project;
 
 import fptu.fcharity.dto.project.ProjectRequestDto;
+import fptu.fcharity.entity.ProjectRequest;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.manage.project.ProjectRequestService;
 import fptu.fcharity.utils.constants.project.ProjectRequestStatus;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -18,46 +20,45 @@ public class ProjectRequestController {
     ProjectRequestService projectRequestService;
 
     //*************COMMON ACTION*************
-    //hủy: yêu cầu vào, yêu cầu ra
-    //hủy: lời mời
-    @PostMapping("/{projectId}/{userId}/cancel")
-    public ResponseEntity<?> cancelRequest(@PathVariable UUID projectId,@PathVariable UUID userId) {
-        ProjectRequestDto prDto = new ProjectRequestDto();
-        prDto.setProjectId(projectId);
-        prDto.setUserId(userId);
-        ProjectRequestResponse prr = projectRequestService.cancelRequest(prDto);
+    //get all reques--OKAY
+    @GetMapping("/{projectId}")
+    public ResponseEntity<?> getAllRequest(@PathVariable UUID projectId) {
+        List<ProjectRequestResponse> l = projectRequestService.getAllProjectRequests(projectId);
+        return ResponseEntity.ok(l);
+    }
+    //hủy: yêu cầu vào, yêu cầu ra ---OKAY
+    //hủy: lời mời---OKAY
+    @PostMapping("/{requestId}/cancel")
+    public ResponseEntity<?> cancelRequest(@PathVariable UUID requestId) {
+        ProjectRequestResponse prr = projectRequestService.cancelRequest(requestId);
         return ResponseEntity.ok(prr);
     }
-    //review: yêu cầu mời vào
-    //review: yêu cầu vào cua user
-    @PostMapping("/{projectId}/{userId}/review-join-request/{decision}")
-    public ResponseEntity<?> reviewJoinRequest(@PathVariable UUID projectId,@PathVariable UUID userId,@PathVariable String decision) {
-        ProjectRequestDto prDto = new ProjectRequestDto();
-        prDto.setProjectId(projectId);
-        prDto.setUserId(userId);
-        String formattedDecision = decision.toUpperCase(Locale.ROOT);
-        if (formattedDecision.equals(ProjectRequestStatus.APPROVED) || formattedDecision.equals(ProjectRequestStatus.REJECTED)) {
-            ProjectRequestResponse prr = projectRequestService.reviewJoinRequest(formattedDecision,prDto);
+    //review: yêu cầu mời vào ---OKAY
+    //review: yêu cầu vào cua user ---OKAY
+    @PostMapping("/{requestId}/approve-join")
+    public ResponseEntity<?> approveJoinRequest(@PathVariable UUID requestId) {
+            ProjectRequestResponse prr = projectRequestService.reviewJoinRequest(ProjectRequestStatus.APPROVED,requestId);
             return ResponseEntity.ok(prr);
-        }
-        return ResponseEntity.badRequest().body("Invalid decision value");
     }
-    //review: yêu cầu ra cua user
-    @PostMapping("/{projectId}/{userId}/review-leave-request/{decision}")
-    public ResponseEntity<?> reviewInvitation(@PathVariable UUID projectId,@PathVariable UUID userId,@PathVariable String decision) {
-        ProjectRequestDto prDto = new ProjectRequestDto();
-        prDto.setProjectId(projectId);
-        prDto.setUserId(userId);
-        String formattedDecision = decision.toUpperCase(Locale.ROOT);
-        if (formattedDecision.equals(ProjectRequestStatus.APPROVED) || formattedDecision.equals(ProjectRequestStatus.REJECTED)) {
-            ProjectRequestResponse prr = projectRequestService.reviewLeaveRequest(formattedDecision,prDto);
+    @PostMapping("/{requestId}/reject-join")
+    public ResponseEntity<?> rejectJoinRequest(@PathVariable UUID requestId) {
+            ProjectRequestResponse prr = projectRequestService.reviewJoinRequest(ProjectRequestStatus.REJECTED,requestId);
             return ResponseEntity.ok(prr);
-        }
-        return ResponseEntity.badRequest().body("Invalid decision value");
+    }
+    //review: yeu cau ra cua user --OKAY 2/2
+    @PostMapping("/{requestId}/approve-move-out")
+    public ResponseEntity<?> approveMoveOut(@PathVariable UUID requestId) {
+        ProjectRequestResponse prr = projectRequestService.reviewLeaveRequest(ProjectRequestStatus.APPROVED,requestId);
+        return ResponseEntity.ok(prr);
+    }
+    @PostMapping("/{requestId}/reject-move-out")
+    public ResponseEntity<?> rejectMoveOut(@PathVariable UUID requestId) {
+        ProjectRequestResponse prr = projectRequestService.reviewLeaveRequest(ProjectRequestStatus.REJECTED,requestId);
+        return ResponseEntity.ok(prr);
     }
 
     //*************USER ACTION*************
-   //gửi: yêu cầu vào, yêu cầu ra
+   //gửi: yêu cầu vào, yêu cầu ra ---OKAY 2/2
     @PostMapping("/{projectId}/join")
     public ResponseEntity<?> sendJoinRequest(@PathVariable UUID projectId,@RequestBody ProjectRequestDto prDto) {
         prDto.setProjectId(projectId);
@@ -72,7 +73,7 @@ public class ProjectRequestController {
     }
 
     //*************FOUNDER ACTION*************
-    //gửi: lời mời vào
+    //gửi: lời mời vào ---OKAY
     @PostMapping("/{projectId}/invite")
     public ResponseEntity<?> sendInvitation(@PathVariable UUID projectId,@RequestBody ProjectRequestDto prDto) {
         prDto.setProjectId(projectId);

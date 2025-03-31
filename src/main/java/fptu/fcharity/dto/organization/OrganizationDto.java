@@ -1,16 +1,16 @@
 package fptu.fcharity.dto.organization;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class OrganizationDto {
-    private UUID id;
+    private UUID organizationId;
     private String organizationName;
     private String email;
     private String phoneNumber;
@@ -21,5 +21,6 @@ public class OrganizationDto {
     private Instant shutdownDay;
     private String organizationStatus;
     private UUID ceoId;
-
+    private String avatarUrl;
+    private String backgroundUrl;
 }

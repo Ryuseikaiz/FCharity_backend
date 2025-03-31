@@ -1,16 +1,20 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "comment_votes")
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Data
 public class CommentVote {
     @EmbeddedId
     private CommentVoteId id;

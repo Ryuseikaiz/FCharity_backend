@@ -28,6 +28,11 @@ public class ProjectController {
         ProjectFinalResponse project = projectService.getProjectById(id);
         return ResponseEntity.ok(project);
     }
+    @GetMapping("/my-owner-project/{userId}")
+    public ResponseEntity<ProjectFinalResponse> getMyOwnerProject(@PathVariable UUID userId) {
+        ProjectFinalResponse project = projectService.getMyOwnerProject(userId);
+        return ResponseEntity.ok(project);
+    }
     @PostMapping("/create")
     public ResponseEntity<?> createProject(@RequestBody ProjectDto projectDto) {
         ProjectFinalResponse newProject =  projectService.createProject(projectDto);

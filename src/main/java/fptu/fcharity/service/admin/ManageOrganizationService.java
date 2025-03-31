@@ -110,7 +110,7 @@ public class ManageOrganizationService {
 
     private OrganizationDTO convertToDTO(Organization organization) {
         return new OrganizationDTO(
-                organization.getId(),
+                organization.getOrganizationId(),
                 organization.getOrganizationName(),
                 organization.getEmail(),
                 organization.getPhoneNumber(),

@@ -36,7 +36,13 @@ public class ProjectMemberService {
             projectMember.setProject(project);
         }
     }
-    public List<ProjectMemberResponse> getMembersOfProject(UUID id) {
+    public List<ProjectMemberResponse> getMembersOfProject(UUID projectId) {
+        List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(projectId);
+        return projectMembers.stream()
+                .map(ProjectMemberResponse::new)
+                .toList();
+    }
+    public List<ProjectMemberResponse> getActiveMembersOfProject(UUID id) {
         List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(id);
         return projectMembers.stream()
                 .filter(pr-> pr.getMemberRole().equals(ProjectMemberRole.MEMBER) && pr.getLeaveDate()==null)
@@ -74,6 +80,7 @@ public class ProjectMemberService {
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);
     }
+
 
 
 }

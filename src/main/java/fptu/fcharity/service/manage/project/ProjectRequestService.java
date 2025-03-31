@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -47,19 +48,29 @@ public class ProjectRequestService {
     * */
 
     //***************COMMON ACTION***************
-    public ProjectRequest findProjectRequestByProjectIdAndUserId(UUID projectId, UUID userId){
-        return projectRequestRepository.findByProjectIdAndUserId(projectId, userId);
-    }
+
     public void takeObject(ProjectRequest pr, ProjectRequestDto prDto){
+
         if (prDto.getUserId() != null) {
             User user = userRepository.findWithDetailsById(prDto.getUserId() );
             pr.setUser(user);
         }
         if (prDto.getProjectId() != null) {
-            Project project = projectRepository.findById(prDto.getProjectId())
-                    .orElseThrow(() -> new ApiRequestException("ProjectRequest not found"));
+            Project project = projectRepository.findWithEssentialById(prDto.getProjectId());
             pr.setProject(project);
         }
+    }
+    public List<ProjectRequestResponse> getAllProjectRequests(UUID projectId){
+        List<ProjectRequest> l = projectRequestRepository.findWithEssentialByProjectId(projectId);
+        return l.stream().map(ProjectRequestResponse::new).toList();
+    }
+    public boolean checkCannotEditRequest(UUID id){
+        ProjectRequest pr = projectRequestRepository.findWithEssentialById(id);
+        return !pr.getStatus().equals(ProjectRequestStatus.PENDING);
+    }
+    public boolean checkExistingRequest(UUID userId, UUID projectId, String requestType){
+        List<ProjectRequest> pr = projectRequestRepository.findExistingRequestByUserIdAndProjectId(userId, projectId,requestType);
+        return !pr.isEmpty();
     }
     public void sendProjectRequest(ProjectRequest pr, String prRequestType){
         pr.setRequestType(prRequestType);
@@ -71,23 +82,28 @@ public class ProjectRequestService {
         pr.setUpdatedAt(Instant.now());
     }
     //hủy yêu cầu tham gia, yêu cầu rời nhoóm
-    public ProjectRequestResponse cancelRequest(ProjectRequestDto prDto){
-        ProjectRequest pr = findProjectRequestByProjectIdAndUserId(prDto.getProjectId(), prDto.getUserId());
+    public ProjectRequestResponse cancelRequest(UUID requestId){
+        ProjectRequest pr = projectRequestRepository.findWithEssentialById(requestId);
+        if(checkCannotEditRequest(pr.getId())){
+            throw new ApiRequestException("Request is already reviewed or cancelled");
+        }
         cancelProjectRequest(pr);
-        takeObject(pr, prDto);
         ProjectRequest p = projectRequestRepository.save(pr);
         return new ProjectRequestResponse(p);
     }
     //user review invitation
     //leader review join request
-    public ProjectRequestResponse reviewJoinRequest(String decision, ProjectRequestDto prDto) {
-        ProjectRequest pr = findProjectRequestByProjectIdAndUserId(prDto.getProjectId(), prDto.getUserId());
+    public ProjectRequestResponse reviewJoinRequest(String decision, UUID id) {
+        ProjectRequest pr =  projectRequestRepository.findWithEssentialById(id);
+        if(checkCannotEditRequest(pr.getId())){
+            throw new ApiRequestException("Request is already reviewed or cancelled");
+        }
         String formattedDecision = decision.toUpperCase(Locale.ROOT);
         if (formattedDecision.equals(ProjectRequestStatus.APPROVED) || formattedDecision.equals(ProjectRequestStatus.REJECTED)) {
             pr.setStatus(formattedDecision);
             ProjectMemberDto pmDto = new ProjectMemberDto();
-            pmDto.setProjectId(prDto.getProjectId());
-            pmDto.setUserId(prDto.getUserId());
+            pmDto.setProjectId(pr.getProject().getId());
+            pmDto.setUserId(pr.getUser().getId());
             if(formattedDecision.equals(ProjectRequestStatus.APPROVED)){
                 projectMemberService.addProjectMember(pmDto);
             }
@@ -95,19 +111,21 @@ public class ProjectRequestService {
             throw new ApiRequestException("Invalid action");
         }
         pr.setUpdatedAt(Instant.now());
-        takeObject(pr, prDto);
         ProjectRequest p = projectRequestRepository.save(pr);
         return new ProjectRequestResponse(p);
     }
   //review leave request
-  public ProjectRequestResponse reviewLeaveRequest(String decision, ProjectRequestDto prDto) {
-      ProjectRequest pr = findProjectRequestByProjectIdAndUserId(prDto.getProjectId(), prDto.getUserId());
+  public ProjectRequestResponse reviewLeaveRequest(String decision, UUID id) {
+      ProjectRequest pr =  projectRequestRepository.findWithEssentialById(id);
+      if(checkCannotEditRequest(pr.getId())){
+          throw new ApiRequestException("Request is already reviewed or cancelled");
+      }
       String formattedDecision = decision.toUpperCase(Locale.ROOT);
       if (formattedDecision.equals(ProjectRequestStatus.APPROVED) || formattedDecision.equals(ProjectRequestStatus.REJECTED)) {
           pr.setStatus(formattedDecision);
           ProjectMemberDto pmDto = new ProjectMemberDto();
-          pmDto.setProjectId(prDto.getProjectId());
-          pmDto.setUserId(prDto.getUserId());
+          pmDto.setProjectId(pr.getProject().getId());
+          pmDto.setUserId(pr.getUser().getId());
           if(formattedDecision.equals(ProjectRequestStatus.APPROVED)){
               projectMemberService.removeProjectMember(pmDto);
           }
@@ -115,7 +133,6 @@ public class ProjectRequestService {
           throw new ApiRequestException("Invalid action");
       }
       pr.setUpdatedAt(Instant.now());
-      takeObject(pr, prDto);
       ProjectRequest p = projectRequestRepository.save(pr);
       return new ProjectRequestResponse(p);
   }
@@ -123,6 +140,9 @@ public class ProjectRequestService {
 
     //gửi yêu cầu tham gia
     public ProjectRequestResponse sendJoinRequest(ProjectRequestDto prDto){
+        if(checkExistingRequest(prDto.getUserId(), prDto.getProjectId(),ProjectRequestType.JOIN_REQUEST)){
+            throw new ApiRequestException("Request already exists");
+        }
         ProjectRequest pr = new ProjectRequest();
         sendProjectRequest(pr, ProjectRequestType.JOIN_REQUEST);
         takeObject(pr, prDto);
@@ -132,6 +152,9 @@ public class ProjectRequestService {
 
     //gửi yêu cầu rời nhóm
     public ProjectRequestResponse sendLeaveRequest(ProjectRequestDto prDto){
+        if(checkExistingRequest(prDto.getUserId(), prDto.getProjectId(),ProjectRequestType.LEAVE_REQUEST)){
+            throw new ApiRequestException("Request already exists");
+        }
         ProjectRequest pr = new ProjectRequest();
         sendProjectRequest(pr, ProjectRequestType.LEAVE_REQUEST);
         takeObject(pr, prDto);
@@ -142,11 +165,15 @@ public class ProjectRequestService {
     //***************FOUNDER ACTION***************
     //gửi lời mời tham gia
     public ProjectRequestResponse sendJoinInvitation(ProjectRequestDto prDto){
+        if(checkExistingRequest(prDto.getUserId(), prDto.getProjectId(),ProjectRequestType.INVITATION)){
+            throw new ApiRequestException("Request already exists");
+        }
         ProjectRequest pr = new ProjectRequest();
         sendProjectRequest(pr, ProjectRequestType.INVITATION);
         takeObject(pr, prDto);
         ProjectRequest p = projectRequestRepository.save(pr);
         return new ProjectRequestResponse(p);
     }
+
 
 }

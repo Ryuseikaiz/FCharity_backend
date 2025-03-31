@@ -1,8 +1,7 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,12 +13,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class User implements UserDetails {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
@@ -52,11 +55,12 @@ public class User implements UserDetails {
     @Column(name = "user_role", nullable = false)
     private UserRole userRole;
 
+
     @Column(name = "created_date", nullable = false)
     private Instant createdDate;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "user_status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
     @Nationalized
@@ -69,13 +73,6 @@ public class User implements UserDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
-
-    @PrePersist
-    public void generateUUID() {
-        if (id == null) {
-            id = UUID.randomUUID();
-        }
-    }
 
     // Constructor for creating an unverified user
     public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, UserRole userRole, Instant createdDate, UserStatus userStatus) {
@@ -98,10 +95,6 @@ public class User implements UserDetails {
         this.createdDate = Instant.now();
         this.userStatus = UserStatus.Unverified;
         this.userRole = UserRole.User;
-    }
-
-    // Default constructor
-    public User() {
     }
 
     @Override
@@ -148,9 +141,9 @@ public class User implements UserDetails {
         Verified,
         Banned
     }
-
     public enum UserRole {
         Admin,
+        Manager,
         User,
     }
 }

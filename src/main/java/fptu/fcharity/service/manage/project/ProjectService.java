@@ -6,10 +6,14 @@ import fptu.fcharity.repository.*;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.project.ProjectImageRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
+import fptu.fcharity.service.WalletService;
+import fptu.fcharity.service.manage.request.RequestService;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -26,9 +30,11 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    private final WalletService walletService;
     private final OrganizationRepository organizationRepository;
     private final TaggableService taggableService;
     private final ProjectImageService projectImageService;
+    private final RequestRepository requestRepository;
 
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
@@ -37,7 +43,10 @@ public class ProjectService {
                           WalletRepository walletRepository,
                           OrganizationRepository organizationRepository,
                           TaggableService taggableService,
-                            ProjectImageService projectImageService) {
+                          RequestService requestService,
+                          WalletService walletService,
+                          RequestRepository requestRepository,
+                          ProjectImageService projectImageService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -46,6 +55,8 @@ public class ProjectService {
         this.organizationRepository = organizationRepository;
         this.taggableService = taggableService;
         this.projectImageService = projectImageService;
+        this.walletService = walletService;
+        this.requestRepository = requestRepository;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -82,11 +93,15 @@ public class ProjectService {
                     .orElseThrow(() -> new ApiRequestException("Không tìm thấy Organization"));
             project.setOrganization(organization);
         }
+        if (projectDto.getRequestId() != null) {
+            HelpRequest r = requestRepository.findWithIncludeById(projectDto.getRequestId());
+            project.setRequest(r);
+        }
     }
-
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
         Project project = projectMapper.toEntity( projectDto );
         project.setProjectStatus(ProjectStatus.DONATING);
+        project.setWalletAddress(walletService.save());
         takeObject(project, projectDto);
         projectRepository.save(project);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
@@ -135,5 +150,15 @@ public class ProjectService {
         {
             throw new ApiRequestException("Error: "+ e.getMessage());
         }
+    }
+
+    public ProjectFinalResponse getMyOwnerProject(UUID userId) {
+        Project project =  projectRepository.findMyOwnerProject(userId);
+        if(project == null ){
+            throw new ApiRequestException("Project not found");
+        }
+        return new ProjectFinalResponse(project,
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()));
     }
 }

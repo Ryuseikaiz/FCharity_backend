@@ -30,6 +30,10 @@ public class Project {
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private HelpRequest request;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id")
     private User leader;
 
@@ -48,6 +52,10 @@ public class Project {
     @Nationalized
     @Column(name = "project_status", length = 50)
     private String projectStatus;
+
+    @Nationalized
+    @Column(name = "location")
+    private String location;
 
     @Nationalized
     @Column(name = "report_file")

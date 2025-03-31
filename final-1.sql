@@ -23,12 +23,12 @@ CREATE TABLE users (
     phone_number NVARCHAR(15),
     address NVARCHAR(255),
     avatar NVARCHAR(255),
-    user_role NVARCHAR(50),
+    user_role NVARCHAR(50), CHECK (user_role IN ('Admin', 'User')),
     created_date DATETIME,
     verification_code NVARCHAR(255),
     verification_code_expires_at DATETIME,
 	wallet_address UNIQUEIDENTIFIER,
-    user_status NVARCHAR(50),
+    user_status NVARCHAR(50) CHECK (user_status IN ('Unverified', 'Verified', 'Banned'))
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
 
@@ -368,7 +368,7 @@ CREATE TABLE to_project_donation_images (
 
 -- Inserting categories into the database
 INSERT INTO categories (category_name)
-VALUES 
+VALUES
     ('Medical'),
     ('Memorial'),
     ('Emergency'),
@@ -390,7 +390,7 @@ VALUES
 
 	-- Inserting tags into the database
 INSERT INTO tags (tag_name)
-VALUES 
+VALUES
     ('Wildfire'),
     ('Flood'),
     ('Earthquake'),
