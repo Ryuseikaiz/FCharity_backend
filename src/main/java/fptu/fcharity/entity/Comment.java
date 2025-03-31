@@ -1,49 +1,63 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
+import lombok.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @ColumnDefault("newid()")
-    @Column(name = "comment_id", nullable = false)
-    private UUID id;
+    @GeneratedValue
+    @JoinColumn(name = "comment_id", nullable = false)
+    private UUID commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "vote")
-    private Integer vote;
-
-    @Nationalized
-    @Lob
-    @Column(name = "content")
+    @Column(columnDefinition = "NVARCHAR(MAX)", nullable = false)
     private String content;
 
-    @Column(name = "created_at")
-    private Instant createdAt;
+    @Column(nullable = false)
+    private int vote;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @ManyToOne
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
 
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> replies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentVote> commentVotes = new ArrayList<>();
+
+    @Transient
+    private Integer totalVotes;
+
+    @PostLoad
+    public void calculateTotalVotes() {
+        this.totalVotes = this.commentVotes.stream()
+                .mapToInt(CommentVote::getVote)
+                .sum();
+    }
 }
