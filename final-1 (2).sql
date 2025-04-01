@@ -29,7 +29,7 @@ CREATE TABLE users (
     verification_code_expires_at DATETIME,
 	wallet_address UNIQUEIDENTIFIER,
     user_status NVARCHAR(50),
-	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
+	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id) ON DELETE CASCADE
 );
 
 CREATE TABLE organizations (
@@ -44,8 +44,8 @@ CREATE TABLE organizations (
     shutdown_day DATETIME,
     organization_status NVARCHAR(50),
 	ceo_id  UNIQUEIDENTIFIER,
-     FOREIGN KEY (ceo_id) REFERENCES users(user_id),
-	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
+     FOREIGN KEY (ceo_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id) ON DELETE CASCADE
 );
 
 -- Table: organization_members--edited
@@ -56,8 +56,8 @@ CREATE TABLE organization_members (
     join_date DATETIME, 
     leave_date DATETIME,
 	member_role NVARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
 --new
 CREATE TABLE organization_requests (
@@ -71,8 +71,8 @@ CREATE TABLE organization_requests (
 	created_at DATETIME DEFAULT GETDATE(),
 	updated_at DATETIME DEFAULT GETDATE(),
 
-	FOREIGN KEY (user_id) REFERENCES users(user_id),
-	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+	FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
 
 -- Table: projects
@@ -95,11 +95,11 @@ CREATE TABLE projects (
 	category_id UNIQUEIDENTIFIER,
 	wallet_address UNIQUEIDENTIFIER,
     request_id UNIQUEIDENTIFIER,
-	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id),
-    FOREIGN KEY (leader_id) REFERENCES users(user_id),
-    FOREIGN KEY (category_id) REFERENCES categories(category_id),
-	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
-        FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
+	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id) ON DELETE CASCADE,
+    FOREIGN KEY (leader_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE,
+	 FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE,
+        FOREIGN KEY (request_id) REFERENCES help_requests(request_id) ON DELETE CASCADE
 );
 
 --new
@@ -114,8 +114,8 @@ CREATE TABLE project_requests (
 	created_at DATETIME DEFAULT GETDATE(),
 	updated_at DATETIME DEFAULT GETDATE(),
 
-	FOREIGN KEY (user_id) REFERENCES users(user_id),
-	FOREIGN KEY (project_id) REFERENCES projects(project_id)
+	FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 
 -- Table: project_members
@@ -126,8 +126,8 @@ CREATE TABLE project_members (
     join_date DATETIME, 
     leave_date DATETIME,
     member_role CHAR(36),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 
 -- Table: notifications
@@ -138,7 +138,7 @@ CREATE TABLE notifications (
     notification_date DATETIME,
     notification_status NVARCHAR(50),
     link NVARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Table: helpRequests--edited
@@ -154,8 +154,8 @@ CREATE TABLE help_requests (
     is_emergency BIT,
 	category_id UNIQUEIDENTIFIER,
 	status NVARCHAR(50),
-	FOREIGN KEY (category_id) REFERENCES categories(category_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+	FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 --ALTER TABLE helpRequests ALTER COLUMN content NVARCHAR(MAX);
 
@@ -167,7 +167,7 @@ CREATE TABLE timeline (
     start_time DATETIME,
     end_time DATETIME,
     content NVARCHAR(255),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 
 --new
@@ -209,8 +209,8 @@ CREATE TABLE task_plan (
     created_at DATETIME,
     updated_at DATETIME,
     parent_task_id UNIQUEIDENTIFIER,  -- Task cha (nếu có)
-    FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE NO ACTION,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (parent_task_id) REFERENCES task_plan(task_plan_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE CASCADE,
     FOREIGN KEY (status_id) REFERENCES task_plan_status(status_id) ON DELETE CASCADE
 );
@@ -225,7 +225,7 @@ CREATE TABLE to_project_allocations (
     amount DECIMAL(18, 2),
     message NVARCHAR(255),
     allocation_time DATETIME,
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 
 -- Table: to_project_donations
@@ -237,8 +237,8 @@ CREATE TABLE to_project_donations (
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Table: to_organization_donations
@@ -250,8 +250,8 @@ CREATE TABLE to_organization_donations (
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
 
 -- Table: posts
@@ -264,7 +264,7 @@ CREATE TABLE posts (
     created_at DATETIME,
     updated_at DATETIME,
 	post_status NVARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 --new
 CREATE TABLE post_votes (
@@ -274,8 +274,8 @@ CREATE TABLE post_votes (
     created_at  DATETIME DEFAULT GETDATE(),
     updated_at  DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (post_id, user_id),
-    FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 -- Table: comments---edited
 CREATE TABLE comments (
@@ -287,9 +287,9 @@ CREATE TABLE comments (
     created_at DATETIME,
     updated_at DATETIME,
 	parent_comment_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-	FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id)
+    FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
 );
 --new 
 CREATE TABLE comment_votes (
@@ -299,8 +299,8 @@ CREATE TABLE comment_votes (
     created_at  DATETIME DEFAULT GETDATE(),
     updated_at  DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (comment_id, user_id),
-    FOREIGN KEY (comment_id) REFERENCES comments(comment_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 
@@ -321,10 +321,10 @@ CREATE TABLE object_attachments (
     phase_id UNIQUEIDENTIFIER,
     post_id UNIQUEIDENTIFIER,
     comment_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (help_request_id) REFERENCES help_requests(request_id),
-    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id),
-    FOREIGN KEY (post_id) REFERENCES posts(post_id),
-    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)
+    FOREIGN KEY (help_request_id) REFERENCES help_requests(request_id)  ON DELETE CASCADE,
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id)  ON DELETE CASCADE,
+    FOREIGN KEY (post_id) REFERENCES posts(post_id)  ON DELETE CASCADE,
+    FOREIGN KEY (comment_id) REFERENCES comments(comment_id)  ON DELETE CASCADE
 );
 -- Table: reports
 ---new
@@ -334,8 +334,8 @@ CREATE TABLE post_reports (
 	post_id UNIQUEIDENTIFIER,
     reason NVARCHAR(255),
     report_date DATETIME,
-    FOREIGN KEY (reporter_id) REFERENCES users(user_id),
-	FOREIGN KEY (post_id) REFERENCES posts(post_id),
+    FOREIGN KEY (reporter_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
 );
 CREATE TABLE project_reports (
     report_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -343,26 +343,26 @@ CREATE TABLE project_reports (
     project_id UNIQUEIDENTIFIER,
     reason NVARCHAR(255),
     report_date DATETIME,
-    FOREIGN KEY (reporter_id) REFERENCES users(user_id),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id)
+    FOREIGN KEY (reporter_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 CREATE TABLE to_project_allocation_images (
     image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
     image_url NVARCHAR(255),
     to_project_allocation_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (to_project_allocation_id) REFERENCES to_project_allocations(allocation_id)
+    FOREIGN KEY (to_project_allocation_id) REFERENCES to_project_allocations(allocation_id) ON DELETE CASCADE
 );
 CREATE TABLE to_organization_donation_images (
     image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
     image_url NVARCHAR(255),
     to_organization_donation_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (to_organization_donation_id) REFERENCES to_organization_donations(donation_id),
+    FOREIGN KEY (to_organization_donation_id) REFERENCES to_organization_donations(donation_id) ON DELETE CASCADE,
 );
 CREATE TABLE to_project_donation_images (
     image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
     image_url NVARCHAR(255),
     to_project_donation_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id),
+    FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id) ON DELETE CASCADE,
 );
 INSERT INTO task_plan_status (status_id, status_name)
 VALUES (NEWID(), N'TODO');
