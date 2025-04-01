@@ -74,6 +74,12 @@ public class User implements UserDetails {
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
+    @Column(name = "reason")
+    private String reason;
+
+    @Column(name = "advice")
+    private String advice;
+
     // Constructor for creating an unverified user
     public User(String fullName, String email, String password, String phoneNumber, String address, String avatar, UserRole userRole, Instant createdDate, UserStatus userStatus) {
         this.fullName = fullName;
