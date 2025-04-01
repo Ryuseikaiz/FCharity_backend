@@ -96,7 +96,8 @@ public class ManagePostService {
                 post.getVote(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
-                post.getPostStatus()
+                post.getPostStatus(),
+                post.getReason()
         );
     }
 }

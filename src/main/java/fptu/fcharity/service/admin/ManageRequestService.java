@@ -102,7 +102,7 @@ public List<RequestDto> getAllRequests() {
         dto.setTagIds(null);
         dto.setImageUrls(null);
         dto.setVideoUrls(null);
-
+        dto.setReason(helpRequest.getReason());
         return dto;
     }
 }

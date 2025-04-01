@@ -70,7 +70,8 @@ public class ManageUserService {
                 user.getAvatar(),
                 user.getUserRole(),
                 user.getUserStatus(),
-                user.getCreatedDate()
+                user.getCreatedDate(),
+                user.getReason()
         );
     }
 }
