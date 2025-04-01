@@ -31,6 +31,8 @@ CREATE TABLE users (
     user_status NVARCHAR(50),
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
+alter table users add reason NVARCHAR(MAX);
+alter table users add advice  NVARCHAR(MAX);
 
 CREATE TABLE organizations (
     organization_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -47,6 +49,8 @@ CREATE TABLE organizations (
      FOREIGN KEY (ceo_id) REFERENCES users(user_id),
 	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
+alter table organizations add reason NVARCHAR(MAX);
+alter table organizations add advice  NVARCHAR(MAX);
 
 -- Table: organization_members--edited
 CREATE TABLE organization_members (
@@ -157,6 +161,8 @@ CREATE TABLE help_requests (
 	FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+alter table help_requests add reason NVARCHAR(MAX);
+alter table help_requests add advice  NVARCHAR(MAX);
 --ALTER TABLE helpRequests ALTER COLUMN content NVARCHAR(MAX);
 
 -- Table: timeline
@@ -266,6 +272,8 @@ CREATE TABLE posts (
 	post_status NVARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+alter table posts add reason NVARCHAR(MAX);
+alter table posts add advice  NVARCHAR(MAX);
 --new
 CREATE TABLE post_votes (
     post_id     UNIQUEIDENTIFIER,

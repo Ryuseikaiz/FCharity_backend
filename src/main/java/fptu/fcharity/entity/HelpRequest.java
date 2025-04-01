@@ -58,6 +58,12 @@ public class HelpRequest {
     @Nationalized
     @Column(name = "status", length = 50)
     private String status;
+
+    @Column(name = "reason")
+    private String reason;
+
+    @Column(name = "advice")
+    private String advice;
     public HelpRequest() {
     }
     public HelpRequest(User user, String title,

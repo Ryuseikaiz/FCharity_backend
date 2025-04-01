@@ -47,6 +47,12 @@ public class Post {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Column(name = "reason")
+    private String reason;
+
+    @Column(name = "advice")
+    private String advice;
+
 
     protected void onCreate() {
         createdAt = Instant.now();
