@@ -50,9 +50,6 @@ public class Post {
     @Column(name = "reason")
     private String reason;
 
-    @Column(name = "advice")
-    private String advice;
-
 
     protected void onCreate() {
         createdAt = Instant.now();

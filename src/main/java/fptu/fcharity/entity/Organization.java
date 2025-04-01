@@ -65,7 +65,5 @@ public class Organization {
     @Column(name = "reason")
     private String reason;
 
-    @Column(name = "advice")
-    private String advice;
 }
 

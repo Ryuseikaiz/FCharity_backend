@@ -62,8 +62,6 @@ public class HelpRequest {
     @Column(name = "reason")
     private String reason;
 
-    @Column(name = "advice")
-    private String advice;
     public HelpRequest() {
     }
     public HelpRequest(User user, String title,
