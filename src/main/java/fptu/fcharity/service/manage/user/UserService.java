@@ -60,15 +60,26 @@ public class UserService {
     public User changePassword(ChangePasswordDto changePasswordDto) {
         User user = userRepository.findByEmail(changePasswordDto.getEmail())
                 .orElseThrow(() -> new ApiRequestException("User not found"));
-        if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPassword())) {
-            throw new ApiRequestException("Old password is incorrect");
+
+        // Nếu user đã có mật khẩu, kiểm tra oldPassword
+        if (user.getPassword() != null) {
+            if (!passwordEncoder.matches(changePasswordDto.getOldPassword(), user.getPassword())) {
+                throw new ApiRequestException("Old password is incorrect");
+            }
+            if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword())) {
+                throw new ApiRequestException("New password must be different from the old password");
+            }
+        } else {
+            // Nếu user chưa có mật khẩu, có thể kiểm tra nếu raw oldPassword không rỗng
+            if (changePasswordDto.getOldPassword() != null && !changePasswordDto.getOldPassword().isEmpty()) {
+                throw new ApiRequestException("User has no password set yet");
+            }
         }
-        if (passwordEncoder.matches(changePasswordDto.getNewPassword(), user.getPassword())) {
-            throw new ApiRequestException("New password must be different from the old password");
-        }
-        updatePassword(user.getEmail(),passwordEncoder.encode(changePasswordDto.getNewPassword()));
+
+        updatePassword(user.getEmail(), passwordEncoder.encode(changePasswordDto.getNewPassword()));
         return user;
     }
+
     public List<User> getAllUsersNotInOrganization(UUID organizationId) {
         List<User> allUsers = userRepository.findAll();
         List<OrganizationMember> organizationMembers = organizationMemberRepository.findAllOrganizationMemberByOrganization(organizationId);
