@@ -32,7 +32,6 @@ CREATE TABLE users (
 	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
 alter table users add reason NVARCHAR(MAX);
-alter table users add advice  NVARCHAR(MAX);
 
 CREATE TABLE organizations (
     organization_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -50,7 +49,6 @@ CREATE TABLE organizations (
 	 FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id)
 );
 alter table organizations add reason NVARCHAR(MAX);
-alter table organizations add advice  NVARCHAR(MAX);
 
 -- Table: organization_members--edited
 CREATE TABLE organization_members (
@@ -162,7 +160,6 @@ CREATE TABLE help_requests (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 alter table help_requests add reason NVARCHAR(MAX);
-alter table help_requests add advice  NVARCHAR(MAX);
 --ALTER TABLE helpRequests ALTER COLUMN content NVARCHAR(MAX);
 
 -- Table: timeline
