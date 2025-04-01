@@ -270,7 +270,6 @@ CREATE TABLE posts (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 alter table posts add reason NVARCHAR(MAX);
-alter table posts add advice  NVARCHAR(MAX);
 --new
 CREATE TABLE post_votes (
     post_id     UNIQUEIDENTIFIER,
