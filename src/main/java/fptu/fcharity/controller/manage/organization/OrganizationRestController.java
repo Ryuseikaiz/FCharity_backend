@@ -10,7 +10,7 @@ import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.user.UserService;
-import fptu.fcharity.service.organization.OrganizationImageService;
+import fptu.fcharity.service.manage.organization.OrganizationImageService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
