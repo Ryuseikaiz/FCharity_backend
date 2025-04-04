@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
     List<Comment> findByParentCommentCommentId(UUID parentCommentId);
-    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId")
+    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId And c.parentComment.commentId is null")
     Page<Comment> findByPost_Id(@Param("postId") UUID postId, Pageable pageable);
     // CommentRepository.java
     @Query("SELECT c FROM Comment c WHERE c.parentComment.commentId = :parentCommentId")

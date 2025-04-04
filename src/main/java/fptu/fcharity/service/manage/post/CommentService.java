@@ -7,6 +7,7 @@ import fptu.fcharity.repository.manage.post.CommentVoteRepository;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.authentication.UserResponse;
+import fptu.fcharity.response.post.CommentFinalResponse;
 import fptu.fcharity.response.post.CommentResponse;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,10 +47,22 @@ public class CommentService {
         return commentResponse;
     }
 
-    public List<CommentResponse> getCommentsByPost(UUID postId, int page, int size) {
+    public List<CommentFinalResponse> getCommentsByPost(UUID postId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Comment> commentPage = commentRepository.findByPost_Id(postId, pageable);
-        return commentPage.getContent().stream().map(this::convertToResponse).toList();
+        List<CommentResponse> l = commentPage.getContent().stream().map(this::convertToResponse).toList();
+        List<CommentFinalResponse> finalList = new ArrayList<>();
+        for(CommentResponse commentResponse : l) {
+            List<Comment> repliesList = commentRepository.findByParentCommentCommentId(commentResponse.getCommentId());
+            if(repliesList.isEmpty()) {
+                finalList.add(new CommentFinalResponse(commentResponse, new ArrayList<>()));
+                continue;
+            }
+            List<CommentResponse> repliesResponseList = repliesList.stream().map(this::convertToResponse).toList();
+            CommentFinalResponse a = new CommentFinalResponse(commentResponse, repliesResponseList);
+            finalList.add(a);
+        }
+        return finalList;
     }
 
     public CommentResponse updateComment(UUID commentId, CommentDTO commentDTO) {
@@ -133,6 +147,7 @@ public class CommentService {
                 .vote(comment.getVote())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
+                .parentCommentId(comment.getParentComment()!=null ? comment.getParentComment().getCommentId():null)
                 .build();
     }
 
