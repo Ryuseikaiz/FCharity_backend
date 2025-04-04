@@ -19,6 +19,7 @@ import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,8 @@ public class PostService {
     private TaggableService taggableService;
     @Autowired
     private ObjectAttachmentService objectAttachmentService;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
 
     // Lấy tất cả các Post có trạng thái ACTIVE
@@ -83,6 +86,7 @@ public class PostService {
         objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
         objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
 
+        simpMessagingTemplate.convertAndSend("/topic/post-notifications", "User " + user.getEmail() + " has created a new post.");
         return new PostResponse(savedPost,
                 taggableService.getTagsOfObject(savedPost.getId(), TaggableType.POST),
                 objectAttachmentService.getAttachmentsOfObject(savedPost.getId(), TaggableType.POST));
