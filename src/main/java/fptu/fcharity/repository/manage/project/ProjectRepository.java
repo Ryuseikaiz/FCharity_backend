@@ -19,7 +19,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     Project findWithEssentialById(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = {"category","leader","organization","request","walletAddress"})
-    @Query("SELECT r FROM Project r")
+    @Query("SELECT r FROM Project r where r.projectStatus != 'BANNED'")
     List<Project> findAllWithInclude();
     @EntityGraph(attributePaths = {"category","leader","organization","request"})
     @Query("SELECT r FROM Project r where r.leader.id = :userId")
