@@ -6,6 +6,8 @@ import fptu.fcharity.dto.authentication.LoginUserDto;
 import fptu.fcharity.dto.authentication.RegisterUserDto;
 import fptu.fcharity.dto.authentication.VerifyUserDto;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.entity.Wallet;
+import fptu.fcharity.service.WalletService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.manage.user.UserService;
@@ -31,30 +33,35 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     private final UserService userService;
-
+    private final WalletService walletService;
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
-            UserService userService) {
+            UserService userService,
+            WalletService walletService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.userService = userService;
+        this.walletService = walletService;
     }
 
     public User signup(RegisterUserDto input) {
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new ApiRequestException("Email already exists");
         }
+        Wallet newWallet = walletService.save();
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
         user.setEnabled(false);
         user.setCreatedDate(Instant.now());
+        user.setWalletAddress(newWallet);
         userRepository.save(user);
+
         sendVerificationEmail(user,"Verify your email address");
         return userRepository.findByEmail(user.getEmail()).get();
     }

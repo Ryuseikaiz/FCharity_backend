@@ -3,6 +3,8 @@ package fptu.fcharity.service.manage.user;
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
 import fptu.fcharity.dto.project.ProjectRequestDto;
 import fptu.fcharity.entity.*;
+import fptu.fcharity.repository.TransactionHistoryRepository;
+import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
@@ -11,6 +13,7 @@ import fptu.fcharity.repository.manage.project.ProjectRequestRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.manage.project.TaskPlanService;
+import fptu.fcharity.utils.constants.TransactionType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import fptu.fcharity.dto.user.UpdateProfileDto;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +44,10 @@ public class UserService {
     private ProjectRequestRepository projectRequestRepository;
     @Autowired
     private OrganizationRequestRepository organizationRequestRepository;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private TransactionHistoryRepository transactionHistoryRepository;
 
     public List<User> allUsers() {
         return userRepository.findAll();
@@ -121,5 +129,36 @@ public class UserService {
         user.setAddress(updateProfileDto.getFullAddress());
         user.setAvatar(updateProfileDto.getAvatar());
         return userRepository.save(user);
+    }
+    public User updateVerificationCode(UUID userId, String code) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+        // Cập nhật các trường
+        user.setVerificationCode(code);
+        return userRepository.save(user);
+    }
+
+    //wallet process
+    //deposit
+    public void depositToWallet(String code, int amount, Instant transactionDateTime) {
+        User user = userRepository.findByVerificationCode(code)
+                .orElseThrow(() -> new ApiRequestException("User find by code not found"));
+        Wallet wallet = user.getWalletAddress();
+        wallet.setBalance(wallet.getBalance() + amount);
+        TransactionHistory transactionHistory = new TransactionHistory(
+                wallet,
+                amount,
+                TransactionType.DEPOSIT,
+                transactionDateTime
+        );
+        transactionHistoryRepository.save(transactionHistory);
+        walletRepository.save(wallet);
+        user.setVerificationCode(null);
+        userRepository.save(user);
+    }
+
+    public List<TransactionHistory> getTransactionHistoryOfUserId(UUID userId) {
+        User user = userRepository.findWithDetailsById(userId);
+        return transactionHistoryRepository.findTransactionHistoryByWalletId(user.getWalletAddress().getId());
     }
 }
