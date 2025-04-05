@@ -26,7 +26,7 @@ public class Post {
     @Column(nullable = false)
     @ColumnDefault("'PENDING'") // Đảm bảo giá trị mặc định trong DB cũng là PENDING
     private String postStatus = PostStatus.PENDING;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 

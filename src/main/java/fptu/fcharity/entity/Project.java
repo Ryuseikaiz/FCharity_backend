@@ -33,7 +33,7 @@ public class Project {
     @JoinColumn(name = "request_id")
     private HelpRequest request;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "leader_id")
     private User leader;
 
@@ -81,7 +81,7 @@ public class Project {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 

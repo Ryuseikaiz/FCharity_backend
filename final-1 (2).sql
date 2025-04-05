@@ -15,6 +15,14 @@ create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
 	balance int
 )
+create table transaction_history(
+    transaction_id UNIQUEIDENTIFIER PRIMARY KEY,
+    wallet_id UNIQUEIDENTIFIER,
+    amount int,
+    transaction_type NVARCHAR(50),
+    transaction_date DATETIME,
+    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id) ON DELETE CASCADE
+)
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
     full_name NVARCHAR(255),
@@ -421,7 +429,27 @@ VALUES
     ('Infrastructure Damage');
 
 
+INSERT INTO wallets(wallet_id, balance) VALUES
+                                            ('590396FB-F717-4BE6-B22C-306119606188', 0),
+                                            ('E273F776-E6B0-4DB9-AAE8-337F5B0E416F', 0),
+                                            ('757FF78E-B478-4196-BA9A-479D911B5DFB', 0),
+                                            ('BC4922FB-5B9D-410A-A662-4FFAFB3CDD13', 0),
+                                            ('A836A23C-35C9-4C52-A86C-640EE3A2E066', 0),
+                                            ('D3B77B59-B475-45D4-8BC5-65F93F1F4D15', 0),
+                                            ('12808576-B32A-4C0B-893D-7C6350C24F0E', 0),
+                                            ('34FC7236-5060-4077-9503-B8B94A574CFE', 0),
+                                            ('F0AF45ED-DBC8-4E23-AA74-F634BBA1628F', 0);
 
+-- Update bảng users để gán wallet_address
+UPDATE users SET wallet_address = '590396FB-F717-4BE6-B22C-306119606188' WHERE user_id = '590396FB-F717-4BE6-B22C-306119606188';
+UPDATE users SET wallet_address = 'E273F776-E6B0-4DB9-AAE8-337F5B0E416F' WHERE user_id = 'E273F776-E6B0-4DB9-AAE8-337F5B0E416F';
+UPDATE users SET wallet_address = '757FF78E-B478-4196-BA9A-479D911B5DFB' WHERE user_id = '757FF78E-B478-4196-BA9A-479D911B5DFB';
+UPDATE users SET wallet_address = 'BC4922FB-5B9D-410A-A662-4FFAFB3CDD13' WHERE user_id = 'BC4922FB-5B9D-410A-A662-4FFAFB3CDD13';
+UPDATE users SET wallet_address = 'A836A23C-35C9-4C52-A86C-640EE3A2E066' WHERE user_id = 'A836A23C-35C9-4C52-A86C-640EE3A2E066';
+UPDATE users SET wallet_address = 'D3B77B59-B475-45D4-8BC5-65F93F1F4D15' WHERE user_id = 'D3B77B59-B475-45D4-8BC5-65F93F1F4D15';
+UPDATE users SET wallet_address = '12808576-B32A-4C0B-893D-7C6350C24F0E' WHERE user_id = '12808576-B32A-4C0B-893D-7C6350C24F0E';
+UPDATE users SET wallet_address = '34FC7236-5060-4077-9503-B8B94A574CFE' WHERE user_id = '34FC7236-5060-4077-9503-B8B94A574CFE';
+UPDATE users SET wallet_address = 'F0AF45ED-DBC8-4E23-AA74-F634BBA1628F' WHERE user_id = 'F0AF45ED-DBC8-4E23-AA74-F634BBA1628F';
 
 insert into organization_members (membership_id, user_id, organization_id, join_date, leave_date, member_role)
 values (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7B', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'CEO'),

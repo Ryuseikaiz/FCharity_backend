@@ -82,7 +82,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         wallet.setBalance(0);
         Wallet savedWallet =  walletRepository.save(wallet);
         organization.setWalletAddress(savedWallet);
-
         Organization organizationSaved = organizationRepository.save(organization);
 
         saveImages(organizationSaved.getOrganizationId(), organizationDto.getAvatarUrl(), OrganizationImage.OrganizationImageType.Avatar);
