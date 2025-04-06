@@ -84,6 +84,10 @@ public class Project {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
+    @Column(name = "created_at")
+    private Instant createdAt;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     public Project( ) {
     }
@@ -103,5 +107,6 @@ public class Project {
         this.shutdownReason = shutdownReason;
         this.category = category;
         this.walletAddress = walletAddress;
+        this.createdAt = Instant.now();
     }
 }

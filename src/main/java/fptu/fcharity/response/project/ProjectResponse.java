@@ -43,6 +43,9 @@ public class ProjectResponse {
     private Instant actualStartTime;
 
     private Instant actualEndTime;
+    private Instant createdAt;
+
+    private Instant updatedAt;
 
     private String shutdownReason;
 
@@ -70,5 +73,7 @@ public class ProjectResponse {
         this.shutdownReason = project.getShutdownReason();
         this.category = project.getCategory();
         this.walletAddress = project.getWalletAddress();
+        this.createdAt = project.getCreatedAt();
+        this.updatedAt = project.getUpdatedAt();
     }
 }

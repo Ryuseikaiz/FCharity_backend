@@ -8,6 +8,7 @@ import fptu.fcharity.dto.user.UpdateProfileDto;
 import fptu.fcharity.entity.TransactionHistory;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.response.project.ProjectRequestResponse;
+import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
@@ -41,8 +42,6 @@ public class UserController {
     @GetMapping("/current-wallet")
     public ResponseEntity<?> getMyWallet() {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        currentUser = userService.getById(currentUser.getId())
-                .orElseThrow(() -> new ApiRequestException("User not found"));
         return ResponseEntity.ok(currentUser.getWalletAddress());
     }
 
@@ -87,7 +86,7 @@ public class UserController {
     }
     @GetMapping("/{user_id}/transaction-history")
     public ResponseEntity<?> getTransactionHistoryOfUser(@PathVariable UUID user_id) {
-        List<TransactionHistory> l = userService.getTransactionHistoryOfUserId(user_id);
+        List<TransactionHistoryResponse> l = userService.getTransactionHistoryOfUserId(user_id);
         return ResponseEntity.ok(l);
     }
     @GetMapping("/{project_id}/task-plans")

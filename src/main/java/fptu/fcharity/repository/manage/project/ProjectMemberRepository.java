@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UUID> {
-    @EntityGraph(attributePaths = {"project", "user"})
+    @EntityGraph(attributePaths = {"project", "user","user.walletAddress"})
     List<ProjectMember> findByProjectId(UUID projectId);
     List<ProjectMember> findByUserId(UUID userId);
     ProjectMember findByProjectIdAndUserId(UUID projectId, UUID userId);

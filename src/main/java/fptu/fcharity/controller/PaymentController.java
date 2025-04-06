@@ -12,6 +12,7 @@ import vn.payos.type.CheckoutResponseData;
 import vn.payos.type.ItemData;
 import vn.payos.type.PaymentData;
 
+import java.math.BigDecimal;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -90,13 +91,13 @@ public class PaymentController {
         System.out.println("Transaction Status: " + payload.get("desc"));
 
         ZonedDateTime zonedDateTime = ZonedDateTime.parse((String) data.get("transactionDateTime"), formatter.withZone(ZoneId.of("Asia/Ho_Chi_Minh")));
-
         Instant transactionDateTime = zonedDateTime.toInstant();
-//        Instant transactionDateTime = localDateTime.toInstant(ZoneOffset.UTC);
+        Object amountObj = data.get("amount");
+        BigDecimal amount = (amountObj instanceof Number) ? new BigDecimal(amountObj.toString()) : BigDecimal.ZERO;
         try{
             userService.depositToWallet(
                     (String) data.get("description"),
-                    (int) data.get("amount"),
+                    amount,
                     transactionDateTime
             );
         }catch(Exception e){

@@ -48,4 +48,9 @@ public class ProjectController {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/wallet/{walletId}")
+    public ResponseEntity<ProjectFinalResponse> getProjectByWalletId(@PathVariable UUID walletId) {
+        ProjectFinalResponse project = projectService.getProjectByWalletId(walletId);
+        return ResponseEntity.ok(project);
+    }
 }

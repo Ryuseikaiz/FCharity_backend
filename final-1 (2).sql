@@ -13,16 +13,22 @@ create table tags(
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
-	balance int
+	balance  DECIMAL(18, 2),
 )
 create table transaction_history(
     transaction_id UNIQUEIDENTIFIER PRIMARY KEY,
     wallet_id UNIQUEIDENTIFIER,
-    amount int,
+    amount  DECIMAL(18, 2),
     transaction_type NVARCHAR(50),
     transaction_date DATETIME,
-    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id) ON DELETE CASCADE
+    target_wallet_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id) ON DELETE CASCADE,
+    foreign key (target_wallet_id) REFERENCES wallets(wallet_id) ON DELETE NO ACTION
 )
+-- alter table wallets add balance DECIMAL(18, 2);
+-- alter table transaction_history add amount DECIMAL(18, 2);
+-- alter table transaction_history add target_wallet_id UNIQUEIDENTIFIER
+-- alter table transaction_history add foreign key (target_wallet_id) REFERENCES wallets(wallet_id) ON DELETE NO ACTION
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
     full_name NVARCHAR(255),
@@ -127,7 +133,8 @@ CREATE TABLE projects (
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE,
     FOREIGN KEY (request_id) REFERENCES help_requests(request_id) ON DELETE NO ACTION
 );
-
+alter table projects add created_at DATETIME DEFAULT GETDATE()
+alter table projects add updated_at DATETIME DEFAULT GETDATE()
 CREATE TABLE project_requests (
     project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER NOT NULL,

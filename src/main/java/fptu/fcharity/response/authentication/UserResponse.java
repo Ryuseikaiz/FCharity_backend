@@ -40,7 +40,7 @@ public class UserResponse {
 
     private Instant verificationCodeExpiresAt;
 
-    private Wallet walletAddress;
+    private UUID walletId;
 
     public enum UserStatus {
         Unverified,
@@ -68,6 +68,6 @@ public class UserResponse {
         this.userStatus = user.getUserStatus();
         this.verificationCode = user.getVerificationCode();
         this.verificationCodeExpiresAt = user.getVerificationCodeExpiresAt();
-        this.walletAddress = user.getWalletAddress();
+        this.walletId = user.getWalletAddress().getId();
     }
 }

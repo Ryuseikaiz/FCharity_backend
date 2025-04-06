@@ -12,6 +12,7 @@ import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ProjectRequestRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
 import fptu.fcharity.response.project.ProjectRequestResponse;
+import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.service.manage.project.TaskPlanService;
 import fptu.fcharity.utils.constants.TransactionType;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import fptu.fcharity.dto.user.UpdateProfileDto;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +50,8 @@ public class UserService {
     private WalletRepository walletRepository;
     @Autowired
     private TransactionHistoryRepository transactionHistoryRepository;
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public List<User> allUsers() {
         return userRepository.findAll();
@@ -130,26 +134,27 @@ public class UserService {
         user.setAvatar(updateProfileDto.getAvatar());
         return userRepository.save(user);
     }
-    public User updateVerificationCode(UUID userId, String code) {
+    public void updateVerificationCode(UUID userId, String code) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiRequestException("User not found"));
         // Cập nhật các trường
         user.setVerificationCode(code);
-        return userRepository.save(user);
+         userRepository.save(user);
     }
 
     //wallet process
     //deposit
-    public void depositToWallet(String code, int amount, Instant transactionDateTime) {
+    public void depositToWallet(String code, BigDecimal amount, Instant transactionDateTime) {
         User user = userRepository.findByVerificationCode(code)
                 .orElseThrow(() -> new ApiRequestException("User find by code not found"));
         Wallet wallet = user.getWalletAddress();
-        wallet.setBalance(wallet.getBalance() + amount);
+        wallet.setBalance(wallet.getBalance().add(amount));
         TransactionHistory transactionHistory = new TransactionHistory(
                 wallet,
                 amount,
                 TransactionType.DEPOSIT,
-                transactionDateTime
+                transactionDateTime,
+                wallet
         );
         transactionHistoryRepository.save(transactionHistory);
         walletRepository.save(wallet);
@@ -157,8 +162,18 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public List<TransactionHistory> getTransactionHistoryOfUserId(UUID userId) {
-        User user = userRepository.findWithDetailsById(userId);
-        return transactionHistoryRepository.findTransactionHistoryByWalletId(user.getWalletAddress().getId());
+    public List<TransactionHistoryResponse> getTransactionHistoryOfUserId(UUID userId) {
+        User user = userRepository.findWithEssentialById(userId);
+        List<TransactionHistory> l = transactionHistoryRepository.findTransactionHistoryByWalletId(user.getWalletAddress().getId());
+        return l.stream().map(m -> {
+            if ("DONATE_PROJECT".equals(m.getTransactionType())) {
+                Project p = projectRepository.findByWalletAddressId(m.getTargetWallet().getId());
+                return new TransactionHistoryResponse(m, p.getId(), p.getProjectName());
+            } else if ("DEPOSIT".equals(m.getTransactionType())) {
+                return new TransactionHistoryResponse(m, null, null);
+            } else {
+                return new TransactionHistoryResponse(m, null, null); // fallback for other types
+            }
+        }).toList();
     }
 }

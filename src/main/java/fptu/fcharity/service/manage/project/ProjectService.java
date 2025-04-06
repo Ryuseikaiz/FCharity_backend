@@ -111,11 +111,12 @@ public class ProjectService {
         project.getRequest().setStatus(RequestStatus.REGISTERED);
         requestRepository.save(project.getRequest());
         //set user to leader
-        User u = userRepository.findWithDetailsById(project.getLeader().getId());
+        User u = userRepository.findWithEssentialById(project.getLeader().getId());
         u.setCreatedDate(Instant.now());
         u.setUserRole(User.UserRole.Leader);
         userRepository.save(u);
         //save project
+        project.setCreatedAt(Instant.now());
         projectRepository.save(project);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
         projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
@@ -138,6 +139,7 @@ public class ProjectService {
     public ProjectFinalResponse updateProject(ProjectDto projectDto) {
         Project project = projectRepository.findWithEssentialById(projectDto.getId());
         projectMapper.updateEntityFromDto(projectDto, project);
+        project.setUpdatedAt(Instant.now());
         takeObject(project, projectDto);
         if (projectDto.getTagIds() != null) {
             taggableService.updateTaggables(project.getId(), projectDto.getTagIds(),TaggableType.PROJECT);
@@ -170,6 +172,13 @@ public class ProjectService {
         if(project == null ){
             throw new ApiRequestException("Project not found");
         }
+        return new ProjectFinalResponse(new ProjectResponse(project),
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()));
+    }
+
+    public ProjectFinalResponse getProjectByWalletId(UUID walletId) {
+        Project project = projectRepository.findByWalletAddressId(walletId);
         return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));

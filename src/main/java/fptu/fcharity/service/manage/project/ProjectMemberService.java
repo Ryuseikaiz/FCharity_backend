@@ -27,7 +27,7 @@ public class ProjectMemberService {
 
     public void takeObject(ProjectMember projectMember,ProjectMemberDto projectMemberDto){
         if (projectMemberDto.getUserId() != null) {
-            User user = userRepository.findWithDetailsById(projectMemberDto.getUserId() );
+            User user = userRepository.findWithEssentialById(projectMemberDto.getUserId() );
             projectMember.setUser(user);
         }
         if (projectMemberDto.getProjectId() != null) {
