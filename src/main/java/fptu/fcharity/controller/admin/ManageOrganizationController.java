@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
+import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.service.admin.ManageOrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-    @RequestMapping("/api/admin/organizations")
+@RequestMapping("/api/admin/organizations")
 @RequiredArgsConstructor
 public class ManageOrganizationController {
     private final ManageOrganizationService manageOrganizationService;
@@ -31,11 +32,11 @@ public class ManageOrganizationController {
         return ResponseEntity.ok("Organization deleted successfully.");
     }
 
-//    @PutMapping("/approve/{orgId}")
-//    public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
-//        manageOrganizationService.approveOrganization(orgId);
-//        return ResponseEntity.ok("Organization has been approved successfully.");
-//    }
+    // @PutMapping("/approve/{orgId}")
+    // public ResponseEntity<String> approveOrganization(@PathVariable UUID orgId) {
+    // manageOrganizationService.approveOrganization(orgId);
+    // return ResponseEntity.ok("Organization has been approved successfully.");
+    // }
     @PutMapping("/unban/{orgId}")
     public ResponseEntity<String> unbanOrganization(@PathVariable UUID orgId) {
         manageOrganizationService.unbanOrganization(orgId);
@@ -55,8 +56,8 @@ public class ManageOrganizationController {
     }
 
     @PutMapping("/reject/{orgId}")
-    public ResponseEntity<String> rejectOrganization(@PathVariable UUID orgId) {
-        manageOrganizationService.rejectOrganization(orgId);
+    public ResponseEntity<String> rejectOrganization(@PathVariable UUID orgId, @RequestBody ReasonDTO reasonDTO) {
+        manageOrganizationService.rejectOrganization(orgId, reasonDTO);
         return ResponseEntity.ok("Organization has been rejected successfully.");
     }
 }
