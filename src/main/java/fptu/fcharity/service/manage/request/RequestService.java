@@ -78,7 +78,7 @@ public class RequestService {
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
                    requestDTO.getFullAddress(),
-                   requestDTO.isEmergency(), category);
+                   requestDTO.isEmergency(), category, requestDTO.getReason());
            requestRepository.save(helpRequest);
            taggableService.addTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);

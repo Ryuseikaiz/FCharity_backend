@@ -56,5 +56,6 @@ public class HelpRequestResponse {
         this.isEmergency = helpRequest.getIsEmergency();
         this.category = helpRequest.getCategory();
         this.status = helpRequest.getStatus();
+        this.reason = helpRequest.getReason();
     }
 }

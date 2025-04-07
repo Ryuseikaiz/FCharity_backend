@@ -68,7 +68,8 @@ public class HelpRequest {
                        String content,
                        String phone, String email, String location,
                        Boolean isEmergency,
-                       Category category
+                       Category category,
+                       String reason
     ) {
         this.user = user;
         this.title = title;
@@ -80,6 +81,7 @@ public class HelpRequest {
         this.isEmergency = isEmergency;
         this.category = category;
         this.status = RequestStatus.PENDING;
+        this.reason = reason;
     }
 
 }
