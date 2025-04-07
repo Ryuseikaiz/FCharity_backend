@@ -61,16 +61,20 @@ public class CommentController {
             @PathVariable UUID commentId,
             @RequestParam UUID userId,
             @RequestParam int vote) {
+        System.out.println("Vote request - commentId: " + commentId + ", userId: " + userId + ", vote: " + vote);
         try {
             commentService.voteComment(commentId, userId, vote);
-            int newTotalVotes = commentService.getCommentById(commentId).getVote();
+            Comment comment = commentService.getCommentById(commentId);
+            int totalVotes = comment.getVote();
+            System.out.println("Vote successful - totalVotes: " + totalVotes);
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
                             "commentId", commentId,
-                            "newVote", newTotalVotes // Trả về tổng vote mới
+                            "totalVote", totalVotes
                     ));
         } catch (Exception e) {
+            System.out.println("Vote error: " + e.getMessage());
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }
