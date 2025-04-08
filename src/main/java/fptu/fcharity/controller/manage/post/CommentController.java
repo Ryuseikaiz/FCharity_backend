@@ -2,7 +2,6 @@ package fptu.fcharity.controller.manage.post;
 
 import fptu.fcharity.dto.post.CommentDTO;
 import fptu.fcharity.entity.Comment;
-import fptu.fcharity.response.post.CommentFinalResponse;
 import fptu.fcharity.response.post.CommentResponse;
 import fptu.fcharity.service.manage.post.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +28,11 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<CommentFinalResponse>> getCommentsByPost(
+    public ResponseEntity<List<CommentResponse>> getCommentsByPost(
             @PathVariable UUID postId,
             @RequestParam(defaultValue = "0") int page, // Mặc định page = 1
             @RequestParam(defaultValue = "5") int size) {
-        List<CommentFinalResponse> l = commentService.getCommentsByPost(postId, page, size);
-        return ResponseEntity.ok(l);
+        return ResponseEntity.ok(commentService.getCommentsByPost(postId, page, size));
     }
 
 
@@ -61,20 +59,16 @@ public class CommentController {
             @PathVariable UUID commentId,
             @RequestParam UUID userId,
             @RequestParam int vote) {
-        System.out.println("Vote request - commentId: " + commentId + ", userId: " + userId + ", vote: " + vote);
         try {
             commentService.voteComment(commentId, userId, vote);
-            Comment comment = commentService.getCommentById(commentId);
-            int totalVotes = comment.getVote();
-            System.out.println("Vote successful - totalVotes: " + totalVotes);
+            int newTotalVotes = commentService.getCommentById(commentId).getVote();
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
                             "commentId", commentId,
-                            "totalVote", totalVotes
+                            "newVote", newTotalVotes // Trả về tổng vote mới
                     ));
         } catch (Exception e) {
-            System.out.println("Vote error: " + e.getMessage());
             return ResponseEntity.badRequest()
                     .body(Map.of("error", e.getMessage()));
         }

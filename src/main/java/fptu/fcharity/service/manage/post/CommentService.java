@@ -7,7 +7,6 @@ import fptu.fcharity.repository.manage.post.CommentVoteRepository;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.authentication.UserResponse;
-import fptu.fcharity.response.post.CommentFinalResponse;
 import fptu.fcharity.response.post.CommentResponse;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
 import jakarta.transaction.Transactional;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,22 +45,10 @@ public class CommentService {
         return commentResponse;
     }
 
-    public List<CommentFinalResponse> getCommentsByPost(UUID postId, int page, int size) {
+    public List<CommentResponse> getCommentsByPost(UUID postId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Comment> commentPage = commentRepository.findByPost_Id(postId, pageable);
-        List<CommentResponse> l = commentPage.getContent().stream().map(this::convertToResponse).toList();
-        List<CommentFinalResponse> finalList = new ArrayList<>();
-        for(CommentResponse commentResponse : l) {
-            List<Comment> repliesList = commentRepository.findByParentCommentCommentId(commentResponse.getCommentId());
-            if(repliesList.isEmpty()) {
-                finalList.add(new CommentFinalResponse(commentResponse, new ArrayList<>()));
-                continue;
-            }
-            List<CommentResponse> repliesResponseList = repliesList.stream().map(this::convertToResponse).toList();
-            CommentFinalResponse a = new CommentFinalResponse(commentResponse, repliesResponseList);
-            finalList.add(a);
-        }
-        return finalList;
+        return commentPage.getContent().stream().map(this::convertToResponse).toList();
     }
 
     public CommentResponse updateComment(UUID commentId, CommentDTO commentDTO) {
@@ -89,27 +75,27 @@ public class CommentService {
 
     @Transactional
     public void voteComment(UUID commentId, UUID userId, int newVote) {
-        if (newVote != 1 && newVote != -1 && newVote != 0) {
-            throw new IllegalArgumentException("Vote must be 1 (upvote), -1 (downvote), or 0 (unvote)");
-        }
-
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        // Tìm vote hiện tại của user cho comment này
         CommentVoteId voteId = new CommentVoteId(commentId, userId);
         Optional<CommentVote> existingVote = commentVoteRepository.findById(voteId);
 
         if (existingVote.isPresent()) {
             CommentVote voteRecord = existingVote.get();
-            if (newVote == 0 || voteRecord.getVote() == newVote) {
-                commentVoteRepository.delete(voteRecord); // Unvote
+            if (voteRecord.getVote() == newVote) {
+                // Nếu vote mới giống vote cũ → Xóa vote (unvote)
+                commentVoteRepository.delete(voteRecord);
             } else {
-                voteRecord.setVote(newVote); // Cập nhật vote
+                // Nếu vote mới khác → Cập nhật vote
+                voteRecord.setVote(newVote);
                 commentVoteRepository.save(voteRecord);
             }
-        } else if (newVote != 0) {
+        } else {
+            // Nếu chưa có vote → Tạo mới
             CommentVote newVoteRecord = new CommentVote(voteId, comment, user, newVote);
             commentVoteRepository.save(newVoteRecord);
         }
@@ -146,7 +132,6 @@ public class CommentService {
                 .vote(comment.getVote())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
-                .parentCommentId(comment.getParentComment()!=null ? comment.getParentComment().getCommentId():null)
                 .build();
     }
 
