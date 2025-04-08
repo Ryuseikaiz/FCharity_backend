@@ -44,6 +44,7 @@ public class ProjectImageService {
         return projectImageRepository.findByProjectId(projectId).stream().map(ProjectImageDto::new).toList();
     }
     public void clearProjectImages(UUID projectId) {
-        projectImageRepository.deleteByProjectId(projectId);
+        List<ProjectImage> projectImages = projectImageRepository.findByProjectId(projectId);
+        projectImages.forEach(projectImageRepository::delete);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 @Repository
@@ -20,5 +21,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @EntityGraph(attributePaths = {"walletAddress","walletAddress.balance"})
     @Query("SELECT u FROM User u WHERE u.id = :id")
     User findWithEssentialById(@Param("id") UUID id);
-
+    @EntityGraph(attributePaths = {"walletAddress","walletAddress.balance"})
+    @Query("SELECT u FROM User u")
+    List<User> findAllWithInclude();
 }

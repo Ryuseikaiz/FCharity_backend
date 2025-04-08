@@ -8,13 +8,16 @@ import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
+import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ProjectRequestRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
+import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.service.manage.project.TaskPlanService;
 import fptu.fcharity.utils.constants.TransactionType;
+import fptu.fcharity.utils.constants.project.ProjectRequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,6 +56,8 @@ public class UserService {
     private TransactionHistoryRepository transactionHistoryRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private ProjectMemberRepository projectMemberRepository;;
 
     public List<User> allUsers() {
         return userRepository.findAll();
@@ -176,4 +182,18 @@ public class UserService {
             }
         }).toList();
     }
+
+    public List<UserResponse> getUsersNotInProject(UUID projectId) {
+        List<User> allUsers = userRepository.findAllWithInclude();
+        List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(projectId);
+        List<User> invitedUser = projectRequestRepository.findWithEssentialByProjectId(projectId).stream()
+                .filter(projectRequest -> !Objects.equals(projectRequest.getStatus(), ProjectRequestStatus.REJECTED))
+                .map(ProjectRequest::getUser)
+                .toList();
+        List<User> usersNotInProject = allUsers.stream()
+                .filter(user -> projectMembers.stream().noneMatch(projectMember -> projectMember.getUser().getId().equals(user.getId())))
+                .filter(user -> invitedUser.stream().noneMatch(invited -> invited.getId().equals(user.getId())))
+                .toList();
+        return usersNotInProject.stream().map(UserResponse::new).toList();
+}
 }
