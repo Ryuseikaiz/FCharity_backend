@@ -62,6 +62,7 @@ public class ProjectMemberService {
     public ProjectMemberResponse addProjectMember(ProjectMemberDto projectMemberDto) {
         ProjectMember projectMember = new ProjectMember();
         projectMember.setJoinDate(Instant.now());
+        projectMember.setMemberRole(projectMemberDto.getRole());
         takeObject(projectMember, projectMemberDto);
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);

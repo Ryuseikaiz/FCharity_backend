@@ -2,8 +2,10 @@ package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.dto.project.SpendingPlanDto;
 import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.SpendingItem;
 import fptu.fcharity.entity.SpendingPlan;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.project.SpendingItemRepository;
 import fptu.fcharity.repository.manage.project.SpendingPlanRepository;
 import fptu.fcharity.response.project.SpendingPlanResponse;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
@@ -12,6 +14,7 @@ import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +26,8 @@ public class SpendingPlanService {
     private SpendingPlanRepository spendingPlanRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private SpendingItemRepository spendingItemRepository;
 
     public SpendingPlanResponse createSpendingPlan(SpendingPlanDto dto) {
         Project project = projectRepository.findWithEssentialById(dto.getProjectId());
@@ -99,8 +104,14 @@ public class SpendingPlanService {
         if (plan.getProject().getId() != project.getId()){
             throw new ApiRequestException("Spending plan not found");
         }
+        BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(id)
+                .stream()
+                .map(SpendingItem::getEstimatedCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         project.setProjectStatus(ProjectStatus.DONATING);
         projectRepository.save(project);
+        plan.setEstimatedTotalCost(totalCost);
         plan.setApprovalStatus(SpendingPlanStatus.APPROVED);
         return toResponse(spendingPlanRepository.save(plan));
     }

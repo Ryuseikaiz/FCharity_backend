@@ -4,6 +4,7 @@ import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.response.organization.OrganizationMemberResponse;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,17 +43,20 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
         return  organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(userId, organizationId).getMemberRole();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrganizationMember> findOrganizationMemberByOrganization(Organization organization) {
-        return organizationMemberRepository.findOrganizationMemberByOrganization(organization);
+//    @Override
+//    @Transactional(readOnly = true)
+    public List<OrganizationMemberResponse> findOrganizationMemberByOrganizationIDD(UUID id) {
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByOrganizationId(id);
+        List<OrganizationMemberResponse> organizationMembersr = organizationMembers.stream().map(OrganizationMemberResponse::new).toList();
+    return organizationMembersr;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrganizationMember> findOrganizationMemberByOrganizationId(UUID organizationId) {
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(() -> new ApiRequestException("organization not found"));
-        return organizationMemberRepository.findOrganizationMemberByOrganization(organization);
+    public List<OrganizationMemberResponse> findOrganizationMemberByOrganizationId(UUID organizationId) {
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findOrganizationMemberByOrganizationId(organizationId);
+        List<OrganizationMemberResponse> organizationMembersr = organizationMembers.stream().map(OrganizationMemberResponse::new).toList();
+        return organizationMembersr;
     }
 
     @Override

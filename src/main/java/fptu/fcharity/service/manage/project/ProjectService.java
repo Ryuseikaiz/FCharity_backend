@@ -122,11 +122,13 @@ public class ProjectService {
         u.setCreatedDate(Instant.now());
         u.setUserRole(User.UserRole.Leader);
         userRepository.save(u);
-        ProjectMemberDto projectMemberDto = new ProjectMemberDto(project.getLeader().getId(),project.getId(),ProjectMemberRole.LEADER);
-        projectMemberService.addProjectMember(projectMemberDto);
+
         //save project
         project.setCreatedAt(Instant.now());
         projectRepository.save(project);
+
+        ProjectMemberDto projectMemberDto = new ProjectMemberDto(project.getLeader().getId(),project.getId(),ProjectMemberRole.LEADER);
+        projectMemberService.addProjectMember(projectMemberDto);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
         projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
         projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());

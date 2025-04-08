@@ -3,6 +3,7 @@ package fptu.fcharity.controller.manage.organization;
 import fptu.fcharity.dto.organization.OrganizationMemberDTO;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.organization.OrganizationMemberResponse;
 import fptu.fcharity.service.manage.organization.OrganizationMemberService;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.user.UserService;
@@ -37,8 +38,9 @@ public class OrganizationMemberRestController {
     }
 
     @GetMapping("/organization-members/{organizationId}")
-    public List<OrganizationMember> getOrganizationMember(@PathVariable UUID organizationId) {
-        List<OrganizationMember> organizationMembers = organizationMemberService.findOrganizationMemberByOrganization(organizationService.findEntityById(organizationId));
+    public List<OrganizationMemberResponse> getOrganizationMember(@PathVariable UUID organizationId) {
+        List<OrganizationMemberResponse> organizationMembers = organizationMemberService.findOrganizationMemberByOrganizationId(organizationId);
+        System.out.println(organizationMembers);
         return organizationMembers;
     }
 
