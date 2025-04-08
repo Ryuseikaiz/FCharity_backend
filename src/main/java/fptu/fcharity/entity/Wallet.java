@@ -15,7 +15,6 @@ import java.util.UUID;
 public class Wallet {
     @Id
     @GeneratedValue(generator = "UUID")
-    @ColumnDefault("newid()")
     @Column(name = "wallet_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 

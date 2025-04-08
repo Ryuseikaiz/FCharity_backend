@@ -37,4 +37,8 @@ public class OrganizationImageService {
     public List<OrganizationImage> findByOrganization(Organization organization) {
         return organizationImageRepository.findOrganizationImageByOrganizationId(organization.getOrganizationId());
     }
+
+    public List<OrganizationImage> findAllVerificationDocuments(UUID organizationId) {
+        return organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationId, OrganizationImage.OrganizationImageType.VerificationDocument);
+    }
 }
