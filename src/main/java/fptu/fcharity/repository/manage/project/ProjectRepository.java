@@ -15,7 +15,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @EntityGraph(attributePaths = {"category","wallet"})
     Project findWithCategoryWalletById(UUID id);
     @EntityGraph(attributePaths = {"category", "leader","leader.walletAddress", "organization","request","walletAddress"})
-    @Query("SELECT p FROM Project p WHERE p.id = :id")
     Project findWithEssentialById(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})

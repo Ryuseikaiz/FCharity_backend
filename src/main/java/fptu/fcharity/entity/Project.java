@@ -77,7 +77,7 @@ public class Project {
     @Column(name = "shutdown_reason")
     private String shutdownReason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
 

@@ -61,7 +61,6 @@ public class ProjectMemberService {
     //thêm thành viên
     public ProjectMemberResponse addProjectMember(ProjectMemberDto projectMemberDto) {
         ProjectMember projectMember = new ProjectMember();
-        projectMember.setMemberRole(ProjectMemberRole.MEMBER);
         projectMember.setJoinDate(Instant.now());
         takeObject(projectMember, projectMemberDto);
         projectMemberRepository.save(projectMember);

@@ -7,6 +7,7 @@ import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.dto.user.UpdateProfileDto;
 import fptu.fcharity.entity.TransactionHistory;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.service.manage.user.UserService;
@@ -92,5 +93,10 @@ public class UserController {
     @GetMapping("/{project_id}/task-plans")
     public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
         return ResponseEntity.ok(userService.getTasksOfProjectId(project_id));
+    }
+    @GetMapping("/not-in-project/{projectId}")
+    public ResponseEntity<?> getUserNotInProject(@PathVariable UUID projectId) {
+        List<UserResponse> users = userService.getUsersNotInProject(projectId);
+        return ResponseEntity.ok(users);
     }
 }
