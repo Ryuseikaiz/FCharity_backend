@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -23,12 +22,12 @@ public class OrganizationMember {
     @Column(name="membership_id", unique = true, updatable = false, nullable = false)
     private UUID membershipId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", referencedColumnName = "organization_id", nullable = false)
     private Organization organization;
 
     @Enumerated(EnumType.STRING)

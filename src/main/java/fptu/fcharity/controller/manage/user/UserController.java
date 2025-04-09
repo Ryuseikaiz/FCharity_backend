@@ -71,11 +71,6 @@ public class UserController {
         return ResponseEntity.ok(userResponseMapper.toDTO(updatedUser));
     }
 
-    @GetMapping("/organizations/{organization_id}")
-    public ResponseEntity<?> getUser(@PathVariable UUID organization_id) {
-        List<User> users = userService.getAllUsersNotInOrganization(organization_id);
-        return ResponseEntity.ok(users);
-    }
     @GetMapping("/{user_id}/invitations")
     public ResponseEntity<?> getInvitationsOfUser(@PathVariable UUID user_id) {
         List<ProjectRequestResponse> projectRequests = userService.getInvitationsOfUserId(user_id);
