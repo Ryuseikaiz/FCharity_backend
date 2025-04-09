@@ -28,7 +28,6 @@ public class PostController {
         List<PostResponse> posts = postService.getAllPosts();
         return ResponseEntity.ok(posts);
     }
-
     // Lấy Post theo ID
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable("id") UUID id) {

@@ -62,5 +62,9 @@ public class Organization {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ceo_id")
     private User ceo;
+
+    @Column(name = "reason")
+    private String reason;
+
 }
 

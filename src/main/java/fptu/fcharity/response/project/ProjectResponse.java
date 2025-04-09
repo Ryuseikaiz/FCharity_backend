@@ -43,12 +43,16 @@ public class ProjectResponse {
     private Instant actualStartTime;
 
     private Instant actualEndTime;
+    private Instant createdAt;
+
+    private Instant updatedAt;
 
     private String shutdownReason;
 
-    private Category category;
+    private UUID categoryId;
+    private String categoryName;
 
-    private Wallet walletAddress;
+    private UUID walletId;
     public ProjectResponse(Project project) {
         this.id = project.getId();
         this.projectName = project.getProjectName();
@@ -68,7 +72,10 @@ public class ProjectResponse {
         this.actualStartTime = project.getActualStartTime();
         this.actualEndTime = project.getActualEndTime();
         this.shutdownReason = project.getShutdownReason();
-        this.category = project.getCategory();
-        this.walletAddress = project.getWalletAddress();
+        this.categoryId = project.getCategory().getId();
+        this.categoryName = project.getCategory().getCategoryName();
+        this.walletId = project.getWalletAddress().getId();
+        this.createdAt = project.getCreatedAt();
+        this.updatedAt = project.getUpdatedAt();
     }
 }

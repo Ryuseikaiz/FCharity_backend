@@ -80,8 +80,12 @@ public class PostService {
 
         // Lưu tag và đính kèm hình ảnh/video
         taggableService.addTaggables(savedPost.getId(), postRequestDTO.getTagIds(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
+        if( postRequestDTO.getImageUrls() != null){
+            objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getImageUrls(), TaggableType.POST);
+        }
+        if( postRequestDTO.getVideoUrls() != null){
+            objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
+        }
 
         return new PostResponse(savedPost,
                 taggableService.getTagsOfObject(savedPost.getId(), TaggableType.POST),
