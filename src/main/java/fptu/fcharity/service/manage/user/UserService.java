@@ -98,6 +98,24 @@ public class UserService {
         return user;
     }
 
+    public List<User> getAllUsersNotInOrganization(UUID organizationId) {
+        List<User> allUsers = userRepository.findAll();
+        List<OrganizationMember> organizationMembers = organizationMemberRepository.findAllOrganizationMemberByOrganization(organizationId);
+        List<OrganizationRequest> organizationRequests = organizationRequestRepository.findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Invitation).stream().filter(organizationRequest -> organizationRequest.getStatus() != OrganizationRequest.OrganizationRequestStatus.Rejected).toList();
+        return allUsers.stream().filter(user -> {
+            for (OrganizationMember organizationMember : organizationMembers) {
+                if (organizationMember.getUser().getId() == user.getId()) {
+                    return false;
+                }
+            }
+            for(OrganizationRequest organizationRequest : organizationRequests) {
+                if (organizationRequest.getUser().getId() == user.getId()) {
+                    return false;
+                }
+            }
+            return true;
+        }).toList();
+    }
     //get invitation from project of user
     public List<ProjectRequestResponse> getInvitationsOfUserId(UUID userId) {
         List<ProjectRequest> l = projectRequestRepository.findWithEssentialByUserId(userId);

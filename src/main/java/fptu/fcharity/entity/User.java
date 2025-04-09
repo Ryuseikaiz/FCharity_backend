@@ -23,6 +23,7 @@ import java.util.UUID;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @ColumnDefault("newid()")
     @Column(name = "user_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
     private UUID id;
 
@@ -69,7 +70,7 @@ public class User implements UserDetails {
     @Column(name = "verification_code_expires_at")
     private Instant verificationCodeExpiresAt;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 

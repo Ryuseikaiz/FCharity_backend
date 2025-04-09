@@ -1,8 +1,6 @@
 package fptu.fcharity.service.manage.organization;
 
-import fptu.fcharity.dto.organization.OrganizationDTO;
-import fptu.fcharity.dto.organization.UserDTO;
-import fptu.fcharity.dto.organization.WalletDTO;
+import fptu.fcharity.dto.organization.OrganizationDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import fptu.fcharity.repository.WalletRepository;
@@ -52,29 +50,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional(readOnly = true)  // OK
-    public List<OrganizationDTO> findAll() {
+    public List<OrganizationDto> findAll() {
         List<Organization> organizations = organizationRepository.findAll();
-        return organizations.stream().map(this::convertOrganizationToDTO).toList();
+        List<OrganizationDto>  dtos =  organizations.stream().map(this::convertToDTO).toList();
+        return dtos;
 
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrganizationDTO> getMyOrganizations() {
-        User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("User not found"));
-        List<OrganizationMember> member = organizationMemberRepository
-                .findOrganizationMemberByUserId(
-                        user.getId()).stream().filter(organizationMember -> organizationMember.getMemberRole() == OrganizationMemberRole.MEMBER)
-                .toList();
-        List<Organization> organizations = member.stream().map(m -> organizationRepository.findById(m.getOrganization().getOrganizationId()).orElseThrow(() -> new RuntimeException("One of / All Organizations not found!"))).toList();
-        return organizations.stream().map(this::convertOrganizationToDTO).toList();
     }
 
     @Override  // OK
     @Transactional(readOnly = true)   // OK
-    public OrganizationDTO findById(UUID id) {
+    public OrganizationDto findById(UUID id) {
         Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ApiRequestException("Organization not found"));
-        return convertOrganizationToDTO(organization);
+        return convertToDTO(organization);
     }
 
     @Override
@@ -85,23 +72,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     @Transactional   // OK
-    public OrganizationDTO createOrganization(OrganizationDTO organizationDTO) {
-        User ceo = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
-        if (organizationMemberRepository.findOrganizationMemberByUserId(ceo.getId()).stream().anyMatch(organizationMember -> organizationMember.getMemberRole() == OrganizationMemberRole.CEO)) {
-            throw new ApiRequestException("You have already created an organization, cannot create any more organizations!");
-        }
-        Organization organization = convertToEntity(organizationDTO);
+    public OrganizationDto createOrganization(OrganizationDto organizationDto) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User ceo = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
+
+        Organization organization = convertToEntity(organizationDto);
         organization.setCeo(ceo);
 
         Wallet wallet = new Wallet();
         wallet.setBalance(BigDecimal.valueOf(0));
         Wallet savedWallet =  walletRepository.save(wallet);
         organization.setWalletAddress(savedWallet);
-        organization.setOrganizationStatus(OrganizationStatus.PENDING);
         Organization organizationSaved = organizationRepository.save(organization);
 
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getAvatarUrl(), OrganizationImage.OrganizationImageType.Avatar);
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getBackgroundUrl(), OrganizationImage.OrganizationImageType.Background);
+        saveImages(organizationSaved.getOrganizationId(), organizationDto.getAvatarUrl(), OrganizationImage.OrganizationImageType.Avatar);
+        saveImages(organizationSaved.getOrganizationId(), organizationDto.getBackgroundUrl(), OrganizationImage.OrganizationImageType.Background);
 
         OrganizationMember organizationMember = new OrganizationMember();
         organizationMember.setOrganization(organizationSaved);
@@ -111,176 +96,120 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationMemberRepository.save(organizationMember);
 
-        organizationDTO.setOrganizationId(organizationSaved.getOrganizationId());
+        organizationDto.setOrganizationId(organizationSaved.getOrganizationId());
 
-        return organizationDTO;
+        return organizationDto;
     }
 
     @Override
     @Transactional   // OK
-    public OrganizationDTO updateOrganization(OrganizationDTO organizationDTO) {
-        User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
+    public OrganizationDto updateOrganization(OrganizationDto organizationDto) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
 
-        Organization organization = convertToEntity(organizationDTO);
+        Organization organization = convertToEntity(organizationDto);
+
+        System.out.println("Organization: " + organization);
 
         Optional<Organization> existingOrg = organizationRepository.findById(organization.getOrganizationId());
         if (existingOrg.isEmpty()) {
             throw new RuntimeException("Organization not found");
         }
 
-
         OrganizationMember.OrganizationMemberRole userRole = checkRole(organization.getOrganizationId(), user.getId());
 
         if (userRole == OrganizationMemberRole.CEO || userRole == OrganizationMemberRole.MANAGER) {
-            if (organizationDTO.getAvatarUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Avatar);
+            if (organizationDto.getAvatarUrl() != null) {
+                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getOrganizationId(), OrganizationImage.OrganizationImageType.Avatar);
 
                 if (organizationImage != null && !organizationImage.isEmpty()) {
                     OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
+                    image.setImageUrl(organizationDto.getAvatarUrl());
                     organizationImageRepository.save(image);
                 } else {
                     OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
+                    image.setOrganizationId(organizationDto.getOrganizationId());
+                    image.setImageUrl(organizationDto.getAvatarUrl());
                     image.setImageType(OrganizationImage.OrganizationImageType.Avatar);
                     organizationImageRepository.save(image);
                 }
             }
 
-            if (organizationDTO.getBackgroundUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Background);
+            if (organizationDto.getBackgroundUrl() != null) {
+                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDto.getOrganizationId(), OrganizationImage.OrganizationImageType.Background);
 
                 if (organizationImage != null && !organizationImage.isEmpty()) {
                     OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
+                    image.setImageUrl(organizationDto.getBackgroundUrl());
                     organizationImageRepository.save(image);
                 } else {
                     OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
+                    image.setOrganizationId(organizationDto.getOrganizationId());
+                    image.setImageUrl(organizationDto.getBackgroundUrl());
                     image.setImageType(OrganizationImage.OrganizationImageType.Background);
                     organizationImageRepository.save(image);
                 }
             }
-
-            if (organizationDTO.getCeo().getId() != null) {
-                User newCeo = userRepository.findById(organizationDTO.getCeo().getId()).orElseThrow(() -> new RuntimeException("Ceo not found"));
-                if (userRole == OrganizationMemberRole.CEO) {
-                    organization.setCeo(newCeo);
-                } else {
-                    throw new ApiRequestException("You are not allowed to update CEO information");
-                }
-            } else {
-                organization.setCeo(existingOrg.get().getCeo());
-            }
-
             organizationRepository.save(organization);
         } else {
             throw new RuntimeException("You are not allowed to update this organization");
         }
-        return convertOrganizationToDTO(organization);
+
+        return convertToDTO(organization);
     }
 
 
     @Override
     @Transactional
-    public void deleteOrganizationByCeo(UUID organizationId) {
-        User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to delete organization"));
-        Organization organization = organizationRepository.findById(organizationId).orElseThrow(() -> new RuntimeException("Organization not found"));
-        if (organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(user.getId(), organizationId).getMemberRole() != OrganizationMemberRole.CEO) {
-            throw new ApiRequestException("You are not allowed to delete this organization");
-        }
-
-        organization.setOrganizationStatus(OrganizationStatus.WATINGFORDELETION);
-        organizationRepository.save(organization);
-    }
-
-    @Override
-    @Transactional
-    public void deleteOrganizationByAdmin(UUID organizationId) {
-        User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to delete organization"));
-
-        if (user.getUserRole() != User.UserRole.Admin) {
-            throw new ApiRequestException("You are not allowed to approval deletion of this organization");
-        }
+    public void deleteOrganization(UUID organizationId) {
         organizationRepository.deleteById(organizationId);
     }
 
-    public List<OrganizationDTO> getOrganizationsByManagerId(UUID managerId) {
-        return organizationMemberRepository.findOrganizationMemberByUserId(managerId)
+    @Override   //OK
+    public List<OrganizationDto> getOrganizationsByCeoOrManager(UUID ceoManagerId) {
+
+        return organizationMemberRepository.findOrganizationMemberByUserId(ceoManagerId)
                 .stream()
-                .filter(member -> member.getMemberRole() == OrganizationMemberRole.MANAGER)
+                .filter(member -> member.getMemberRole() == OrganizationMemberRole.MANAGER || member.getMemberRole() == OrganizationMemberRole.CEO)
                 .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
                         .orElseThrow(() -> new RuntimeException("Organization not found")))
-                .map(this::convertOrganizationToDTO)
+                .map(this::convertToDTO)
                 .toList();
     }
 
-    @Override   //OK
-    public OrganizationDTO getOrganizationByCeoId(UUID ceoId) {
-        return organizationMemberRepository.findOrganizationMemberByUserId(ceoId)
-                .stream()
-                .filter(member ->  member.getMemberRole() == OrganizationMemberRole.CEO)
-                .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
-                        .orElseThrow(() -> new RuntimeException("Organization not found")))
-                .map(this::convertOrganizationToDTO)
-                .toList().getFirst();
-    }
-
     @Override   // OK
-    public OrganizationDTO getOrganizationByOrganizationIdAndManagerId(UUID organizationId, UUID managerId) {
-        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(managerId, organizationId);
-        if (organizationMember == null || organizationMember.getMemberRole() != OrganizationMemberRole.MANAGER) {
-            throw new RuntimeException("You are not the manager of this organization");
+    public OrganizationDto getOrganizationByOrganizationIdAndCeoOrManager(UUID organizationId, UUID ceoManagerId) {
+        OrganizationMember organizationMember = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(ceoManagerId, organizationId);
+        if (organizationMember == null || organizationMember.getMemberRole() == OrganizationMemberRole.MEMBER) {
+            throw new RuntimeException("You are not allowed to get this organization");
         }
 
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
 
-        return convertOrganizationToDTO(organization);
+        return convertToDTO(organization);
     }
 
-    private UserDTO convertUserToDTO(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setFullName(user.getFullName());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setPassword(user.getPassword());
-        userDTO.setPhoneNumber(user.getPhoneNumber());
-        userDTO.setAddress(user.getAddress());
-        userDTO.setAvatar(user.getAvatar());
-        userDTO.setUserRole(user.getUserRole());
-        userDTO.setCreatedDate(user.getCreatedDate());
-        userDTO.setUserStatus(user.getUserStatus());
-        userDTO.setVerificationCode(user.getVerificationCode());
-        userDTO.setVerificationCodeExpiresAt(user.getVerificationCodeExpiresAt());
-        userDTO.setWalletAddress(convertWalletToDTO(user.getWalletAddress()));
-
-        return userDTO;
+    @Override
+    public OrganizationDto getMyOrganization(UUID userId) {
+        Organization organization = organizationRepository.findOrganizationByUserId(userId);
+        return convertToDTO(organization);
     }
 
-    private WalletDTO convertWalletToDTO(Wallet wallet) {
-        WalletDTO walletDTO = new WalletDTO();
-        walletDTO.setId(wallet.getId());
-        walletDTO.setBalance(wallet.getBalance());
-        return walletDTO;
-    }
+    private OrganizationDto convertToDTO(Organization organization) {
+        OrganizationDto dto = new OrganizationDto();
 
-    private OrganizationDTO convertOrganizationToDTO(Organization organization) {
-        OrganizationDTO DTO = new OrganizationDTO();
-
-        DTO.setOrganizationId(organization.getOrganizationId());
-        DTO.setOrganizationName(organization.getOrganizationName());
-        DTO.setEmail(organization.getEmail());
-        DTO.setPhoneNumber(organization.getPhoneNumber());
-        DTO.setAddress(organization.getAddress());
-        DTO.setWalletAddress(convertWalletToDTO(organization.getWalletAddress()));
-        DTO.setOrganizationDescription(organization.getOrganizationDescription());
-        DTO.setStartTime(organization.getStartTime());
-        DTO.setShutdownDay(organization.getShutdownDay());
-        DTO.setOrganizationStatus(organization.getOrganizationStatus());
-        DTO.setCeo(convertUserToDTO(organization.getCeo()));
+        dto.setOrganizationId(organization.getOrganizationId());
+        dto.setOrganizationName(organization.getOrganizationName());
+        dto.setEmail(organization.getEmail());
+        dto.setPhoneNumber(organization.getPhoneNumber());
+        dto.setAddress(organization.getAddress());
+        dto.setWalletId(organization.getWalletAddress().getId());
+        dto.setOrganizationDescription(organization.getOrganizationDescription());
+        dto.setStartTime(organization.getStartTime());
+        dto.setShutdownDay(organization.getShutdownDay());
+        dto.setOrganizationStatus(organization.getOrganizationStatus());
+        dto.setCeoId(organization.getCeo().getId());
 
         String avatarUrl =
                 organizationImageRepository
@@ -295,46 +224,44 @@ public class OrganizationServiceImpl implements OrganizationService {
                                 OrganizationImage.OrganizationImageType.Background
                         ).getFirst().getImageUrl();
 
-        DTO.setAvatarUrl(avatarUrl);
-        DTO.setBackgroundUrl(backgroundUrl);
-        return DTO;
+        dto.setAvatarUrl(avatarUrl);
+        dto.setBackgroundUrl(backgroundUrl);
+        return dto;
     }
 
-    private Organization convertToEntity(OrganizationDTO DTO) {
+    private Organization convertToEntity(OrganizationDto dto) {
         Organization organization = new Organization();
 
-        if (DTO.getOrganizationId() != null) {
-            organization.setOrganizationId(DTO.getOrganizationId());
+        if (dto.getOrganizationId() != null) {
+            organization.setOrganizationId(dto.getOrganizationId());
         }
-
-        organization.setOrganizationName(DTO.getOrganizationName());
-        organization.setOrganizationDescription(DTO.getOrganizationDescription());
-        organization.setEmail(DTO.getEmail());
-        organization.setPhoneNumber(DTO.getPhoneNumber());
-        organization.setAddress(DTO.getAddress());
-        if (DTO.getWalletAddress().getId() != null) {
-            organization.setWalletAddress(walletRepository.findById(DTO.getWalletAddress().getId()).orElseThrow(() -> new RuntimeException("Wallet not found")));
+        if (dto.getCeoId() != null) {
+            organization.setCeo(userRepository.findById(dto.getCeoId()).orElseThrow(() -> new RuntimeException("Ceo not found")));
+        }
+        organization.setOrganizationName(dto.getOrganizationName());
+        organization.setOrganizationDescription(dto.getOrganizationDescription());
+        organization.setEmail(dto.getEmail());
+        organization.setPhoneNumber(dto.getPhoneNumber());
+        organization.setAddress(dto.getAddress());
+        if (dto.getWalletId() != null) {
+            organization.setWalletAddress(walletRepository.findById(dto.getWalletId()).orElseThrow(() -> new RuntimeException("Wallet not found")));
         }
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
-        organization.setStartTime(DTO.getStartTime());
-        organization.setShutdownDay(DTO.getShutdownDay());
+        organization.setStartTime(dto.getStartTime());
+        organization.setShutdownDay(dto.getShutdownDay());
         return organization;
     }
 
-    private void saveImages(UUID organizationId, String url, OrganizationImage.OrganizationImageType imageType) {
+    private OrganizationImage saveImages(UUID organizationId, String url, OrganizationImage.OrganizationImageType imageType) {
         OrganizationImage organizationImage = new OrganizationImage();
         organizationImage.setOrganizationId(organizationId);
         organizationImage.setImageUrl(url);
         organizationImage.setImageType(imageType);
 
-        organizationImageRepository.save(organizationImage);
+        return organizationImageRepository.save(organizationImage);
     }
 
     private OrganizationMember.OrganizationMemberRole checkRole(UUID organizationId, UUID userId) {
         return organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(userId, organizationId).getMemberRole();
-    }
-
-    private Authentication getAuthentication() {
-       return SecurityContextHolder.getContext().getAuthentication();
     }
 }

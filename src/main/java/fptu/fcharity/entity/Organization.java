@@ -1,6 +1,5 @@
 package fptu.fcharity.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -40,7 +39,7 @@ public class Organization {
     @Column(name="address")
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
@@ -59,7 +58,7 @@ public class Organization {
     private String organizationStatus;
 
     // TODO: ceo id -> object
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ceo_id")
     private User ceo;
 
