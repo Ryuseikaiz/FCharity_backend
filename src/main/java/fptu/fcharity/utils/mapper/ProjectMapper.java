@@ -1,7 +1,7 @@
 package fptu.fcharity.utils.mapper;
 
-import fptu.fcharity.entity.Project;
 import fptu.fcharity.dto.project.ProjectDto;
+import fptu.fcharity.entity.Project;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

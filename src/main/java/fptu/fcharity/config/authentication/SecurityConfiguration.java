@@ -30,11 +30,15 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/**")
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/ws/**").permitAll()
+                );
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**", "/oauth2/**").permitAll()
+                        .requestMatchers("/auth/**", "/oauth2/**", "/requests/*", "/tags", "/categories","/api/**","/projects","/posts/**","/comments/*","/payment/webhook").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -53,7 +57,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:3001", "http://localhost:3002")); // Thêm frontend URL
+        configuration.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:3001", "http://localhost:3002","https://fcharity.azurewebsites.net","https://fcharitywebapp.azurewebsites.net","http://localhost:4000")); // Thêm frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE","OPTIONS"));
         configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả headers
         configuration.setAllowCredentials(true); // Cho phép gửi cookie/token (nếu cần)

@@ -6,13 +6,16 @@ import fptu.fcharity.dto.authentication.LoginUserDto;
 import fptu.fcharity.dto.authentication.RegisterUserDto;
 import fptu.fcharity.dto.authentication.VerifyUserDto;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.entity.Wallet;
+import fptu.fcharity.service.WalletService;
 import fptu.fcharity.utils.exception.ApiRequestException;
-import fptu.fcharity.repository.UserRepository;
-import fptu.fcharity.service.UserService;
+import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.helpers.email.EmailService;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -30,34 +33,38 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     private final UserService userService;
-
+    private final WalletService walletService;
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             EmailService emailService,
-            UserService userService) {
+            UserService userService,
+            WalletService walletService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.userService = userService;
+        this.walletService = walletService;
     }
 
     public User signup(RegisterUserDto input) {
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new ApiRequestException("Email already exists");
         }
+        Wallet newWallet = walletService.save();
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
         user.setEnabled(false);
+        user.setCreatedDate(Instant.now());
+        user.setWalletAddress(newWallet);
         userRepository.save(user);
+
         sendVerificationEmail(user,"Verify your email address");
         return userRepository.findByEmail(user.getEmail()).get();
     }
-
-
 
     public User authenticate(LoginUserDto input) {
         User user = userRepository.findByEmail(input.getEmail())
@@ -77,7 +84,7 @@ public class AuthenticationService {
     }
 
     public boolean verifyEmail(User user, String verificationCode) {
-        if (Objects.equals(user.getVerificationCode(), "") ||user.getVerificationCodeExpiresAt().isBefore(Instant.now())) {
+        if (Objects.equals(user.getVerificationCode(), "") || user.getVerificationCodeExpiresAt().isBefore(Instant.now())) {
             throw new ApiRequestException("Verification code has expired");
         }
 
@@ -85,7 +92,7 @@ public class AuthenticationService {
             user.setVerificationCode(null);
             user.setVerificationCodeExpiresAt(null);
             userRepository.save(user);
-        }else{
+        } else {
             throw new ApiRequestException("Verification code not match");
         }
         return true;
@@ -104,37 +111,46 @@ public class AuthenticationService {
             throw new ApiRequestException("User not found");
         }
     }
-    public void sendResetPwdOTPCode(String email,String msg) {
+
+    public void sendResetPwdOTPCode(String email, String msg) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (Objects.equals(user.getPassword(), null)) {
                 throw new ApiRequestException("User doesn't have a password");
             }
-            if (user.isEnabled()) {
-                user.setVerificationCode(generateVerificationCode());
-                user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
-                sendVerificationEmail(user,msg);
-                userRepository.save(user);
-            }else{
-                throw new ApiRequestException("Account not verified. Please verify your account.");
+
+            if (!user.isEnabled()) {
+                throw new RuntimeException("Account not verified. Please verify your account.");
             }
-        } else {
-            throw new ApiRequestException("User not found");
+//            if (user.getVerificationCodeExpiresAt() != null &&
+//                    user.getVerificationCodeExpiresAt().isAfter(LocalDateTime.now())) {
+//                throw new RuntimeException("A verification code has already been sent. Please wait before requesting a new one.");
+//            }
+            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
+            userRepository.save(user);
+            sendVerificationEmail(user, "Reset your FCHARITY password");
+        }else{
+            throw new UsernameNotFoundException("Please provide an verificated email!");
         }
     }
 
-    public void resendVerificationCode(String email,String msg) {
+    public void resendVerificationCode(String email, String msg) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.isEnabled()) {
                 throw new ApiRequestException("Account is already verified");
             }
-            user.setVerificationCode(generateVerificationCode());
-            user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
-            sendVerificationEmail(user,msg);
-            userRepository.save(user);
+            if(user.isEnabled()) {
+                user.setVerificationCode(generateVerificationCode());
+                user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
+                sendVerificationEmail(user,msg);
+                userRepository.save(user);
+            } else {
+                throw new ApiRequestException("Account not verified. Please verify your account.");
+            }
         } else {
             throw new ApiRequestException("User not found");
         }
@@ -199,7 +215,6 @@ public class AuthenticationService {
         User u = userRepository.findByEmail(resetPasswordDto.getEmail()).get();
         try{
             String newPassword = resetPasswordDto.getNewPassword();
-
             if (passwordEncoder.matches(resetPasswordDto.getNewPassword(), u.getPassword())) {
                 throw new ApiRequestException("New password must be different from the old password");
             }
@@ -237,6 +252,22 @@ public class AuthenticationService {
             userRepository.save(user);
         }
 
+        return user;
+    }
+
+    public User loginAdmin(LoginUserDto input) {
+        User user = userRepository.findByEmail(input.getEmail())
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+
+        if (!user.isEnabled()) {
+            throw new ApiRequestException("Account not verified. Please verify your account.");
+        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        input.getEmail(),
+                        input.getPassword()
+                )
+        );
         return user;
     }
 }

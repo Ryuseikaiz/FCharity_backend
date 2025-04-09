@@ -15,4 +15,6 @@ public class PostRequestDTO {
     private UUID userId;
     private List<UUID> tagIds;
     private String status;
+    private List<String> imageUrls;
+    private List<String> videoUrls;
 }

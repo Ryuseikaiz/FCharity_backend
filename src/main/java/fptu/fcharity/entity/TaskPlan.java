@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -15,15 +17,17 @@ import java.util.UUID;
 @Table(name = "task_plan")
 public class TaskPlan {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "task_plan_id", nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id")
-    private Project project;
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "phase_id")
+    private Timeline phase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -41,14 +45,19 @@ public class TaskPlan {
     @Column(name = "end_time")
     private Instant endTime;
 
-    @Nationalized
-    @Column(name = "task_plan_status", length = 50)
-    private String taskPlanStatus;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "status_id")
+    private TaskPlanStatus status;
 
     @Column(name = "created_at")
     private Instant createdAt;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "parent_task_id")
+    private TaskPlan parentTask;
 
 }

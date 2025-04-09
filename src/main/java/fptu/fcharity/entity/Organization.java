@@ -1,31 +1,35 @@
 package fptu.fcharity.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "organizations")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Organization {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(generator = "UUID")
+    @Column(name="organization_id", unique = true, updatable = false, nullable = false)
     @ColumnDefault("newid()")
-    @Column(name = "organization_id", nullable = false)
-    private UUID id;
+    private UUID organizationId;
 
     @Nationalized
-    @Column(name = "organization_name")
+    @Column(name = "organization_name", nullable = false)
     private String organizationName;
 
     @Nationalized
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     @Nationalized
@@ -33,7 +37,7 @@ public class Organization {
     private String phoneNumber;
 
     @Nationalized
-    @Column(name = "address")
+    @Column(name="address")
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,7 +45,7 @@ public class Organization {
     private Wallet walletAddress;
 
     @Nationalized
-    @Column(name = "organization_description")
+    @Column(name="organization_description")
     private String organizationDescription;
 
     @Column(name = "start_time")
@@ -51,11 +55,16 @@ public class Organization {
     private Instant shutdownDay;
 
     @Nationalized
-    @Column(name = "organization_status", length = 50)
+    @Column(name="organization_status", length = 50)
     private String organizationStatus;
 
+    // TODO: ceo id -> object
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ceo_id")
     private User ceo;
 
+    @Column(name = "reason")
+    private String reason;
+
 }
+
