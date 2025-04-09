@@ -1,7 +1,6 @@
 package fptu.fcharity.response.project;
 
 import fptu.fcharity.entity.ProjectRequest;
-import fptu.fcharity.response.authentication.UserResponse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,7 @@ import java.util.UUID;
 @Setter
 public class ProjectRequestResponse {
         private UUID id;
-        private UserResponse user;
+        private UUID userId;
         private UUID projectId;
 
         private String requestType;
@@ -23,7 +22,7 @@ public class ProjectRequestResponse {
         private Instant updatedAt;
         public ProjectRequestResponse(ProjectRequest pr) {
             this.id = pr.getId();
-            this.user = new UserResponse(pr.getUser());
+            this.userId = pr.getUser().getId();
             this.projectId = pr.getProject().getId();
             this.requestType = pr.getRequestType();
             this.status = pr.getStatus();

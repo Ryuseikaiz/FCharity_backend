@@ -28,9 +28,9 @@ public class ProjectController {
         ProjectFinalResponse project = projectService.getProjectById(id);
         return ResponseEntity.ok(project);
     }
-    @GetMapping("/my-project/{userId}")
-    public ResponseEntity<List<ProjectFinalResponse>> getMyProject(@PathVariable UUID userId) {
-        List<ProjectFinalResponse> project = projectService.getMyProject(userId);
+    @GetMapping("/my-owner-project/{userId}")
+    public ResponseEntity<ProjectFinalResponse> getMyOwnerProject(@PathVariable UUID userId) {
+        ProjectFinalResponse project = projectService.getMyOwnerProject(userId);
         return ResponseEntity.ok(project);
     }
     @PostMapping("/create")
@@ -47,10 +47,5 @@ public class ProjectController {
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
-    }
-    @GetMapping("/wallet/{walletId}")
-    public ResponseEntity<ProjectFinalResponse> getProjectByWalletId(@PathVariable UUID walletId) {
-        ProjectFinalResponse project = projectService.getProjectByWalletId(walletId);
-        return ResponseEntity.ok(project);
     }
 }

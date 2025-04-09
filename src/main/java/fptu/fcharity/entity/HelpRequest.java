@@ -21,7 +21,7 @@ public class HelpRequest {
     @Column(name = "request_id", nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -58,10 +58,6 @@ public class HelpRequest {
     @Nationalized
     @Column(name = "status", length = 50)
     private String status;
-
-    @Column(name = "reason")
-    private String reason;
-
     public HelpRequest() {
     }
     public HelpRequest(User user, String title,

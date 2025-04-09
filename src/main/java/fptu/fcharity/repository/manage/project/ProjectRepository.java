@@ -14,15 +14,14 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @EntityGraph(attributePaths = {"category","wallet"})
     Project findWithCategoryWalletById(UUID id);
-    @EntityGraph(attributePaths = {"category", "leader","leader.walletAddress", "organization","request","walletAddress"})
+    @EntityGraph(attributePaths = {"category", "leader", "organization","request"})
+    @Query("SELECT p FROM Project p WHERE p.id = :id")
     Project findWithEssentialById(@Param("id") UUID id);
 
-    @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})
-    @Query("SELECT r FROM Project r where r.projectStatus != 'BANNED'")
+    @EntityGraph(attributePaths = {"category","leader","organization","request","walletAddress"})
+    @Query("SELECT r FROM Project r")
     List<Project> findAllWithInclude();
-    @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})
+    @EntityGraph(attributePaths = {"category","leader","organization","request"})
     @Query("SELECT r FROM Project r where r.leader.id = :userId")
     Project findMyOwnerProject(UUID userId);
-    @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})
-    Project findByWalletAddressId(UUID walletId);
 }

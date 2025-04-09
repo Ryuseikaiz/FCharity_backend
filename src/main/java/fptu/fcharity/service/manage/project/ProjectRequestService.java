@@ -52,7 +52,7 @@ public class ProjectRequestService {
     public void takeObject(ProjectRequest pr, ProjectRequestDto prDto){
 
         if (prDto.getUserId() != null) {
-            User user = userRepository.findWithEssentialById(prDto.getUserId() );
+            User user = userRepository.findWithDetailsById(prDto.getUserId() );
             pr.setUser(user);
         }
         if (prDto.getProjectId() != null) {

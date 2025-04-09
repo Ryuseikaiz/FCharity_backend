@@ -26,7 +26,7 @@ public class Post {
     @Column(nullable = false)
     @ColumnDefault("'PENDING'") // Đảm bảo giá trị mặc định trong DB cũng là PENDING
     private String postStatus = PostStatus.PENDING;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -46,9 +46,6 @@ public class Post {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    @Column(name = "reason")
-    private String reason;
 
 
     protected void onCreate() {
