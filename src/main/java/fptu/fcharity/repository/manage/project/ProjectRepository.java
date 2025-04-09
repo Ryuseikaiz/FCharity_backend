@@ -25,4 +25,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
     Project findMyOwnerProject(UUID userId);
     @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})
     Project findByWalletAddressId(UUID walletId);
+    @EntityGraph(attributePaths = {"category","leader","leader.walletAddress","organization","request","walletAddress"})
+    @Query("SELECT r FROM Project r where r.projectStatus != 'BANNED' and r.organization.organizationId = :orgId")
+    List<Project> findByOrganizationOrganizationId(UUID orgId);
 }

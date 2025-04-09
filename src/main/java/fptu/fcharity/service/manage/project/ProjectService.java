@@ -197,4 +197,12 @@ public class ProjectService {
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
     }
+
+    public List<ProjectFinalResponse> getProjectByOrgId(UUID orgId) {
+        List<Project> projects = projectRepository.findByOrganizationOrganizationId(orgId);
+        return projects.stream().map(project -> new ProjectFinalResponse(new ProjectResponse(project),
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()))
+        ).toList();
+    }
 }
