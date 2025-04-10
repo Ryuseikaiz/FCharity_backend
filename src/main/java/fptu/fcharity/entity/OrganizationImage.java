@@ -30,6 +30,6 @@ public class OrganizationImage {
     private OrganizationImageType imageType;
 
     public enum OrganizationImageType {
-        Avatar, Background, VerificationDocument, General
+        Avatar, Background, General
     }
 }

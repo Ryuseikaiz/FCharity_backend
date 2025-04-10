@@ -1,4 +1,4 @@
-package fptu.fcharity.service.organization;
+package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationImage;
@@ -36,9 +36,5 @@ public class OrganizationImageService {
 
     public List<OrganizationImage> findByOrganization(Organization organization) {
         return organizationImageRepository.findOrganizationImageByOrganizationId(organization.getOrganizationId());
-    }
-
-    public List<OrganizationImage> findAllVerificationDocuments(UUID organizationId) {
-        return organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationId, OrganizationImage.OrganizationImageType.VerificationDocument);
     }
 }
