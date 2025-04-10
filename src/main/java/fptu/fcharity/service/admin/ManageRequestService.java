@@ -60,6 +60,13 @@ public class ManageRequestService {
 
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
+        notificationService.notifyUser(
+                helpRequest.getUser(),
+                "Request Approved",
+                null,
+                "Your request \"" + helpRequest.getTitle() + "\" has been approved.",
+                "/user/request/" + requestId
+        );
     }
 
     @Transactional
@@ -79,7 +86,7 @@ public class ManageRequestService {
                 request.getUser(),
                 "Yeu cau bi tu choi",
                 null,
-                "Yeu Cau \"" + request.getTitle() + "\" đã bị từ chối voi li do: " + reasonDTO.getReason(),
+                "Yeu Cau \"" + request.getTitle() + "\" da bi tu choi voi li do: " + reasonDTO.getReason(),
                 "/user/request/" + requestId
         );
     }
