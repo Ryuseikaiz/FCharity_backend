@@ -20,6 +20,7 @@ public class ProjectResponse {
     private String projectName;
 
     private UUID organizationId;
+    private String organizationName;
 
     private UUID requestId;
 
@@ -57,6 +58,7 @@ public class ProjectResponse {
         this.id = project.getId();
         this.projectName = project.getProjectName();
         this.organizationId = project.getOrganization().getOrganizationId();
+        this.organizationName = project.getOrganization().getOrganizationName();
        if(project.getRequest()!= null){
            this.requestId = project.getRequest().getId();
        }

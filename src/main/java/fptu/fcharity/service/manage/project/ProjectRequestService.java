@@ -175,5 +175,11 @@ public class ProjectRequestService {
         return new ProjectRequestResponse(p);
     }
 
+    public List<ProjectRequestResponse> getMyInvitations(UUID userId) {
+        List<ProjectRequest> list = projectRequestRepository
+                .findByUserIdAndRequestTypeAndStatus(userId, ProjectRequestType.INVITATION, ProjectRequestStatus.PENDING);
+        return list.stream().map(ProjectRequestResponse::new).toList();
+    }
+
 
 }
