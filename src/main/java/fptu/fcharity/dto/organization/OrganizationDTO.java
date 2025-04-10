@@ -1,5 +1,6 @@
 package fptu.fcharity.dto.organization;
 
+import fptu.fcharity.entity.Organization;
 import lombok.*;
 
 import java.time.Instant;

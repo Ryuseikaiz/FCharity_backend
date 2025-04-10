@@ -100,7 +100,6 @@ public class CommentService {
             commentVoteRepository.save(newVoteRecord);
         }
 
-        // Cập nhật tổng vote cho comment
         int totalVotes = commentVoteRepository.sumVotesByCommentId(commentId);
         comment.setVote(totalVotes);
         commentRepository.save(comment);

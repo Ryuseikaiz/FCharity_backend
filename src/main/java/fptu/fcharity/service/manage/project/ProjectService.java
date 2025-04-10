@@ -1,10 +1,12 @@
 package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.dto.project.ProjectDto;
+import fptu.fcharity.dto.project.ProjectMemberDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.project.ProjectImageRepository;
+import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
@@ -15,6 +17,7 @@ import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.service.manage.request.RequestService;
+import fptu.fcharity.utils.constants.project.ProjectMemberRole;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.constants.request.RequestStatus;
@@ -38,7 +41,8 @@ public class ProjectService {
     private final TaggableService taggableService;
     private final ProjectImageService projectImageService;
     private final RequestRepository requestRepository;
-
+    private final ProjectMemberService projectMemberService;
+    private final ProjectMemberRepository projectMemberRepository;
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
@@ -49,7 +53,8 @@ public class ProjectService {
                           RequestService requestService,
                           WalletService walletService,
                           RequestRepository requestRepository,
-                          ProjectImageService projectImageService) {
+                          ProjectMemberRepository projectMemberRepository,
+                          ProjectImageService projectImageService, ProjectMemberService projectMemberService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -60,6 +65,8 @@ public class ProjectService {
         this.projectImageService = projectImageService;
         this.walletService = walletService;
         this.requestRepository = requestRepository;
+        this.projectMemberService = projectMemberService;
+        this.projectMemberRepository = projectMemberRepository;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -104,19 +111,24 @@ public class ProjectService {
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
         Wallet newWallet = walletService.save();
         Project project = projectMapper.toEntity( projectDto );
-        project.setProjectStatus(ProjectStatus.DONATING);
+        project.setProjectStatus(ProjectStatus.PLANNING);
         project.setWalletAddress(newWallet);
         takeObject(project, projectDto);
         // Set status of request to REGISTERED
         project.getRequest().setStatus(RequestStatus.REGISTERED);
         requestRepository.save(project.getRequest());
         //set user to leader
-        User u = userRepository.findWithDetailsById(project.getLeader().getId());
+        User u = userRepository.findWithEssentialById(project.getLeader().getId());
         u.setCreatedDate(Instant.now());
         u.setUserRole(User.UserRole.Leader);
         userRepository.save(u);
+
         //save project
+        project.setCreatedAt(Instant.now());
         projectRepository.save(project);
+
+        ProjectMemberDto projectMemberDto = new ProjectMemberDto(project.getLeader().getId(),project.getId(),ProjectMemberRole.LEADER);
+        projectMemberService.addProjectMember(projectMemberDto);
         taggableService.addTaggables(project.getId(), projectDto.getTagIds(), TaggableType.PROJECT);
         projectImageService.saveProjectImages(project.getId(), projectDto.getImageUrls());
         projectImageService.saveProjectImages(project.getId(), projectDto.getVideoUrls());
@@ -138,6 +150,7 @@ public class ProjectService {
     public ProjectFinalResponse updateProject(ProjectDto projectDto) {
         Project project = projectRepository.findWithEssentialById(projectDto.getId());
         projectMapper.updateEntityFromDto(projectDto, project);
+        project.setUpdatedAt(Instant.now());
         takeObject(project, projectDto);
         if (projectDto.getTagIds() != null) {
             taggableService.updateTaggables(project.getId(), projectDto.getTagIds(),TaggableType.PROJECT);
@@ -165,13 +178,31 @@ public class ProjectService {
         }
     }
 
-    public ProjectFinalResponse getMyOwnerProject(UUID userId) {
-        Project project =  projectRepository.findMyOwnerProject(userId);
-        if(project == null ){
-            throw new ApiRequestException("Project not found");
-        }
+    public List<ProjectFinalResponse> getMyProject(UUID userId) {
+        List<ProjectMember> projectMemberList =  projectMemberRepository.findMyProjectMembers(userId);
+        List<Project> projects = projectMemberList.stream().map(
+                projectMember -> projectRepository.findWithEssentialById(projectMember.getProject().getId())
+        ).toList();
+        System.out.println(projects.getFirst().getWalletAddress().getId());
+        List<ProjectFinalResponse> pResponse = projects.stream().map(project -> new ProjectFinalResponse(new ProjectResponse(project),
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()))
+        ).toList();
+        return pResponse;
+    }
+
+    public ProjectFinalResponse getProjectByWalletId(UUID walletId) {
+        Project project = projectRepository.findByWalletAddressId(walletId);
         return new ProjectFinalResponse(new ProjectResponse(project),
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()));
+    }
+
+    public List<ProjectFinalResponse> getProjectByOrgId(UUID orgId) {
+        List<Project> projects = projectRepository.findByOrganizationOrganizationId(orgId);
+        return projects.stream().map(project -> new ProjectFinalResponse(new ProjectResponse(project),
+                taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                projectImageService.getProjectImages(project.getId()))
+        ).toList();
     }
 }

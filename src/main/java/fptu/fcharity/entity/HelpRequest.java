@@ -21,7 +21,7 @@ public class HelpRequest {
     @Column(name = "request_id", nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -58,13 +58,18 @@ public class HelpRequest {
     @Nationalized
     @Column(name = "status", length = 50)
     private String status;
+
+    @Column(name = "reason")
+    private String reason;
+
     public HelpRequest() {
     }
     public HelpRequest(User user, String title,
                        String content,
                        String phone, String email, String location,
                        Boolean isEmergency,
-                       Category category
+                       Category category,
+                       String reason
     ) {
         this.user = user;
         this.title = title;
@@ -76,6 +81,7 @@ public class HelpRequest {
         this.isEmergency = isEmergency;
         this.category = category;
         this.status = RequestStatus.PENDING;
+        this.reason = reason;
     }
 
 }

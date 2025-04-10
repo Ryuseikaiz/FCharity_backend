@@ -1,5 +1,6 @@
 package fptu.fcharity.controller.admin;
 
+import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.service.admin.ManageRequestService;
 import lombok.RequiredArgsConstructor;
@@ -37,15 +38,15 @@ public class ManageRequestController {
         return ResponseEntity.ok("Request has been approved successfully.");
     }
 
-//    @PutMapping("/hide/{requestId}")
-//    public ResponseEntity<String> hideRequest(@PathVariable UUID requestId) {
-//        manageRequestService.hideRequest(requestId);
-//        return ResponseEntity.ok("Request has been hidden successfully.");
-//    }
-    //Set Status thành REJECTED
+    // @PutMapping("/hide/{requestId}")
+    // public ResponseEntity<String> hideRequest(@PathVariable UUID requestId) {
+    // manageRequestService.hideRequest(requestId);
+    // return ResponseEntity.ok("Request has been hidden successfully.");
+    // }
+    // Set Status thành REJECTED
     @PutMapping("/reject/{requestId}")
-    public ResponseEntity<String> rejectRequest(@PathVariable UUID requestId) {
-        manageRequestService.rejectRequest(requestId);
+    public ResponseEntity<String> rejectRequest(@PathVariable UUID requestId, @RequestBody ReasonDTO reasonDTO) {
+        manageRequestService.rejectRequest(requestId, reasonDTO);
         return ResponseEntity.ok("Request has been rejected successfully.");
     }
 }
