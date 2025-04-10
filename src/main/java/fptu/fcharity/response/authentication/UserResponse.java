@@ -1,7 +1,6 @@
 package fptu.fcharity.response.authentication;
 
 import fptu.fcharity.entity.User;
-import fptu.fcharity.entity.Wallet;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
@@ -40,8 +39,6 @@ public class UserResponse {
 
     private Instant verificationCodeExpiresAt;
 
-    private UUID walletId;
-
     public enum UserStatus {
         Unverified,
         Verified,
@@ -68,6 +65,5 @@ public class UserResponse {
         this.userStatus = user.getUserStatus();
         this.verificationCode = user.getVerificationCode();
         this.verificationCodeExpiresAt = user.getVerificationCodeExpiresAt();
-        this.walletId = user.getWalletAddress().getId();
     }
 }
