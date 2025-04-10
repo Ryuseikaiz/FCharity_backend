@@ -17,6 +17,9 @@ public class CommentVote {
     @EmbeddedId
     private CommentVoteId id;
 
+    @Column(name = "is_upvote", nullable = false)
+    private Boolean isUpvote;
+
     @ManyToOne
     @MapsId("commentId")
     @JoinColumn(name = "comment_id")

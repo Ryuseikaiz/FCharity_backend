@@ -76,7 +76,8 @@ public class CommentController {
         } catch (Exception e) {
             System.out.println("Vote error: " + e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
+
         }
     }
 }
