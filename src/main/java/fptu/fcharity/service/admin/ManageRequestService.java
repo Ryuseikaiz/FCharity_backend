@@ -65,7 +65,7 @@ public class ManageRequestService {
                 "Request Approved",
                 null,
                 "Your request \"" + helpRequest.getTitle() + "\" has been approved.",
-                "/user/request/" + requestId
+                "/requests/" + requestId
         );
     }
 
@@ -87,7 +87,7 @@ public class ManageRequestService {
                 "Yeu cau bi tu choi",
                 null,
                 "Yeu Cau \"" + request.getTitle() + "\" da bi tu choi voi li do: " + reasonDTO.getReason(),
-                "/user/request/" + requestId
+                "/user/manage-profile/myrequests"
         );
     }
 
