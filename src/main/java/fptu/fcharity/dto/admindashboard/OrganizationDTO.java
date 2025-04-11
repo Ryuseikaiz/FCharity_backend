@@ -19,4 +19,5 @@ public class OrganizationDTO {
     private Instant shutdownDay;
     private String organizationStatus;
     private UUID ceoId;
+    private String reason;
 }

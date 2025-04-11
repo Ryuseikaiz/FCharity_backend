@@ -27,7 +27,7 @@ public class ProjectMemberService {
 
     public void takeObject(ProjectMember projectMember,ProjectMemberDto projectMemberDto){
         if (projectMemberDto.getUserId() != null) {
-            User user = userRepository.findWithDetailsById(projectMemberDto.getUserId() );
+            User user = userRepository.findWithEssentialById(projectMemberDto.getUserId() );
             projectMember.setUser(user);
         }
         if (projectMemberDto.getProjectId() != null) {
@@ -61,8 +61,8 @@ public class ProjectMemberService {
     //thêm thành viên
     public ProjectMemberResponse addProjectMember(ProjectMemberDto projectMemberDto) {
         ProjectMember projectMember = new ProjectMember();
-        projectMember.setMemberRole(ProjectMemberRole.MEMBER);
         projectMember.setJoinDate(Instant.now());
+        projectMember.setMemberRole(projectMemberDto.getRole());
         takeObject(projectMember, projectMemberDto);
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);

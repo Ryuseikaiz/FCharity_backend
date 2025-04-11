@@ -1,6 +1,7 @@
 package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.PostDTO;
+import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.Post;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.utils.constants.PostStatus;
@@ -75,7 +76,7 @@ public class ManagePostService {
     }
 
     @Transactional
-    public void rejectPost(UUID postId) {
+    public void rejectPost(UUID postId, ReasonDTO reasonDTO) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
 
@@ -84,6 +85,7 @@ public class ManagePostService {
         }
 
         post.setPostStatus(PostStatus.REJECTED);
+        post.setReason(reasonDTO.getReason());
         postRepository.save(post);
     }
 
@@ -96,7 +98,7 @@ public class ManagePostService {
                 post.getVote(),
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
-                post.getPostStatus()
-        );
+                post.getPostStatus(),
+                post.getReason());
     }
 }

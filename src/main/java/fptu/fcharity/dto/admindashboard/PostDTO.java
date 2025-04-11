@@ -17,4 +17,5 @@ public class PostDTO {
     private Instant createdAt;
     private Instant updatedAt;
     private String postStatus;
+    private String reason;
 }
