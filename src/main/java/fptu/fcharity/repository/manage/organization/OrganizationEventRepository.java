@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface OrganizationEventRepository extends JpaRepository<OrganizationEvent, UUID> {
-    @Query("SELECT oe FROM OrganizationEvent oe JOIN FETCH oe.organizer o JOIN FETCH o.walletAddress w JOIN FETCH o.ceo c JOIN FETCH c.walletAddress WHERE o.organizationId = :organizationId")
+    @Query("SELECT oe FROM OrganizationEvent oe JOIN FETCH oe.organizer o JOIN FETCH o.walletAddress w JOIN FETCH o.ceo c WHERE o.organizationId = :organizationId")
     public List<OrganizationEvent> findOrganizationEventByOrganizerOrganizationId(@Param("organizationId") UUID organizationId);
     OrganizationEvent findOrganizationEventsByOrganizationEventId(UUID organizationEventId);
     boolean existsOrganizationEventByOrganizationEventId(UUID organizationEventId);

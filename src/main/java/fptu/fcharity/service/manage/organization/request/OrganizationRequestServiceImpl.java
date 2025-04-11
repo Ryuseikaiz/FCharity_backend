@@ -1,5 +1,6 @@
 package fptu.fcharity.service.manage.organization.request;
 
+import fptu.fcharity.dto.organization.OrganizationRequestDTO;
 import fptu.fcharity.dto.request.OrganizationRequestDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationMember;
@@ -8,6 +9,7 @@ import fptu.fcharity.entity.User;
 
 import fptu.fcharity.repository.manage.organization.*;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.utils.mapper.organization.OrganizationRequestMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,192 +17,194 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizationRequestServiceImpl implements OrganizationRequestService {
 
-    private final OrganizationRequestRepository OrganizationRequestRepository;
+    private final OrganizationRequestRepository organizationRequestRepository;
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final OrganizationMemberRepository organizationMemberRepository;
+    private final OrganizationRequestMapper organizationRequestMapper;
 
-    public OrganizationRequestServiceImpl(OrganizationRequestRepository OrganizationRequestRepository, UserRepository userRepository, OrganizationRepository organizationRepository, OrganizationMemberRepository organizationMemberRepository) {
-        this.OrganizationRequestRepository = OrganizationRequestRepository;
+    public OrganizationRequestServiceImpl(
+            OrganizationRequestRepository organizationRequestRepository,
+            UserRepository userRepository,
+            OrganizationRepository organizationRepository,
+            OrganizationMemberRepository organizationMemberRepository,
+            OrganizationRequestMapper organizationRequestMapper) {
+        this.organizationRequestRepository = organizationRequestRepository;
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
         this.organizationMemberRepository = organizationMemberRepository;
-    }
-
-    @Override
-    @Transactional
-    public OrganizationRequest createJoinRequest(OrganizationRequestDto OrganizationRequestDto) {
-        OrganizationRequest newJoinRequest = new OrganizationRequest();
-        User user = userRepository.findById(OrganizationRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + OrganizationRequestDto.getUserId()));
-        Organization organization = organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId()));
-
-        if (OrganizationRequestRepository.findByUserIdAndOrganizationOrganizationId(OrganizationRequestDto.getUserId(), OrganizationRequestDto.getOrganizationId()) != null)
-            throw new IllegalArgumentException("User already exists with ID: " + OrganizationRequestDto.getUserId());
-
-        newJoinRequest.setRequestType(OrganizationRequest.OrganizationRequestType.Request);
-        newJoinRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Pending);
-        newJoinRequest.setOrganization(organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId())));
-
-        newJoinRequest.setUser(user);
-        return OrganizationRequestRepository.save(newJoinRequest);
-    }
-
-    @Override
-    @Transactional
-    public OrganizationRequest updateJoinRequest(OrganizationRequestDto OrganizationRequestDto) {
-        User user = userRepository.findById(OrganizationRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + OrganizationRequestDto.getUserId()));
-        Organization organization = organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId()));
-
-        OrganizationRequest OrganizationRequest = OrganizationRequestRepository.findByUserIdAndOrganizationOrganizationId(OrganizationRequestDto.getUserId(), OrganizationRequestDto.getOrganizationId());
-
-        if ( OrganizationRequest == null)
-            throw new IllegalArgumentException("OrganizationRequest not found with ID: " + OrganizationRequestDto.getUserId());
-
-
-        switch (OrganizationRequestDto.getStatus()) {
-            case fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Approved:
-                System.out.println("created new organization member: ");
-
-                OrganizationMember newMember = new OrganizationMember();
-                newMember.setUser(user);
-                newMember.setOrganization(organization);
-
-                System.out.println(organizationMemberRepository.save(newMember));
-                break;
-            case fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Rejected:
-                break;
-            default:
-                break;
-        }
-
-        OrganizationRequest.setRequestType(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Request);
-        OrganizationRequest.setStatus(OrganizationRequestDto.getStatus());
-        OrganizationRequest.setOrganization(organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId())));
-
-        OrganizationRequest.setUser(user);
-        return OrganizationRequestRepository.save(OrganizationRequest);
-    }
-
-    @Override
-    @Transactional
-    public void deleteJoinRequest(UUID joinRequestId) {
-        if (!OrganizationRequestRepository.existsById(joinRequestId))
-            throw new IllegalArgumentException("OrganizationRequest not found with ID: " + joinRequestId);
-        OrganizationRequestRepository.deleteById(joinRequestId);
+        this.organizationRequestMapper = organizationRequestMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrganizationRequest> getAllJoinRequests() {
-        return OrganizationRequestRepository.findAll();
+    public List<OrganizationRequest> getAllJoinInvitationRequests() {
+        return organizationRequestRepository.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrganizationRequest> getAllJoinRequestsByOrganizationId(UUID organizationId) {
-        return OrganizationRequestRepository.findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Request);
+    public List<OrganizationRequestDTO> getAllJoinRequestsByOrganizationId(UUID organizationId) {
+        return organizationRequestRepository
+                .findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Join)
+                .stream()
+                .map(organizationRequestMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganizationRequest> getAllJoinRequestsByUserId(UUID userId) {
+        return organizationRequestRepository.findByUserIdAndRequestType(userId, OrganizationRequest.OrganizationRequestType.Join);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<OrganizationRequest> getJoinRequestById(UUID id) {
-        return OrganizationRequestRepository.findById(id);
+        return organizationRequestRepository.findById(id);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<OrganizationRequest> getAllJoinRequestsByUserId(UUID userId) {
-        return OrganizationRequestRepository.findByUserIdAndRequestType(userId, OrganizationRequest.OrganizationRequestType.Request);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<OrganizationRequest> getInviteRequestById(UUID id) {
-        return OrganizationRequestRepository.findById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<OrganizationRequest> getAllInviteRequestsByOrganizationId(UUID organizationId) {
-        return OrganizationRequestRepository.findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Invitation);
-    }
-
-    @Override
-    public OrganizationRequest createInviteRequest(OrganizationRequestDto organizationRequestDto) {
-
-        System.out.println("creating new invite request: " + organizationRequestDto);
-
-        OrganizationRequest OrganizationRequest = new OrganizationRequest();
-        User user = userRepository.findById(organizationRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + organizationRequestDto.getUserId()));
-
+    @Transactional
+    public OrganizationRequest createJoinRequest(OrganizationRequestDto organizationRequestDto) {
+        OrganizationRequest newJoinRequest = new OrganizationRequest();
+        User user = userRepository.findById(organizationRequestDto.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + organizationRequestDto.getUserId()));
         Organization organization = organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId()));
 
+        if (organizationRequestRepository.findByUserIdAndOrganizationOrganizationId(organizationRequestDto.getUserId(), organizationRequestDto.getOrganizationId()) != null)
+            throw new IllegalArgumentException("User already exists with ID: " + organizationRequestDto.getUserId());
 
-       if (OrganizationRequestRepository.findByUserIdAndOrganizationOrganizationId(user.getId(), organization.getOrganizationId()) != null) {
-           System.out.println("OrganizationRequest already exists with ID: " + organizationRequestDto.getUserId());
-           throw new IllegalArgumentException("Invite request already exists");
-       }
+        newJoinRequest.setRequestType(OrganizationRequest.OrganizationRequestType.Join);
+        newJoinRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Pending);
+        newJoinRequest.setOrganization(organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId())));
 
-       OrganizationRequest.setUser(user);
-       OrganizationRequest.setOrganization(organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId())));
-       OrganizationRequest.setRequestType(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation);
-       OrganizationRequest.setStatus(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Pending);
-       return OrganizationRequestRepository.save(OrganizationRequest);
+        newJoinRequest.setUser(user);
+        return organizationRequestRepository.save(newJoinRequest);
     }
 
     @Override
-    public OrganizationRequest updateInviteRequest(OrganizationRequestDto OrganizationRequestDto) {
-        User user = userRepository.findById(OrganizationRequestDto.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + OrganizationRequestDto.getUserId()));
-        Organization organization = organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId()));
+    @Transactional
+    public OrganizationRequest acceptJoinRequest(UUID joinRequestId) {
+        OrganizationRequest organizationRequest = organizationRequestRepository.findById(joinRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + joinRequestId));
 
-        System.out.println("updating invite request: " + organization);
+        User requestUser = userRepository.findById(organizationRequest.getUser().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + organizationRequest.getUser().getId()));
 
-        OrganizationRequest OrganizationRequest = OrganizationRequestRepository
-                .findByUserIdAndOrganizationOrganizationIdAndRequestType(
-                        user.getId(),
-                        organization.getOrganizationId(),
-                        fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation
-                );
+        Organization organization = organizationRepository
+                .findById(organizationRequest.getOrganization().getOrganizationId())
+                .orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequest.getOrganization().getOrganizationId()));
 
-        if (OrganizationRequest == null)
-            throw new IllegalArgumentException("Invite request does not exist");
+        OrganizationMember newMember = new OrganizationMember();
+        newMember.setUser(requestUser);
+        newMember.setOrganization(organization);
+        newMember.setMemberRole(OrganizationMember.OrganizationMemberRole.MEMBER);
+        organizationMemberRepository.save(newMember);
 
-        switch (OrganizationRequestDto.getStatus()) {
-            case fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Approved:
-                System.out.println("created new organization member: ");
+        organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Approved);
+        return organizationRequestRepository.save(organizationRequest);
+    }
 
-                OrganizationMember newMember = new OrganizationMember();
-                newMember.setUser(user);
-                newMember.setOrganization(organization);
-                newMember.setMemberRole(OrganizationMember.OrganizationMemberRole.MEMBER);
-                newMember.setJoinDate(Instant.now());
+    @Override
+    @Transactional
+    public OrganizationRequest rejectJoinRequest(UUID joinRequestId) {
+        OrganizationRequest organizationRequest = organizationRequestRepository
+                .findById(joinRequestId).orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + joinRequestId));
 
-                System.out.println(organizationMemberRepository.save(newMember));
-                break;
-            case fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Rejected:
-                break;
-            default:
-                break;
+        organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Rejected);
+        return organizationRequestRepository.save(organizationRequest);
+    }
+
+    @Override
+    @Transactional
+    public void cancelJoinRequest(UUID joinRequestId) {
+        organizationRequestRepository.deleteById(joinRequestId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganizationRequestDTO> getAllInvitationRequestsByOrganizationId(UUID organizationId) {
+        return organizationRequestRepository.findByOrganizationOrganizationIdAndRequestType(organizationId, OrganizationRequest.OrganizationRequestType.Invitation)
+                .stream().map(organizationRequestMapper::toDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganizationRequest> getAllInvitationRequestsByUserId(UUID userId) {
+        return organizationRequestRepository.findByUserIdAndRequestType(userId, OrganizationRequest.OrganizationRequestType.Invitation);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<OrganizationRequest> getInvitationRequestById(UUID id) {
+        return organizationRequestRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public OrganizationRequestDTO createInvitationRequest(UUID organizationId, UUID userId) {
+        OrganizationRequest organizationRequest = new OrganizationRequest();
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        Organization organization = organizationRepository.findById(organizationId).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationId));
+
+
+        if (organizationRequestRepository.findByUserIdAndOrganizationOrganizationId(user.getId(), organization.getOrganizationId()) != null) {
+            System.out.println("OrganizationRequest already exists with ID: " + userId);
+            throw new IllegalArgumentException("Invite request already exists");
         }
 
-        OrganizationRequest.setUser(user);
-        OrganizationRequest.setOrganization(organizationRepository.findById(OrganizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + OrganizationRequestDto.getOrganizationId())));
-        OrganizationRequest.setRequestType(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation);
-        OrganizationRequest.setStatus(OrganizationRequestDto.getStatus());
+        organizationRequest.setUser(user);
+        organizationRequest.setOrganization(organizationRepository.findById(organizationId).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationId)));
+        organizationRequest.setRequestType(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation);
+        organizationRequest.setStatus(fptu.fcharity.entity.OrganizationRequest.OrganizationRequestStatus.Pending);
+        organizationRequestRepository.save(organizationRequest);
 
-        return OrganizationRequestRepository.save(OrganizationRequest);
+        System.out.println("Invite request created: 🤖🤖🤖🤖" + organizationRequest);
+        return organizationRequestMapper.toDTO(organizationRequestRepository.findByUserIdAndOrganizationOrganizationIdAndRequestType(userId, organizationId, fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation));
     }
 
     @Override
-    public void deleteInviteRequest(UUID id) {
-        if (!OrganizationRequestRepository.existsById(id))
-            throw new IllegalArgumentException("Invite request does not exist");
-        OrganizationRequestRepository.deleteById(id);
+    @Transactional
+    public OrganizationRequest acceptInvitationRequest(UUID invitationRequestId) {
+        OrganizationRequest organizationRequest = organizationRequestRepository.findById(invitationRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + invitationRequestId));
+
+        User requestUser = userRepository.findById(organizationRequest.getUser().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + organizationRequest.getUser().getId()));
+
+        Organization organization = organizationRepository
+                .findById(organizationRequest.getOrganization().getOrganizationId())
+                .orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequest.getOrganization().getOrganizationId()));
+
+        OrganizationMember newMember = new OrganizationMember();
+        newMember.setUser(requestUser);
+        newMember.setOrganization(organization);
+        newMember.setMemberRole(OrganizationMember.OrganizationMemberRole.MEMBER);
+        organizationMemberRepository.save(newMember);
+
+        organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Approved);
+        return organizationRequestRepository.save(organizationRequest);
+    }
+
+    @Override
+    @Transactional
+    public OrganizationRequest rejectInvitationRequest(UUID invitationRequestId) {
+        OrganizationRequest organizationRequest = organizationRequestRepository
+                .findById(invitationRequestId).orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + invitationRequestId));
+
+        organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Rejected);
+        return organizationRequestRepository.save(organizationRequest);
+    }
+
+    @Override
+    @Transactional
+    public void cancelInvitationRequest(UUID invitationRequestId) {
+        organizationRequestRepository.deleteById(invitationRequestId);
     }
 }

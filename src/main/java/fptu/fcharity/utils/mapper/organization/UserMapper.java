@@ -7,9 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {WalletMapper.class})
 public interface UserMapper {
-    @Mapping(source = "walletAddress", target = "walletAddress")
     UserDTO toDTO(User entity);
 
-    @Mapping(source = "walletAddress", target = "walletAddress")
     User toEntity(UserDTO dto);
 }

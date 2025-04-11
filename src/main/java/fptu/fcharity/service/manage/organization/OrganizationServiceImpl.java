@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -92,7 +93,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setCeo(ceo);
 
         Wallet wallet = new Wallet();
-        wallet.setBalance(0);
+        wallet.setBalance(BigDecimal.valueOf(0));
         Wallet savedWallet =  walletRepository.save(wallet);
         organization.setWalletAddress(savedWallet);
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
@@ -253,7 +254,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         userDTO.setUserStatus(user.getUserStatus());
         userDTO.setVerificationCode(user.getVerificationCode());
         userDTO.setVerificationCodeExpiresAt(user.getVerificationCodeExpiresAt());
-        userDTO.setWalletAddress(convertWalletToDTO(user.getWalletAddress()));
 
         return userDTO;
     }
@@ -333,6 +333,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     private Authentication getAuthentication() {
-       return SecurityContextHolder.getContext().getAuthentication();
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 }

@@ -2,6 +2,7 @@ package fptu.fcharity.dto.organization;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -11,5 +12,5 @@ import java.util.UUID;
 @ToString
 public class WalletDTO {
     private UUID id;
-    private int balance;
+    private BigDecimal balance;
 }

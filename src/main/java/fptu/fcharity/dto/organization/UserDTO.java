@@ -25,5 +25,4 @@ public class UserDTO {
     private User.UserStatus userStatus;
     private String verificationCode;
     private Instant verificationCodeExpiresAt;
-    private WalletDTO walletAddress;
 }

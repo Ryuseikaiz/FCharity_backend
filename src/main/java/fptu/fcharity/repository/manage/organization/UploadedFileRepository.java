@@ -11,10 +11,10 @@ import java.util.UUID;
 
 @Repository
 public interface UploadedFileRepository extends JpaRepository<UploadedFile, Long> {
-    @Query("SELECT uf FROM UploadedFile uf JOIN FETCH uf.uploadedBy u JOIN FETCH uf.organization o JOIN FETCH u.walletAddress JOIN FETCH o.walletAddress JOIN FETCH o.ceo ce JOIN FETCH ce.walletAddress  WHERE uf.uploadedFileId = :id")
+    @Query("SELECT uf FROM UploadedFile uf JOIN FETCH uf.uploadedBy u JOIN FETCH uf.organization o JOIN FETCH o.walletAddress JOIN FETCH o.ceo ce   WHERE uf.uploadedFileId = :id")
     UploadedFile findUploadedFileByUploadedFileId(@Param("id") UUID uploadedFileId);
 
-    @Query("SELECT uf FROM UploadedFile uf JOIN FETCH uf.uploadedBy u JOIN FETCH u.walletAddress JOIN FETCH uf.organization o JOIN FETCH o.walletAddress JOIN FETCH o.ceo ce JOIN FETCH ce.walletAddress WHERE o.organizationId = :id")
+    @Query("SELECT uf FROM UploadedFile uf JOIN FETCH uf.uploadedBy u JOIN FETCH uf.organization o JOIN FETCH o.walletAddress JOIN FETCH o.ceo ce  WHERE o.organizationId = :id")
     List<UploadedFile> findUploadedFileByOrganizationOrganizationId(@Param("id") UUID organizationId);
 
     void deleteUploadedFileByUploadedFileId(UUID uploadedFileId);
