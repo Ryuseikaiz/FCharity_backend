@@ -21,6 +21,6 @@ public interface ToProjectDonationRepository extends JpaRepository<ToProjectDona
 
     <T> ToProjectDonation findByOrderCode(int orderCode);
 
-    // Custom query methods can be defined here if needed
-    // For example, you can define methods to find donations by project ID or user ID
+    List<ToProjectDonation> findByUserId(UUID userId);
+
 }

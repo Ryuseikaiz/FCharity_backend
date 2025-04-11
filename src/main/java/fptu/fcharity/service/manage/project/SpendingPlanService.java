@@ -108,10 +108,10 @@ public class SpendingPlanService {
                 .stream()
                 .map(SpendingItem::getEstimatedCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        BigDecimal extraCost = totalCost.multiply(new BigDecimal("0.1"));
         project.setProjectStatus(ProjectStatus.DONATING);
         projectRepository.save(project);
-        plan.setEstimatedTotalCost(totalCost);
+        plan.setEstimatedTotalCost(totalCost.add(extraCost));
         plan.setApprovalStatus(SpendingPlanStatus.APPROVED);
         return toResponse(spendingPlanRepository.save(plan));
     }

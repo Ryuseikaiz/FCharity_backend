@@ -273,7 +273,7 @@ CREATE TABLE to_project_donations (
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION
 );
--- alter table to_project_donations add order_code int;
+alter table to_organization_donations add order_code int;
 -- Table: to_organization_donations
 CREATE TABLE to_organization_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
