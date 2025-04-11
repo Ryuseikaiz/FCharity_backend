@@ -12,16 +12,16 @@ import java.util.UUID;
 
 @Repository
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UUID> {
-    @EntityGraph(attributePaths = {"project", "user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"project", "user"})
     List<ProjectMember> findByProjectId(UUID projectId);
     List<ProjectMember> findByUserId(UUID userId);
     ProjectMember findByProjectIdAndUserId(UUID projectId, UUID userId);
-    @EntityGraph(attributePaths = {"project", "user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"project", "user"})
     ProjectMember findWithEssentialById(UUID id);
-    @EntityGraph(attributePaths = {"project","user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"project","user"})
     @Query("SELECT r FROM ProjectMember r")
     List<ProjectMember> findAllWithInclude();
-    @EntityGraph(attributePaths = {"project","user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"project","user"})
     @Query("SELECT p FROM ProjectMember p " +
             "WHERE p.user.id = :userId")
     List<ProjectMember> findMyProjectMembers(UUID userId);

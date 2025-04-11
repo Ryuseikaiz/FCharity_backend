@@ -13,15 +13,11 @@ import java.util.Optional;
 import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    @EntityGraph(attributePaths = {"walletAddress"})
     Optional<User> findByEmail(String email);
-    @EntityGraph(attributePaths = {"walletAddress"})
     Optional<User> findByVerificationCode(String verificationCode);
     @Transactional
-    @EntityGraph(attributePaths = {"walletAddress","walletAddress.balance"})
     @Query("SELECT u FROM User u WHERE u.id = :id")
     User findWithEssentialById(@Param("id") UUID id);
-    @EntityGraph(attributePaths = {"walletAddress","walletAddress.balance"})
     @Query("SELECT u FROM User u")
     List<User> findAllWithInclude();
 }

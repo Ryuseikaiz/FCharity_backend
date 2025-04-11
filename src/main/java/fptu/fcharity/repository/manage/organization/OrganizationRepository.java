@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 @Repository
 public interface OrganizationRepository  extends JpaRepository<Organization, UUID> {
-    @EntityGraph(attributePaths = {"ceo","ceo.walletAddress","walletAddress"})
+    @EntityGraph(attributePaths = {"ceo","walletAddress"})
     @Query("SELECT o FROM Organization o WHERE o.ceo.id = :UserId")
     Organization findOrganizationByUserId(UUID UserId);
 }

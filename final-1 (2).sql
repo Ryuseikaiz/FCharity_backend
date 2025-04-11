@@ -15,20 +15,8 @@ create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
 	balance  DECIMAL(18, 2),
 )
-create table transaction_history(
-    transaction_id UNIQUEIDENTIFIER PRIMARY KEY,
-    wallet_id UNIQUEIDENTIFIER,
-    amount  DECIMAL(18, 2),
-    transaction_type NVARCHAR(50),
-    transaction_date DATETIME,
-    target_wallet_id UNIQUEIDENTIFIER,
-    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id) ON DELETE CASCADE,
-    foreign key (target_wallet_id) REFERENCES wallets(wallet_id) ON DELETE NO ACTION
-)
 -- alter table wallets add balance DECIMAL(18, 2);
--- alter table transaction_history add amount DECIMAL(18, 2);
--- alter table transaction_history add target_wallet_id UNIQUEIDENTIFIER
--- alter table transaction_history add foreign key (target_wallet_id) REFERENCES wallets(wallet_id) ON DELETE NO ACTION
+
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
     full_name NVARCHAR(255),
@@ -41,10 +29,8 @@ CREATE TABLE users (
     created_date DATETIME,
     verification_code NVARCHAR(255),
     verification_code_expires_at DATETIME,
-	wallet_address UNIQUEIDENTIFIER,
     user_status NVARCHAR(50),
     reason NVARCHAR(MAX),
-	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id) ON DELETE CASCADE
 );
 
 CREATE TABLE organizations (
@@ -298,10 +284,11 @@ CREATE TABLE to_project_donations (
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
+    order_code int,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION
 );
-
+-- alter table to_project_donations add order_code int;
 -- Table: to_organization_donations
 CREATE TABLE to_organization_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,

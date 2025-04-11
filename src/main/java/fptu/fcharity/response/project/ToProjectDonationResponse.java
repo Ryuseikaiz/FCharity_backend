@@ -36,6 +36,7 @@ public class ToProjectDonationResponse {
     private Instant donationTime;
 
     private String message;
+    private int orderCode;
     public ToProjectDonationResponse(ToProjectDonation t){
         this.amount = t.getAmount();
         this.id = t.getId();
@@ -44,5 +45,6 @@ public class ToProjectDonationResponse {
         this.donationStatus = t.getDonationStatus();
         this.donationTime = t.getDonationTime();
         this.message = t.getMessage();
+        this.orderCode = t.getOrderCode();
     }
 }

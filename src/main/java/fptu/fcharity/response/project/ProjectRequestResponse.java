@@ -10,24 +10,28 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ProjectRequestResponse {
-        private UUID id;
-        private UserResponse user;
-        private UUID projectId;
+    private UUID id;
+    private UUID projectId;
+    private String requestType;
+    private String status;
+    private Instant createdAt;
+    private Instant updatedAt;
 
-        private String requestType;
+    private UserResponse user;      // đã có
+    private ProjectResponse project; // thêm cái này
 
-        private String status;
+    public ProjectRequestResponse(ProjectRequest entity) {
+        this.id = entity.getId();
+        this.projectId = entity.getProject().getId();
+        this.requestType = entity.getRequestType();
+        this.status = entity.getStatus();
+        this.createdAt = entity.getCreatedAt();
+        this.updatedAt = entity.getUpdatedAt();
 
-        private Instant createdAt;
+        this.user = new UserResponse(entity.getUser());
 
-        private Instant updatedAt;
-        public ProjectRequestResponse(ProjectRequest pr) {
-            this.id = pr.getId();
-            this.user = new UserResponse(pr.getUser());
-            this.projectId = pr.getProject().getId();
-            this.requestType = pr.getRequestType();
-            this.status = pr.getStatus();
-            this.createdAt = pr.getCreatedAt();
-            this.updatedAt = pr.getUpdatedAt();
-        }
+        // map thêm nếu bạn có ProjectResponse
+        this.project = new ProjectResponse(entity.getProject());
+    }
 }
+

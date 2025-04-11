@@ -21,8 +21,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ToProjectDonationDto {
     private UUID projectId;
-    private BigDecimal amount;
+    private int amount;
     private UUID userId;
     private String donationStatus;
     private String message;
+    private int orderCode;
 }

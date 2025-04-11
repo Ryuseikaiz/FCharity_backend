@@ -83,4 +83,10 @@ public class ProjectRequestController {
         return ResponseEntity.ok(prr);
     }
 
+    @GetMapping("/my-invitations/{userId}")
+    public ResponseEntity<?> getMyInvitations(@PathVariable UUID userId) {
+        List<ProjectRequestResponse> list = projectRequestService.getMyInvitations(userId);
+        return ResponseEntity.ok(list);
+    }
+
 }

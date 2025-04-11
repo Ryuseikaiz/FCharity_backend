@@ -3,7 +3,6 @@ package fptu.fcharity.service.manage.project;
 import fptu.fcharity.dto.project.ToProjectDonationDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.entity.ToProjectDonation;
-import fptu.fcharity.repository.TransactionHistoryRepository;
 import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ToProjectDonationRepository;
@@ -11,11 +10,15 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ToProjectDonationResponse;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.utils.constants.TransactionType;
+import fptu.fcharity.utils.constants.project.DonationStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +32,6 @@ public class ToProjectDonationService {
     @Autowired
     private WalletRepository walletRepository;
     @Autowired
-    private TransactionHistoryRepository transactionHistoryRepository;
-    @Autowired
     private ToProjectDonationRepository toProjectDonationRepository;
     @Transactional
 //    public void takeObject(ToProjectDonation t, ToProjectDonationDto dto){
@@ -43,9 +44,28 @@ public class ToProjectDonationService {
 //            t.setUser(u);
 //        }
 //    }
+    public int hashUUIDToInt(UUID uuid) {
+        try {
+            String input = uuid.toString();
+
+            // Hash bằng SHA-256
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+
+            // Lấy 4 byte đầu để tạo ra int
+            int result = 0;
+            for (int i = 0; i < 4; i++) {
+                result = (result << 8) | (hash[i] & 0xff);
+            }
+
+            // Đảm bảo kết quả là số dương
+            return Math.abs(result);
+        } catch (Exception e) {
+            throw new RuntimeException("Hashing failed", e);
+        }
+    }
 
     public ToProjectDonationResponse createDonation(ToProjectDonationDto donationDto) {
-        // Create a new donation
         ToProjectDonation donation = new ToProjectDonation();
         if(donationDto.getProjectId()!=null){
             Project p = projectRepository.findWithEssentialById(donationDto.getProjectId());
@@ -55,31 +75,28 @@ public class ToProjectDonationService {
             User u = userRepository.findWithEssentialById(donationDto.getUserId());
             donation.setUser(u);
         }
-        donation.setAmount(donationDto.getAmount());
+        donation.setAmount(BigDecimal.valueOf(donationDto.getAmount()));
         donation.setMessage(donationDto.getMessage());
         donation.setDonationTime(Instant.now());
-        donation.setDonationStatus("VERIFIED");
+        donation.setDonationStatus(donationDto.getDonationStatus());
+        donation.setOrderCode(donationDto.getOrderCode());
         ToProjectDonation t = toProjectDonationRepository.save(donation);
-        updateWalletBalanceDonate(donation);
         return new ToProjectDonationResponse(t);
     }
+    public ToProjectDonationResponse updateDonation(int orderCode,Instant transactionTime, String decision) {
+        ToProjectDonation donation = toProjectDonationRepository.findByOrderCode(orderCode);
+       if(decision.equals(DonationStatus.COMPLETED) || decision.equals(DonationStatus.CANCELLED)) {
+           donation.setDonationStatus(decision);
+           donation.setDonationTime(transactionTime);
+           toProjectDonationRepository.save(donation);
+           updateWalletBalanceDonate(donation);
+       }
+        return new ToProjectDonationResponse(donation);
+    }
     private void updateWalletBalanceDonate(ToProjectDonation t){
-        Wallet userWallet = t.getUser().getWalletAddress();
-        userWallet.setBalance(userWallet.getBalance().subtract(t.getAmount()));
-        walletRepository.save(userWallet);
-
         Wallet projectWallet = t.getProject().getWalletAddress();
         projectWallet.setBalance(projectWallet.getBalance().add(t.getAmount()));
         walletRepository.save(projectWallet);
-
-        TransactionHistory transactionHistory = new TransactionHistory(
-                userWallet,
-                t.getAmount(),
-                TransactionType.DONATE_PROJECT,
-                t.getDonationTime(),
-                projectWallet
-        );
-        transactionHistoryRepository.save(transactionHistory);
     }
 
     public List<ToProjectDonationResponse> getAllDonationsOfProject(UUID projectId) {
