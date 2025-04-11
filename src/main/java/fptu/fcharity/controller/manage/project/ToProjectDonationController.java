@@ -16,11 +16,7 @@ import java.util.UUID;
 public class ToProjectDonationController {
     @Autowired
     private ToProjectDonationService toProjectDonationService;
-    @PostMapping("/create")
-    public ResponseEntity<?> createDonation(@RequestBody ToProjectDonationDto donationDto) {
-       ToProjectDonationResponse res =  toProjectDonationService.createDonation(donationDto);
-        return ResponseEntity.ok(res);
-    }
+
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getAllDonations(@PathVariable UUID projectId) {
         List<ToProjectDonationResponse> res =  toProjectDonationService.getAllDonationsOfProject(projectId);

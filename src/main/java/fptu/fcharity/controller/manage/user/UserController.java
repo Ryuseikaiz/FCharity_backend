@@ -5,11 +5,9 @@ import fptu.fcharity.dto.project.ProjectRequestDto;
 import fptu.fcharity.entity.ProjectRequest;
 import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.dto.user.UpdateProfileDto;
-import fptu.fcharity.entity.TransactionHistory;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.project.ProjectRequestResponse;
-import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
@@ -40,11 +38,6 @@ public class UserController {
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
     }
-    @GetMapping("/current-wallet")
-    public ResponseEntity<?> getMyWallet() {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.ok(currentUser.getWalletAddress());
-    }
 
     @GetMapping("/all-user")
     public ResponseEntity<List<User>> allUsers() {
@@ -71,6 +64,11 @@ public class UserController {
         return ResponseEntity.ok(userResponseMapper.toDTO(updatedUser));
     }
 
+    @GetMapping("/organizations/{organization_id}")
+    public ResponseEntity<?> getUser(@PathVariable UUID organization_id) {
+        List<User> users = userService.getAllUsersNotInOrganization(organization_id);
+        return ResponseEntity.ok(users);
+    }
     @GetMapping("/{user_id}/invitations")
     public ResponseEntity<?> getInvitationsOfUser(@PathVariable UUID user_id) {
         List<ProjectRequestResponse> projectRequests = userService.getInvitationsOfUserId(user_id);
@@ -80,11 +78,7 @@ public class UserController {
     public ResponseEntity<?> getTaskPlansOfUser(@PathVariable UUID user_id) {
         return ResponseEntity.ok(userService.getTasksOfUserId(user_id));
     }
-    @GetMapping("/{user_id}/transaction-history")
-    public ResponseEntity<?> getTransactionHistoryOfUser(@PathVariable UUID user_id) {
-        List<TransactionHistoryResponse> l = userService.getTransactionHistoryOfUserId(user_id);
-        return ResponseEntity.ok(l);
-    }
+
     @GetMapping("/{project_id}/task-plans")
     public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
         return ResponseEntity.ok(userService.getTasksOfProjectId(project_id));

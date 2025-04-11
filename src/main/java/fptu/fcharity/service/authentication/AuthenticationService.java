@@ -53,13 +53,11 @@ public class AuthenticationService {
         if (userRepository.findByEmail(input.getEmail()).isPresent()) {
             throw new ApiRequestException("Email already exists");
         }
-        Wallet newWallet = walletService.save();
         User user = new User(input.getFullName(), input.getEmail(), passwordEncoder.encode(input.getPassword()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(Instant.now().plusMillis(1500000000));
         user.setEnabled(false);
         user.setCreatedDate(Instant.now());
-        user.setWalletAddress(newWallet);
         userRepository.save(user);
 
         sendVerificationEmail(user,"Verify your email address");

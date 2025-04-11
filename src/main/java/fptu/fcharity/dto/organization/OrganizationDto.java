@@ -5,24 +5,23 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class OrganizationDTO {
+public class OrganizationDto {
     private UUID organizationId;
     private String organizationName;
     private String email;
     private String phoneNumber;
     private String address;
-    private WalletDTO walletAddress;
+    private UUID walletId;
     private String organizationDescription;
     private Instant startTime;
     private Instant shutdownDay;
     private String organizationStatus;
-    private UserDTO ceo;
+    private UUID ceoId;
     private String avatarUrl;
     private String backgroundUrl;
 }

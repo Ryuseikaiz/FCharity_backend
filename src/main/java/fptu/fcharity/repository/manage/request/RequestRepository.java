@@ -13,12 +13,12 @@ import java.util.UUID;
 
 @Repository
 public interface RequestRepository extends JpaRepository<HelpRequest, UUID> {
-    @EntityGraph(attributePaths = {"category","user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"category","user"})
     HelpRequest findWithIncludeById(UUID id);
-    @EntityGraph(attributePaths = {"category","user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"category","user"})
     @Query("SELECT r FROM HelpRequest r")
     List<HelpRequest> findAllWithInclude();
     @Query("SELECT r FROM HelpRequest r WHERE r.user.id = :userId")
-    @EntityGraph(attributePaths = {"category","user","user.walletAddress"})
+    @EntityGraph(attributePaths = {"category","user"})
     List<HelpRequest> findByUserId(@Param("userId") UUID userId);
 }
