@@ -1,4 +1,4 @@
-package fptu.fcharity.service.manage.organization;
+package fptu.fcharity.service.organization;
 
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationImage;

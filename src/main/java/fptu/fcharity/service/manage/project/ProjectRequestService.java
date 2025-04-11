@@ -52,7 +52,7 @@ public class ProjectRequestService {
     public void takeObject(ProjectRequest pr, ProjectRequestDto prDto){
 
         if (prDto.getUserId() != null) {
-            User user = userRepository.findWithEssentialById(prDto.getUserId() );
+            User user = userRepository.findWithDetailsById(prDto.getUserId() );
             pr.setUser(user);
         }
         if (prDto.getProjectId() != null) {
@@ -173,12 +173,6 @@ public class ProjectRequestService {
         takeObject(pr, prDto);
         ProjectRequest p = projectRequestRepository.save(pr);
         return new ProjectRequestResponse(p);
-    }
-
-    public List<ProjectRequestResponse> getMyInvitations(UUID userId) {
-        List<ProjectRequest> list = projectRequestRepository
-                .findByUserIdAndRequestTypeAndStatus(userId, ProjectRequestType.INVITATION, ProjectRequestStatus.PENDING);
-        return list.stream().map(ProjectRequestResponse::new).toList();
     }
 
 

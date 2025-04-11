@@ -5,8 +5,8 @@ import fptu.fcharity.dto.project.ProjectRequestDto;
 import fptu.fcharity.entity.ProjectRequest;
 import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.dto.user.UpdateProfileDto;
+import fptu.fcharity.entity.TransactionHistory;
 import fptu.fcharity.entity.User;
-import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -37,6 +37,13 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         return ResponseEntity.ok(userResponseMapper.toDTO(currentUser));
+    }
+    @GetMapping("/current-wallet")
+    public ResponseEntity<?> getMyWallet() {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        currentUser = userService.getById(currentUser.getId())
+                .orElseThrow(() -> new ApiRequestException("User not found"));
+        return ResponseEntity.ok(currentUser.getWalletAddress());
     }
 
     @GetMapping("/all-user")
@@ -78,14 +85,13 @@ public class UserController {
     public ResponseEntity<?> getTaskPlansOfUser(@PathVariable UUID user_id) {
         return ResponseEntity.ok(userService.getTasksOfUserId(user_id));
     }
-
+    @GetMapping("/{user_id}/transaction-history")
+    public ResponseEntity<?> getTransactionHistoryOfUser(@PathVariable UUID user_id) {
+        List<TransactionHistory> l = userService.getTransactionHistoryOfUserId(user_id);
+        return ResponseEntity.ok(l);
+    }
     @GetMapping("/{project_id}/task-plans")
     public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
         return ResponseEntity.ok(userService.getTasksOfProjectId(project_id));
-    }
-    @GetMapping("/not-in-project/{projectId}")
-    public ResponseEntity<?> getUserNotInProject(@PathVariable UUID projectId) {
-        List<UserResponse> users = userService.getUsersNotInProject(projectId);
-        return ResponseEntity.ok(users);
     }
 }

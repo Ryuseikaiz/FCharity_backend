@@ -19,5 +19,4 @@ public class UserDTO {
     private UserRole userRole;
     private UserStatus userStatus;
     private Instant createdDate;
-    private String reason;
 }

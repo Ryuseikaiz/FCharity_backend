@@ -8,7 +8,6 @@ import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -28,13 +27,8 @@ public class TransactionHistory {
     @JoinColumn(name = "wallet_id")
     private Wallet wallet;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "target_wallet_id")
-    private Wallet targetWallet;
-
     @Column(name = "amount")
-    private BigDecimal amount;
+    private Integer amount;
 
     @Nationalized
     @Column(name = "transaction_type", length = 50)
@@ -43,11 +37,10 @@ public class TransactionHistory {
     @Column(name = "transaction_date")
     private Instant transactionDate;
 
-    public TransactionHistory(Wallet wallet, BigDecimal amount, String deposit, Instant transactionDate,Wallet targetWallet) {
+    public TransactionHistory(Wallet wallet, int amount, String deposit,Instant transactionDate) {
         this.wallet = wallet;
         this.amount = amount;
         this.transactionType = deposit;
         this.transactionDate = transactionDate;
-        this.targetWallet = targetWallet;
     }
 }

@@ -74,19 +74,11 @@ public class ProjectRequestController {
 
     //*************FOUNDER ACTION*************
     //gửi: lời mời vào ---OKAY
-    @PostMapping("/{projectId}/invite/{userId}")
-    public ResponseEntity<?> sendInvitation(@PathVariable UUID projectId,@PathVariable UUID userId) {
-       ProjectRequestDto prDto = new ProjectRequestDto();
-        prDto.setUserId(userId);
+    @PostMapping("/{projectId}/invite")
+    public ResponseEntity<?> sendInvitation(@PathVariable UUID projectId,@RequestBody ProjectRequestDto prDto) {
         prDto.setProjectId(projectId);
         ProjectRequestResponse prr = projectRequestService.sendJoinInvitation(prDto);
         return ResponseEntity.ok(prr);
-    }
-
-    @GetMapping("/my-invitations/{userId}")
-    public ResponseEntity<?> getMyInvitations(@PathVariable UUID userId) {
-        List<ProjectRequestResponse> list = projectRequestService.getMyInvitations(userId);
-        return ResponseEntity.ok(list);
     }
 
 }

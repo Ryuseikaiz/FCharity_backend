@@ -1,7 +1,6 @@
 package fptu.fcharity.controller.admin;
 
 import fptu.fcharity.dto.admindashboard.UserDTO;
-import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.service.admin.ManageUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,17 +34,17 @@ public class ManageUserController {
         return ResponseEntity.ok("User deleted successfully.");
     }
 
-    // // Duyệt user lên Founder
-    // @PutMapping("/{userId}/approve-founder")
-    // public ResponseEntity<Void> approveUserToFounder(@PathVariable UUID userId) {
-    // manageUserService.approveUserToFounder(userId);
-    // return ResponseEntity.ok().build();
-    // }
+//    // Duyệt user lên Founder
+//    @PutMapping("/{userId}/approve-founder")
+//    public ResponseEntity<Void> approveUserToFounder(@PathVariable UUID userId) {
+//        manageUserService.approveUserToFounder(userId);
+//        return ResponseEntity.ok().build();
+//    }
 
     // Ban user
     @PutMapping("/ban/{userId}")
-    public ResponseEntity<String> banUser(@PathVariable UUID userId, @RequestBody ReasonDTO reasonDTO) {
-        manageUserService.banUser(userId, reasonDTO);
+    public ResponseEntity<String> banUser(@PathVariable UUID userId) {
+        manageUserService.banUser(userId);
         return ResponseEntity.ok("User has been banned successfully.");
     }
 

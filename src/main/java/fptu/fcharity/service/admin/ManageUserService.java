@@ -1,6 +1,5 @@
 package fptu.fcharity.service.admin;
 
-import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.dto.admindashboard.UserDTO;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.entity.User.UserStatus;
@@ -23,11 +22,13 @@ public class ManageUserService {
         return userRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+
     public UserDTO getUserById(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiRequestException("User not found with ID: " + userId));
         return convertToDTO(user);
     }
+
 
     @Transactional
     public void deleteUser(UUID userId) {
@@ -37,12 +38,11 @@ public class ManageUserService {
     }
 
     @Transactional
-    public void banUser(UUID userId, ReasonDTO reasonDTO) {
+    public void banUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiRequestException("User not found with ID: " + userId));
 
         user.setUserStatus(UserStatus.Banned);
-        user.setReason(reasonDTO.getReason());
         userRepository.save(user);
     }
 
@@ -56,9 +56,9 @@ public class ManageUserService {
         }
 
         user.setUserStatus(UserStatus.Verified);
-        user.setReason(null);
         userRepository.save(user);
     }
+
 
     private UserDTO convertToDTO(User user) {
         return new UserDTO(
@@ -70,7 +70,7 @@ public class ManageUserService {
                 user.getAvatar(),
                 user.getUserRole(),
                 user.getUserStatus(),
-                user.getCreatedDate(),
-                user.getReason());
+                user.getCreatedDate()
+        );
     }
 }

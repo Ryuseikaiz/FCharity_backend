@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -22,6 +21,6 @@ public class Wallet {
 
     @Nationalized
     @Column(name = "balance")
-    private BigDecimal balance;
+    private int balance;
 
 }

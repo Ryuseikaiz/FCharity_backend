@@ -1,7 +1,7 @@
 package fptu.fcharity.service.admin;
 
+
 import fptu.fcharity.dto.request.RequestDto;
-import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.utils.constants.request.RequestStatus;
@@ -22,17 +22,17 @@ import java.util.stream.Collectors;
 public class ManageRequestService {
     private final RequestRepository requestRepository;
 
-    // public List<RequestDto> getAllRequests() {
-    // return requestRepository.findAll().stream()
-    // .map(this::convertToDTO)
-    // .collect(Collectors.toList());
-    // }
-    public List<RequestDto> getAllRequests() {
-        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "creationDate"));
-        return requestRepository.findAll(pageable).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+//    public List<RequestDto> getAllRequests() {
+//        return requestRepository.findAll().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
+//    }
+public List<RequestDto> getAllRequests() {
+    Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "creationDate"));
+    return requestRepository.findAll(pageable).stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList());
+}
 
     public RequestDto getRequestById(UUID requestId) {
         HelpRequest helpRequest = requestRepository.findById(requestId)
@@ -59,9 +59,8 @@ public class ManageRequestService {
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
     }
-
     @Transactional
-    public void rejectRequest(UUID requestId, ReasonDTO reasonDTO) {
+    public void rejectRequest(UUID requestId) {
         HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
@@ -70,7 +69,6 @@ public class ManageRequestService {
         }
 
         request.setStatus(RequestStatus.REJECTED);
-        request.setReason(reasonDTO.getReason());
         requestRepository.save(request);
     }
 
@@ -104,7 +102,7 @@ public class ManageRequestService {
         dto.setTagIds(null);
         dto.setImageUrls(null);
         dto.setVideoUrls(null);
-        dto.setReason(helpRequest.getReason());
+
         return dto;
     }
 }

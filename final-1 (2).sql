@@ -13,10 +13,16 @@ create table tags(
 
 create table wallets(
 	wallet_id UNIQUEIDENTIFIER PRIMARY KEY,
-	balance  DECIMAL(18, 2),
+	balance int
 )
--- alter table wallets add balance DECIMAL(18, 2);
-
+create table transaction_history(
+    transaction_id UNIQUEIDENTIFIER PRIMARY KEY,
+    wallet_id UNIQUEIDENTIFIER,
+    amount int,
+    transaction_type NVARCHAR(50),
+    transaction_date DATETIME,
+    FOREIGN KEY (wallet_id) REFERENCES wallets(wallet_id) ON DELETE CASCADE
+)
 CREATE TABLE users (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),  
     full_name NVARCHAR(255),
@@ -29,8 +35,10 @@ CREATE TABLE users (
     created_date DATETIME,
     verification_code NVARCHAR(255),
     verification_code_expires_at DATETIME,
+	wallet_address UNIQUEIDENTIFIER,
     user_status NVARCHAR(50),
     reason NVARCHAR(MAX),
+	FOREIGN KEY (wallet_address) REFERENCES wallets(wallet_id) ON DELETE CASCADE
 );
 
 CREATE TABLE organizations (
@@ -119,8 +127,7 @@ CREATE TABLE projects (
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE,
     FOREIGN KEY (request_id) REFERENCES help_requests(request_id) ON DELETE NO ACTION
 );
-alter table projects add created_at DATETIME DEFAULT GETDATE()
-alter table projects add updated_at DATETIME DEFAULT GETDATE()
+
 CREATE TABLE project_requests (
     project_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER NOT NULL,
@@ -144,37 +151,7 @@ CREATE TABLE project_members (
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE NO ACTION
 );
 
-CREATE TABLE spending_plans (
-     spending_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-     project_id UNIQUEIDENTIFIER NOT NULL,
-    plan_name NVARCHAR(255),
-    description NVARCHAR(255),
-     created_date DATETIME DEFAULT GETDATE(),
-     updated_date DATETIME DEFAULT GETDATE(),
-     min_required_donation_amount DECIMAL(18,2),
-    estimated_total_cost DECIMAL(18, 2),
-    approval_status NVARCHAR(50),
-    FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
-);
-CREATE TABLE spending_items (
-    spending_item_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    spending_plan_id UNIQUEIDENTIFIER NOT NULL,
-    item_name NVARCHAR(255),
-    estimated_cost DECIMAL(18,2),
-    note NVARCHAR(255),
-    created_date DATETIME DEFAULT GETDATE(),
- updated_date DATETIME DEFAULT GETDATE(),
-FOREIGN KEY (spending_plan_id) REFERENCES spending_plans(spending_plan_id) ON DELETE CASCADE
-);
-CREATE TABLE spending_details (
-                                  detail_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-                                  spending_item_id UNIQUEIDENTIFIER NOT NULL,
-                                  amount DECIMAL(18,2),
-                                  transaction_time DATETIME DEFAULT GETDATE(),
-                                  description NVARCHAR(255),
-                                  proof_image NVARCHAR(255),
-                                  FOREIGN KEY (spending_item_id) REFERENCES spending_items(spending_item_id) ON DELETE CASCADE
-);
+
 
 -- Table: notifications
 CREATE TABLE notifications (
@@ -269,11 +246,10 @@ CREATE TABLE to_project_donations (
     donation_status NVARCHAR(50),
     donation_time DATETIME,
     message NVARCHAR(255),
-    order_code int,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION
 );
--- alter table to_project_donations add order_code int;
+
 -- Table: to_organization_donations
 CREATE TABLE to_organization_donations (
     donation_id UNIQUEIDENTIFIER PRIMARY KEY,
@@ -380,8 +356,24 @@ CREATE TABLE project_reports (
     FOREIGN KEY (reporter_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE NO ACTION
 );
-
-
+CREATE TABLE to_project_allocation_images (
+    image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
+    image_url NVARCHAR(255),
+    to_project_allocation_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (to_project_allocation_id) REFERENCES to_project_allocations(allocation_id) ON DELETE CASCADE
+);
+CREATE TABLE to_organization_donation_images (
+    image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
+    image_url NVARCHAR(255),
+    to_organization_donation_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (to_organization_donation_id) REFERENCES to_organization_donations(donation_id) ON DELETE CASCADE,
+);
+CREATE TABLE to_project_donation_images (
+    image_id CHAR(36) PRIMARY KEY DEFAULT NEWID(),
+    image_url NVARCHAR(255),
+    to_project_donation_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (to_project_donation_id) REFERENCES to_project_donations(donation_id) ON DELETE CASCADE,
+);
 INSERT INTO task_plan_status (status_id, status_name)
 VALUES (NEWID(), N'TODO');
 
@@ -458,13 +450,6 @@ UPDATE users SET wallet_address = 'D3B77B59-B475-45D4-8BC5-65F93F1F4D15' WHERE u
 UPDATE users SET wallet_address = '12808576-B32A-4C0B-893D-7C6350C24F0E' WHERE user_id = '12808576-B32A-4C0B-893D-7C6350C24F0E';
 UPDATE users SET wallet_address = '34FC7236-5060-4077-9503-B8B94A574CFE' WHERE user_id = '34FC7236-5060-4077-9503-B8B94A574CFE';
 UPDATE users SET wallet_address = 'F0AF45ED-DBC8-4E23-AA74-F634BBA1628F' WHERE user_id = 'F0AF45ED-DBC8-4E23-AA74-F634BBA1628F';
-
-
-INSERT INTO project_members (user_id, project_id, join_date, member_role)
-VALUES
-    ('590396FB-F717-4BE6-B22C-306119606188', 'CEB2685C-2963-4B02-97E8-205ADAE6A34F', '2025-04-02 17:00:00.000', 'LEADER'),
-    ('F0AF45ED-DBC8-4E23-AA74-F634BBA1628F', 'ECB848DD-7094-415A-926C-2DEF392E43CF', '2025-04-02 17:00:00.000', 'LEADER'),
-    ('E273F776-E6B0-4DB9-AAE8-337F5B0E416F', '53B0DD0E-731F-462E-A4A8-95DC1F878870', '2025-04-02 17:00:00.000', 'LEADER');
 
 insert into organization_members (membership_id, user_id, organization_id, join_date, leave_date, member_role)
 values (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7B', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'CEO'),

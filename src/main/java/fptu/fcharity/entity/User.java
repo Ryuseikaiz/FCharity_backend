@@ -70,6 +70,9 @@ public class User implements UserDetails {
     @Column(name = "verification_code_expires_at")
     private Instant verificationCodeExpiresAt;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "wallet_address")
+    private Wallet walletAddress;
 
     @Column(name = "reason")
     private String reason;

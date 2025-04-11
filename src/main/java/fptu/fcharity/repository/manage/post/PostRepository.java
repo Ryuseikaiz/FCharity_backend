@@ -11,9 +11,9 @@ import java.util.UUID;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, UUID> {
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {"user","user.walletAddress"})
     Post findWithIncludeById(UUID id);
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {"user","user.walletAddress"})
     @Query("SELECT r FROM Post r")
     List<Post> findAllWithInclude();
     @Query("SELECT DISTINCT p FROM Post p " +

@@ -1,7 +1,6 @@
 package fptu.fcharity.controller.admin;
 
 import fptu.fcharity.dto.admindashboard.PostDTO;
-import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.service.admin.ManagePostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -51,8 +50,8 @@ public class ManagePostController {
     }
 
     @PutMapping("/reject/{postId}")
-    public ResponseEntity<String> rejectPost(@PathVariable UUID postId, @RequestBody ReasonDTO reasonDTO) {
-        postService.rejectPost(postId, reasonDTO);
+    public ResponseEntity<String> rejectPost(@PathVariable UUID postId) {
+        postService.rejectPost(postId);
         return ResponseEntity.ok("Post has been rejected successfully.");
     }
 }

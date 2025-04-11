@@ -11,14 +11,12 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.utils.constants.OrganizationStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -31,8 +29,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
 
 
     @Autowired
@@ -83,7 +79,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setCeo(ceo);
 
         Wallet wallet = new Wallet();
-        wallet.setBalance(BigDecimal.valueOf(0));
+        wallet.setBalance(0);
         Wallet savedWallet =  walletRepository.save(wallet);
         organization.setWalletAddress(savedWallet);
         Organization organizationSaved = organizationRepository.save(organization);
@@ -98,10 +94,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMember.setJoinDate(Instant.now());
 
         organizationMemberRepository.save(organizationMember);
-        simpMessagingTemplate.convertAndSend(
-                "/topic/organization-notifications",
-                "User " + ceo.getEmail() + " has created a new organization: " + organizationSaved.getOrganizationName()
-        );
 
         organizationDto.setOrganizationId(organizationSaved.getOrganizationId());
 

@@ -1,7 +1,6 @@
 package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
-import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -41,19 +40,18 @@ public class ManageOrganizationService {
         organizationRepository.delete(organization);
     }
 
-    // @Transactional
-    // public void unHideOrganization(UUID orgId) {
-    // Organization organization = organizationRepository.findById(orgId)
-    // .orElseThrow(() -> new ApiRequestException("Organization not found with ID: "
-    // + orgId));
-    //
-    // if (organization.getOrganizationStatus().equals(APPROVED)) {
-    // throw new ApiRequestException("Organization is already active.");
-    // }
-    //
-    // organization.setOrganizationStatus(APPROVED);
-    // organizationRepository.save(organization);
-    // }
+//    @Transactional
+//    public void unHideOrganization(UUID orgId) {
+//        Organization organization = organizationRepository.findById(orgId)
+//                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
+//
+//        if (organization.getOrganizationStatus().equals(APPROVED)) {
+//            throw new ApiRequestException("Organization is already active.");
+//        }
+//
+//        organization.setOrganizationStatus(APPROVED);
+//        organizationRepository.save(organization);
+//    }
     @Transactional
     public void banOrganization(UUID orgId) {
         Organization organization = organizationRepository.findById(orgId)
@@ -98,7 +96,7 @@ public class ManageOrganizationService {
     }
 
     @Transactional
-    public void rejectOrganization(UUID orgId, ReasonDTO reasonDTO) {
+    public void rejectOrganization(UUID orgId) {
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 
@@ -107,7 +105,6 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(REJECTED);
-        organization.setReason(reasonDTO.getReason());
         organizationRepository.save(organization);
     }
 
@@ -122,7 +119,7 @@ public class ManageOrganizationService {
                 organization.getStartTime(),
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
-                organization.getCeo() != null ? organization.getCeo().getId() : null,
-                organization.getReason());
+                organization.getCeo() != null ? organization.getCeo().getId() : null
+        );
     }
 }

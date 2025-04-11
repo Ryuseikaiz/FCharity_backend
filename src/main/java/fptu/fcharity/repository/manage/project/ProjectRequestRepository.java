@@ -25,6 +25,4 @@ public interface ProjectRequestRepository extends JpaRepository<ProjectRequest, 
      @EntityGraph(attributePaths = {"user", "project"})
      @Query("SELECT p FROM ProjectRequest p WHERE p.project.id = :projectId")
      List<ProjectRequest> findWithEssentialByProjectId(UUID projectId);
-     List<ProjectRequest> findByUserIdAndRequestTypeAndStatus(UUID userId, String requestType, String status);
-
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class RequestFinalResponse {
-    private HelpRequestResponse helpRequest;
+    private HelpRequest helpRequest;
     private List<Taggable> requestTags;
     private List<String> attachments;
 }
