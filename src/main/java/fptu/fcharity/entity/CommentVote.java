@@ -32,4 +32,8 @@ public class CommentVote {
 
     @Column(nullable = false)
     private int vote; // +1 or -1
+
+    public CommentVote(CommentVoteId voteId, Comment comment, User user, int newVote) {
+
+    }
 }

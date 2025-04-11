@@ -89,7 +89,6 @@ public class CommentService {
 
     @Transactional
     public void voteComment(UUID commentId, UUID userId, int newVote) {
-        // Validate vote value
         if (newVote != 1 && newVote != -1 && newVote != 0) {
             throw new IllegalArgumentException("Vote must be 1 (upvote), -1 (downvote), or 0 (unvote)");
         }
@@ -102,33 +101,19 @@ public class CommentService {
         CommentVoteId voteId = new CommentVoteId(commentId, userId);
         Optional<CommentVote> existingVote = commentVoteRepository.findById(voteId);
 
-        // Xử lý logic vote
         if (existingVote.isPresent()) {
             CommentVote voteRecord = existingVote.get();
-            if (newVote == 0) {
-                // Unvote
-                commentVoteRepository.delete(voteRecord);
-            } else if (voteRecord.getVote() != newVote) {
-                // Đổi vote
-                voteRecord.setVote(newVote);
+            if (newVote == 0 || voteRecord.getVote() == newVote) {
+                commentVoteRepository.delete(voteRecord); // Unvote
+            } else {
+                voteRecord.setVote(newVote); // Cập nhật vote
                 commentVoteRepository.save(voteRecord);
             }
         } else if (newVote != 0) {
-            // Vote mới
-            CommentVote newVoteRecord = new CommentVote();
-            newVoteRecord.setId(voteId);
-            newVoteRecord.setComment(comment);
-            newVoteRecord.setUser(user);
-            newVoteRecord.setVote(newVote);
-            newVoteRecord.setIsUpvote(newVote == 1); // true nếu upvote
-
-
+            CommentVote newVoteRecord = new CommentVote(voteId, comment, user, newVote);
             commentVoteRepository.save(newVoteRecord);
-
-
         }
 
-        // Cập nhật tổng vote
         int totalVotes = commentVoteRepository.sumVotesByCommentId(commentId);
         comment.setVote(totalVotes);
         commentRepository.save(comment);
