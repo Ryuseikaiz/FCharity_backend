@@ -78,6 +78,10 @@ public class UserController {
     public ResponseEntity<?> getTaskPlansOfUser(@PathVariable UUID user_id) {
         return ResponseEntity.ok(userService.getTasksOfUserId(user_id));
     }
+    @GetMapping("/{userId}/transaction-history")
+    public ResponseEntity<?> getTransactionHistory(@PathVariable UUID userId) {
+        return ResponseEntity.ok(userService.getTransactionHistory(userId));
+    }
 
     @GetMapping("/{project_id}/task-plans")
     public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
