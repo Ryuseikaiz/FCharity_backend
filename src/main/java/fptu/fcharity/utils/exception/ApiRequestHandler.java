@@ -26,4 +26,12 @@ public class ApiRequestHandler {
         );
         return new ResponseEntity<>(apiException, apiException.getHttpStatus());
     }
+    @ExceptionHandler(value = { IllegalArgumentException.class})
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        ApiException apiException = new ApiException(
+                HttpStatus.BAD_REQUEST,e.getMessage(),
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return new ResponseEntity<>(apiException, apiException.getHttpStatus());
+    }
 }

@@ -15,6 +15,7 @@ import java.util.UUID;
 @Table(name = "sub_tasks")
 public class SubTask {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "sub_task_id", nullable = false)
     private UUID id;
@@ -32,8 +33,8 @@ public class SubTask {
     private User user;
 
     @Nationalized
-    @Column(name = "task_plan_description")
-    private String taskPlanDescription;
+    @Column(name = "sub_task_description")
+    private String subTaskDescription;
 
     @Column(name = "start_time")
     private Instant startTime;
@@ -42,8 +43,8 @@ public class SubTask {
     private Instant endTime;
 
     @Nationalized
-    @Column(name = "task_plan_status", length = 50)
-    private String taskPlanStatus;
+    @Column(name = "sub_task_status", length = 50)
+    private String subTaskStatus;
 
     @Column(name = "created_at")
     private Instant createdAt;
