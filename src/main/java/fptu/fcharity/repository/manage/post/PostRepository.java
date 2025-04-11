@@ -16,4 +16,9 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @EntityGraph(attributePaths = {"user","user.walletAddress"})
     @Query("SELECT r FROM Post r")
     List<Post> findAllWithInclude();
+    @Query("SELECT DISTINCT p FROM Post p " +
+            "JOIN Taggable tg ON tg.objectId = p.id AND tg.objectType = 'POST' " +
+            "JOIN Tag t ON t.id = tg.tag.id " +
+            "WHERE LOWER(t.tagName) = LOWER(:tagName)")
+    List<Post> findPostsByTagName(@org.springframework.data.repository.query.Param("tagName") String tagName);
 }

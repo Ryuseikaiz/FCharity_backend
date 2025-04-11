@@ -122,6 +122,17 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
+    public List<PostResponse> getPostsByTag(String tagName) {
+        List<Post> posts = postRepository.findPostsByTagName(tagName);
+        return posts.stream()
+                .filter(post -> PostStatus.APPROVED.equals(post.getPostStatus()))
+                .map(post -> new PostResponse(
+                        post,
+                        taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                        objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST)
+                ))
+                .toList();
+    }
 
 
 

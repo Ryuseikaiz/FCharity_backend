@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -63,21 +64,32 @@ public class PostController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-    @PostMapping("/{postId}/upvote/{userId}")
-    public ResponseEntity<String> upvote(@PathVariable UUID postId, @PathVariable UUID userId) {
-        postVoteService.votePost(postId, userId, 1);
-        return ResponseEntity.ok("Upvoted successfully!");
+    @PostMapping("/{postId}/vote")
+    public ResponseEntity<Map<String, Object>> votePost(
+            @PathVariable UUID postId,
+            @RequestParam UUID userId,
+            @RequestParam int vote
+    ) {
+        try {
+            postVoteService.votePost(postId, userId, vote);
+            int totalVotes = postVoteService.getTotalVotes(postId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "postId", postId,
+                    "totalVote", totalVotes
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "error", e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"
+            ));
+        }
+    }
+    @GetMapping("/tag/{tagName}")
+    public ResponseEntity<List<PostResponse>> getPostsByTag(@PathVariable String tagName) {
+        List<PostResponse> posts = postService.getPostsByTag(tagName);
+        return ResponseEntity.ok(posts);
     }
 
-    @PostMapping("/{postId}/downvote/{userId}")
-    public ResponseEntity<String> downvote(@PathVariable UUID postId, @PathVariable UUID userId) {
-        postVoteService.votePost(postId, userId, -1);
-        return ResponseEntity.ok("Downvoted successfully!");
-    }
 
-    @DeleteMapping("/{postId}/unvote/{userId}")
-    public ResponseEntity<String> unvote(@PathVariable UUID postId, @PathVariable UUID userId) {
-        postVoteService.unvotePost(postId, userId);
-        return ResponseEntity.ok("Vote removed successfully!");
-    }
+
 }
