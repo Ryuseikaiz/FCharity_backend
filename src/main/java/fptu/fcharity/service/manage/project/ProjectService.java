@@ -13,6 +13,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.response.project.ProjectResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.service.WalletService;
@@ -43,6 +44,7 @@ public class ProjectService {
     private final RequestRepository requestRepository;
     private final ProjectMemberService projectMemberService;
     private final ProjectMemberRepository projectMemberRepository;
+    private final HelpNotificationService notificationService;
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
@@ -54,7 +56,7 @@ public class ProjectService {
                           WalletService walletService,
                           RequestRepository requestRepository,
                           ProjectMemberRepository projectMemberRepository,
-                          ProjectImageService projectImageService, ProjectMemberService projectMemberService) {
+                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, HelpNotificationService notificationService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -67,6 +69,7 @@ public class ProjectService {
         this.requestRepository = requestRepository;
         this.projectMemberService = projectMemberService;
         this.projectMemberRepository = projectMemberRepository;
+        this.notificationService = notificationService;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -126,6 +129,23 @@ public class ProjectService {
         //save project
         project.setCreatedAt(Instant.now());
         projectRepository.save(project);
+        User requestOwner = project.getRequest().getUser();
+        notificationService.notifyUser(
+                requestOwner,
+                "Project created",
+                null,
+                "Project \"" + project.getProjectName() + "\" has been registered \"",
+                "/requests/" + project.getRequest().getId()
+        );
+
+        User leader = project.getLeader();
+        notificationService.notifyUser(
+                leader,
+                "Project created",
+                null,
+                "Ban duoc moi lam leader cua project: \"" + project.getProjectName(),
+                "/projects/" + project.getId()
+        );
 
         ProjectMemberDto projectMemberDto = new ProjectMemberDto(project.getLeader().getId(),project.getId(),ProjectMemberRole.LEADER);
         projectMemberService.addProjectMember(projectMemberDto);

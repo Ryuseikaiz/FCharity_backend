@@ -8,6 +8,7 @@ import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ToProjectDonationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ToProjectDonationResponse;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.utils.constants.TransactionType;
 import fptu.fcharity.utils.constants.project.DonationStatus;
@@ -33,6 +34,8 @@ public class ToProjectDonationService {
     private WalletRepository walletRepository;
     @Autowired
     private ToProjectDonationRepository toProjectDonationRepository;
+    @Autowired
+    private HelpNotificationService notificationService;
     @Transactional
 //    public void takeObject(ToProjectDonation t, ToProjectDonationDto dto){
 //        if(dto.getProjectId()!=null){
@@ -81,6 +84,18 @@ public class ToProjectDonationService {
         donation.setDonationStatus(donationDto.getDonationStatus());
         donation.setOrderCode(donationDto.getOrderCode());
         ToProjectDonation t = toProjectDonationRepository.save(donation);
+
+        Project project = projectRepository.findWithEssentialById(donationDto.getProjectId());
+        User leader = project.getLeader();
+        User user = userRepository.findWithEssentialById(donationDto.getUserId());
+        notificationService.notifyUser(
+                leader,
+                "New donation received",
+                null,
+                "User \"" + user.getFullName() + "\" has donated " +
+                        donation.getAmount() + " VND to your project \"" + project.getProjectName() + "\".",
+                "/manage-project/donations"
+        );
         return new ToProjectDonationResponse(t);
     }
     public ToProjectDonationResponse updateDonation(int orderCode,Instant transactionTime, String decision) {
