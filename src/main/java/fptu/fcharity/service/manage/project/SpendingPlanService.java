@@ -35,7 +35,7 @@ public class SpendingPlanService {
         plan.setProject(project);
         plan.setPlanName(dto.getPlanName());
         plan.setDescription(dto.getDescription());
-        plan.setMinRequiredDonationAmount(dto.getMinRequiredDonationAmount());
+        plan.setMaxExtraCostPercentage(dto.getMaxExtraCostPercentage());
         plan.setEstimatedTotalCost(dto.getEstimatedTotalCost());
         plan.setApprovalStatus(SpendingPlanStatus.PREPARING);
         plan.setCreatedDate(Instant.now());
@@ -56,7 +56,7 @@ public class SpendingPlanService {
         if (dto.getPlanName() != null) plan.setPlanName(dto.getPlanName());
         if (dto.getDescription() != null) plan.setDescription(dto.getDescription());
         if (dto.getEstimatedTotalCost() != null) plan.setEstimatedTotalCost(dto.getEstimatedTotalCost());
-        if (dto.getMinRequiredDonationAmount() != null) plan.setMinRequiredDonationAmount(dto.getMinRequiredDonationAmount());
+        if (dto.getMaxExtraCostPercentage() != null) plan.setMaxExtraCostPercentage(dto.getMaxExtraCostPercentage());
         if (dto.getApprovalStatus() != null) plan.setApprovalStatus(dto.getApprovalStatus());
 
         plan.setUpdatedDate(Instant.now());
@@ -77,25 +77,16 @@ public class SpendingPlanService {
         res.setPlanName(plan.getPlanName());
         res.setDescription(plan.getDescription());
         res.setEstimatedTotalCost(plan.getEstimatedTotalCost());
-        res.setMinRequiredDonationAmount(plan.getMinRequiredDonationAmount());
+        res.setMaxExtraCostPercentage(plan.getMaxExtraCostPercentage());
         res.setApprovalStatus(plan.getApprovalStatus());
         res.setCreatedDate(plan.getCreatedDate());
         res.setUpdatedDate(plan.getUpdatedDate());
         return res;
     }
 
-    public List<SpendingPlanResponse> getAllSpendingPlansByProject(UUID projectId) {
-        return spendingPlanRepository.findByProjectId(projectId)
-                .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    public List<SpendingPlanResponse> getSpendingPlanByProjectId(UUID projectId) {
-        List<SpendingPlan> plans = spendingPlanRepository.findByProjectId(projectId);
-        return  plans.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList()); // Return the first plan or handle as needed
+    public SpendingPlanResponse getSpendingPlanByProjectId(UUID projectId) {
+        SpendingPlan p= spendingPlanRepository.findByProjectId(projectId);
+        return  toResponse(p); // Return the first plan or handle as needed
     }
     public SpendingPlanResponse approvePlan(UUID id,UUID projectId){
         SpendingPlan plan = spendingPlanRepository.findById(id)
@@ -114,5 +105,14 @@ public class SpendingPlanService {
         plan.setEstimatedTotalCost(totalCost.add(extraCost));
         plan.setApprovalStatus(SpendingPlanStatus.APPROVED);
         return toResponse(spendingPlanRepository.save(plan));
+    }
+
+    public SpendingPlanResponse saveFromExcel(SpendingPlan spendingPlan, UUID projectId) {
+        Project project = projectRepository.findWithEssentialById(projectId);
+        spendingPlan.setProject(project);
+        spendingPlan.setApprovalStatus(SpendingPlanStatus.PREPARING);
+        spendingPlan.setCreatedDate(Instant.now());
+        spendingPlanRepository.save(spendingPlan);
+        return toResponse(spendingPlan);
     }
 }

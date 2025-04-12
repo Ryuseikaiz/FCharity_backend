@@ -61,6 +61,8 @@ public class HelpRequest {
 
     @Column(name = "reason")
     private String reason;
+    @Column(name = "support_type")
+    private String supportType;
 
     public HelpRequest() {
     }
@@ -69,7 +71,7 @@ public class HelpRequest {
                        String phone, String email, String location,
                        Boolean isEmergency,
                        Category category,
-                       String reason
+                       String reason,String supportType
     ) {
         this.user = user;
         this.title = title;
@@ -82,6 +84,7 @@ public class HelpRequest {
         this.category = category;
         this.status = RequestStatus.PENDING;
         this.reason = reason;
+        this.supportType = supportType;
     }
 
 }

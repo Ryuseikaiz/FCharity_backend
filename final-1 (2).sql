@@ -89,10 +89,14 @@ CREATE TABLE help_requests (
     is_emergency BIT,
 	category_id UNIQUEIDENTIFIER,
 	status NVARCHAR(50),
+    reason NVARCHAR(MAX),
+    support_type NVARCHAR(50),
 	FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 alter table help_requests add reason NVARCHAR(MAX);
+ALTER TABLE help_requests ADD support_type NVARCHAR(50);
+
 -- Table: projects
 CREATE TABLE projects (
     project_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -151,11 +155,12 @@ CREATE TABLE spending_plans (
     description NVARCHAR(255),
      created_date DATETIME DEFAULT GETDATE(),
      updated_date DATETIME DEFAULT GETDATE(),
-     min_required_donation_amount DECIMAL(18,2),
+     max_extra_cost_percentage DECIMAL(18,2),
     estimated_total_cost DECIMAL(18, 2),
     approval_status NVARCHAR(50),
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
+alter table spending_plans add  max_extra_cost_percentage DECIMAL(18,2);
 CREATE TABLE spending_items (
     spending_item_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     spending_plan_id UNIQUEIDENTIFIER NOT NULL,

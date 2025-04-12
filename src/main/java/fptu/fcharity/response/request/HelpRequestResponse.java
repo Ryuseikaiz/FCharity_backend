@@ -43,6 +43,7 @@ public class HelpRequestResponse {
     private String status;
 
     private String reason;
+    private String supportType;
 
     public HelpRequestResponse(HelpRequest helpRequest) {
         this.id = helpRequest.getId();
@@ -57,5 +58,6 @@ public class HelpRequestResponse {
         this.category = helpRequest.getCategory();
         this.status = helpRequest.getStatus();
         this.reason = helpRequest.getReason();
+        this.supportType = helpRequest.getSupportType();
     }
 }
