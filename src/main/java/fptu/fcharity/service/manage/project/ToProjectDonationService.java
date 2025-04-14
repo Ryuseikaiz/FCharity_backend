@@ -85,17 +85,6 @@ public class ToProjectDonationService {
         donation.setOrderCode(donationDto.getOrderCode());
         ToProjectDonation t = toProjectDonationRepository.save(donation);
 
-        Project project = projectRepository.findWithEssentialById(donationDto.getProjectId());
-        User leader = project.getLeader();
-        User user = userRepository.findWithEssentialById(donationDto.getUserId());
-        notificationService.notifyUser(
-                leader,
-                "New donation received",
-                null,
-                "User \"" + user.getFullName() + "\" has donated " +
-                        donation.getAmount() + " VND to your project \"" + project.getProjectName() + "\".",
-                "/manage-project/donations"
-        );
         return new ToProjectDonationResponse(t);
     }
     public ToProjectDonationResponse updateDonation(int orderCode,Instant transactionTime, String decision) {
@@ -105,7 +94,22 @@ public class ToProjectDonationService {
            donation.setDonationTime(transactionTime);
            toProjectDonationRepository.save(donation);
            updateWalletBalanceDonate(donation);
+
+           UUID projectId = donation.getProject().getId();
+           Project project = projectRepository.findWithEssentialById(projectId);
+           User leader = project.getLeader();
+
+           if (leader != null) {
+               notificationService.notifyUser(
+                       leader,
+                       null,
+                       "New donation received",
+                       "Your project \"" + project.getProjectName() + "\" has just received a new donation.",
+                       "/projects/" + project.getId() +"/details"
+               );
+           }
        }
+
         return new ToProjectDonationResponse(donation);
     }
     private void updateWalletBalanceDonate(ToProjectDonation t){
