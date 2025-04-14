@@ -34,6 +34,10 @@ public class ProjectMemberController {
         ProjectMemberResponse pmr = projectMemberService.removeProjectMemberById(memberId);
         return ResponseEntity.ok(pmr);
     }
+    @PostMapping("/remove/{memberId}")
+    public ResponseEntity<?> removeProjectMember(@PathVariable UUID memberId ) {
+        return ResponseEntity.ok(projectMemberService.removeProjectMemberCompletely(memberId));
+    }
     @PostMapping("/add-member/{projectId}/{userId}/{role}")
     public ResponseEntity<?> addMemberProject(@PathVariable UUID projectId ,@PathVariable UUID userId,@PathVariable String role ) {
         ProjectMemberDto pmDto = new ProjectMemberDto();

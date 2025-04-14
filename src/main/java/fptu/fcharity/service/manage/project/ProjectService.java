@@ -1,33 +1,37 @@
 package fptu.fcharity.service.manage.project;
 
+import fptu.fcharity.dto.project.SpendingItemDto;
+import fptu.fcharity.entity.ProjectConfirmationRequest;
 import fptu.fcharity.dto.project.ProjectDto;
 import fptu.fcharity.dto.project.ProjectMemberDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
-import fptu.fcharity.repository.manage.project.ProjectImageRepository;
-import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
-import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationTransactionHistoryRepository;
+import fptu.fcharity.repository.manage.project.*;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.response.project.ProjectResponse;
-import fptu.fcharity.response.request.RequestFinalResponse;
-import fptu.fcharity.service.ObjectAttachmentService;
+import fptu.fcharity.response.project.SpendingItemResponse;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.service.manage.request.RequestService;
+import fptu.fcharity.utils.constants.organization.OrganizationTransactionType;
 import fptu.fcharity.utils.constants.project.ProjectMemberRole;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.constants.request.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestSupportType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.ProjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 @Service
 public class ProjectService {
@@ -43,6 +47,13 @@ public class ProjectService {
     private final RequestRepository requestRepository;
     private final ProjectMemberService projectMemberService;
     private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectConfirmationRequestRepository projectConfirmationRequestRepository;
+    private final SpendingItemService spendingItemService;
+    private final SpendingPlanRepository spendingPlanRepository;
+    private final SpendingItemRepository spendingItemRepository;
+    private final SpendingDetailRepository spendingDetailRepository;
+    private final OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository;
+
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
@@ -54,7 +65,7 @@ public class ProjectService {
                           WalletService walletService,
                           RequestRepository requestRepository,
                           ProjectMemberRepository projectMemberRepository,
-                          ProjectImageService projectImageService, ProjectMemberService projectMemberService) {
+                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, ProjectConfirmationRequestRepository projectConfirmationRequestRepository, SpendingItemService spendingItemService, SpendingPlanRepository spendingPlanRepository, SpendingItemRepository spendingItemRepository, SpendingDetailRepository spendingDetailRepository, OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -67,6 +78,12 @@ public class ProjectService {
         this.requestRepository = requestRepository;
         this.projectMemberService = projectMemberService;
         this.projectMemberRepository = projectMemberRepository;
+        this.projectConfirmationRequestRepository = projectConfirmationRequestRepository;
+        this.spendingItemService = spendingItemService;
+        this.spendingPlanRepository = spendingPlanRepository;
+        this.spendingItemRepository = spendingItemRepository;
+        this.spendingDetailRepository = spendingDetailRepository;
+        this.organizationTransactionHistoryRepository = organizationTransactionHistoryRepository;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -204,5 +221,59 @@ public class ProjectService {
                 taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
                 projectImageService.getProjectImages(project.getId()))
         ).toList();
+    }
+
+    public void handleCreateProjectJob(UUID id) {
+        Project p = projectRepository.findWithEssentialById(id);
+        SpendingPlan plan = spendingPlanRepository.findByProjectId(p.getId());
+        BigDecimal totalDonations = p.getWalletAddress().getBalance();
+        //if donations < plan.getEstimatedTotalCost()
+        if(totalDonations.compareTo(plan.getEstimatedTotalCost()) < 0){
+            //send confirm
+            projectConfirmationRequestRepository.save( new ProjectConfirmationRequest(p.getRequest(),p,
+                    "The project has reached its start time, but the donations are still insufficient. We will return all the donated funds to you so that you may use them for other purposes. Please confirm this action."
+            ));
+        }else{
+            //make spending detail for project
+            BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(plan.getId())
+                    .stream()
+                    .map(SpendingItem::getEstimatedCost)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            SpendingItem item = new SpendingItem();
+            item.setItemName("Extra funds");
+            item.setEstimatedCost(totalDonations.subtract(totalCost));
+            item.setSpendingPlan(plan);
+            item.setNote("Extra funds for project");
+            item.setSpendingPlan(plan);
+            item.setCreatedDate(Instant.now());
+            spendingItemRepository.save(item);
+
+            SpendingDetail spendingDetail = new SpendingDetail();
+            spendingDetail.setSpendingItem(item);
+            spendingDetail.setAmount(item.getEstimatedCost());
+            spendingDetail.setDescription("Extra funds for project");
+            spendingDetail.setTransactionTime(Instant.now());
+            spendingDetailRepository.save(spendingDetail);
+
+            p.getWalletAddress().setBalance(
+                    p.getWalletAddress().getBalance().subtract(spendingDetail.getAmount())
+            );
+            walletRepository.save(p.getWalletAddress());
+
+            //send extra cost to org
+            OrganizationTransactionHistory organizationTransactionHistory = new OrganizationTransactionHistory();
+            organizationTransactionHistory.setOrganization(p.getOrganization());
+            organizationTransactionHistory.setTransactionTime(Instant.now());
+            organizationTransactionHistory.setTransactionType(OrganizationTransactionType.EXTRACT_EXTRA_COST);
+            organizationTransactionHistory.setAmount(spendingDetail.getAmount());
+            organizationTransactionHistory.setProject(p);
+            organizationTransactionHistory.setMessage("Extracted extra funds from project");
+            organizationTransactionHistoryRepository.save(organizationTransactionHistory);
+
+            p.getOrganization().getWalletAddress().setBalance(
+                    p.getOrganization().getWalletAddress().getBalance().add(spendingDetail.getAmount())
+            );
+            walletRepository.save(p.getOrganization().getWalletAddress());
+        }
     }
 }

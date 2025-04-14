@@ -22,6 +22,7 @@ public class SpendingItemDto {
             this.itemName = spendingItem.getItemName();
             this.estimatedCost = spendingItem.getEstimatedCost();
             this.note = spendingItem.getNote();
+            this.spendingPlanId = spendingItem.getSpendingPlan().getId();
         }
         public SpendingItemDto(UUID spendingPlanId, String itemName, BigDecimal estimatedCost, String note) {
             this.spendingPlanId = spendingPlanId;

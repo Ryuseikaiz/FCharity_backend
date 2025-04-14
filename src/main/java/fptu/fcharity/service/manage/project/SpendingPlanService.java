@@ -88,13 +88,10 @@ public class SpendingPlanService {
         SpendingPlan p= spendingPlanRepository.findByProjectId(projectId);
         return  toResponse(p); // Return the first plan or handle as needed
     }
-    public SpendingPlanResponse approvePlan(UUID id,UUID projectId){
+    public SpendingPlanResponse approvePlan(UUID id){
         SpendingPlan plan = spendingPlanRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestException("Spending plan not found"));
-        Project project = projectRepository.findWithEssentialById(projectId);
-        if (plan.getProject().getId() != project.getId()){
-            throw new ApiRequestException("Spending plan not found");
-        }
+        Project project = plan.getProject();
         BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(id)
                 .stream()
                 .map(SpendingItem::getEstimatedCost)

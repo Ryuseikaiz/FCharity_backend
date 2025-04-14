@@ -135,9 +135,9 @@ public class SpendingController {
         List<SpendingItemResponse> response = spendingItemService.getItemsBySpendingPlan(planId);
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/plans/{projectId}/{planId}/approve")
-    public ResponseEntity<?> approvePlan(@PathVariable UUID planId, @PathVariable UUID projectId) {
-        SpendingPlanResponse response = spendingPlanService.approvePlan(planId,projectId);
+    @PostMapping("/plans/{planId}/approve")
+    public ResponseEntity<?> approvePlan(@PathVariable UUID planId) {
+        SpendingPlanResponse response = spendingPlanService.approvePlan(planId);
         return ResponseEntity.ok(response);
     }
 }
