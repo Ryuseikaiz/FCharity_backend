@@ -26,4 +26,5 @@ public class RequestDto {
     private List<String> imageUrls;
     private List<String> videoUrls;
     private String reason;
+    private String supportType;
 }

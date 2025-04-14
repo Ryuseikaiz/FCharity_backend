@@ -7,13 +7,12 @@ import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
-import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
-import fptu.fcharity.repository.manage.project.ProjectRepository;
-import fptu.fcharity.repository.manage.project.ProjectRequestRepository;
-import fptu.fcharity.repository.manage.project.TaskPlanRepository;
+import fptu.fcharity.repository.manage.organization.ToOrganizationDonationRepository;
+import fptu.fcharity.repository.manage.project.*;
 import fptu.fcharity.response.authentication.UserResponse;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 
+import fptu.fcharity.response.user.TransactionHistoryResponse;
 import fptu.fcharity.utils.constants.project.ProjectRequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
@@ -56,6 +55,11 @@ public class UserService {
     private ProjectRepository projectRepository;
     @Autowired
     private ProjectMemberRepository projectMemberRepository;;
+    @Autowired
+    private ToProjectDonationRepository toProjectDonationRepository;
+    @Autowired
+    private ToOrganizationDonationRepository toOrganizationDonationRepository;
+
 
     public List<User> allUsers() {
         return userRepository.findAll();
@@ -152,6 +156,7 @@ public class UserService {
                 .toList();
         return usersNotInProject.stream().map(UserResponse::new).toList();
 }
+
     public User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -162,6 +167,19 @@ public class UserService {
         } else {
             throw new ApiRequestException("Invalid principal type: " + principal.getClass());
         }
+    }
+    
+
+    public List<TransactionHistoryResponse> getTransactionHistory(UUID userId) {
+        List<ToProjectDonation> donations = toProjectDonationRepository.findByUserId(userId);
+        List<TransactionHistoryResponse> transactionHistory = new java.util.ArrayList<>(donations.stream()
+                .map(TransactionHistoryResponse::new)
+                .toList());
+        List<ToOrganizationDonation> organizationDonations = toOrganizationDonationRepository.findByUserId(userId);
+        transactionHistory.addAll(organizationDonations.stream()
+                .map(TransactionHistoryResponse::new)
+                .toList());
+        return transactionHistory;
     }
 
 }

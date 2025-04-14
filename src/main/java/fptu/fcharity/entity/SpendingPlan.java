@@ -44,8 +44,8 @@ public class SpendingPlan {
     @Column(name = "updated_date")
     private Instant updatedDate;
 
-    @Column(name = "min_required_donation_amount", precision = 18, scale = 2)
-    private BigDecimal minRequiredDonationAmount;
+    @Column(name = "max_extra_cost_percentage", precision = 18, scale = 2)
+    private BigDecimal maxExtraCostPercentage;
 
     @Column(name = "estimated_total_cost", precision = 18, scale = 2)
     private BigDecimal estimatedTotalCost;

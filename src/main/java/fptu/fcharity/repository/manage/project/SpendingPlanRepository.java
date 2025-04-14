@@ -11,7 +11,7 @@ import java.util.UUID;
 @Repository
 public interface SpendingPlanRepository extends JpaRepository<SpendingPlan, UUID> {
    @Query("SELECT sp FROM SpendingPlan sp JOIN FETCH sp.project p WHERE p.id = :projectId")
-    List<SpendingPlan> findByProjectId(UUID projectId);
+   SpendingPlan findByProjectId(UUID projectId);
     // Define any custom query methods if needed
     // For example:
     // List<SpendingPlan> findByProjectId(UUID projectId);

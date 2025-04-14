@@ -1,5 +1,6 @@
 package fptu.fcharity.dto.project;
 
+import fptu.fcharity.entity.SpendingItem;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,11 @@ public class SpendingItemDto {
         private String itemName;
         private BigDecimal estimatedCost;
         private String note;
+        public SpendingItemDto(SpendingItem spendingItem) {
+            this.itemName = spendingItem.getItemName();
+            this.estimatedCost = spendingItem.getEstimatedCost();
+            this.note = spendingItem.getNote();
+        }
         public SpendingItemDto(UUID spendingPlanId, String itemName, BigDecimal estimatedCost, String note) {
             this.spendingPlanId = spendingPlanId;
             this.itemName = itemName;

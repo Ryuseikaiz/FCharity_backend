@@ -19,7 +19,7 @@ public class SpendingPlanResponse {
     private UUID projectId;
     private String planName;
     private String description;
-    private BigDecimal minRequiredDonationAmount;
+    private BigDecimal maxExtraCostPercentage;
     private BigDecimal estimatedTotalCost;
     private String approvalStatus;
     private Instant createdDate;
@@ -29,11 +29,12 @@ public class SpendingPlanResponse {
         this.projectId = spendingPlan.getProject().getId();
         this.planName = spendingPlan.getPlanName();
         this.description = spendingPlan.getDescription();
-        this.minRequiredDonationAmount = spendingPlan.getMinRequiredDonationAmount();
+        this.maxExtraCostPercentage = spendingPlan.getMaxExtraCostPercentage();
         this.estimatedTotalCost = spendingPlan.getEstimatedTotalCost();
         this.approvalStatus = spendingPlan.getApprovalStatus();
         this.createdDate = spendingPlan.getCreatedDate();
         this.updatedDate = spendingPlan.getUpdatedDate();
     }
+
 }
 

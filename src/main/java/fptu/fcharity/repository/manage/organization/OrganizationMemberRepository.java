@@ -5,6 +5,8 @@ import fptu.fcharity.entity.OrganizationMember;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT om FROM OrganizationMember om WHERE om.organization.organizationId = :id")
     List<OrganizationMember> findAllOrganizationMemberByOrganization(UUID id);
-    @EntityGraph(attributePaths = {"user"})
-    @Query("SELECT om FROM OrganizationMember om WHERE om.organization.organizationId = :id")
-    List<OrganizationMember> findOrganizationMemberByOrganizationId(UUID id);
+
+    @Query("SELECT om FROM OrganizationMember om JOIN FETCH om.organization o JOIN FETCH om.user u JOIN FETCH o.walletAddress ow JOIN FETCH o.ceo oc WHERE o.organizationId = :organizationId")
+    List<OrganizationMember> findByOrganizationOrganizationId(@Param("organizationId") UUID organizationId);
 }

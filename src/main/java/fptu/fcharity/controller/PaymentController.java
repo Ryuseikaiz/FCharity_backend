@@ -2,7 +2,11 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.payment.PaymentDto;
 import fptu.fcharity.dto.project.ToProjectDonationDto;
+import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.response.project.ToProjectDonationResponse;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.service.manage.project.ProjectService;
 import fptu.fcharity.service.manage.project.ToProjectDonationService;
 import fptu.fcharity.service.manage.user.UserService;
@@ -45,6 +49,11 @@ public class PaymentController {
     private ProjectService projectService;
     @Autowired
     private ToProjectDonationService toProjectDonationService;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private HelpNotificationService notificationService;
+
 
     private int generateRandomOrderCode() {
         Random random = new Random();
@@ -109,6 +118,19 @@ public class PaymentController {
                     transactionDateTime,
                    DonationStatus.COMPLETED
             );
+            UUID projectId = p.getProjectId();
+            Project project = projectRepository.findWithEssentialById(projectId);
+            User leader = project.getLeader();
+
+            if (leader != null) {
+                notificationService.notifyUser(
+                        leader,
+                        null,
+                        "New donation received",
+                        "Your project \"" + project.getProjectName() + "\" has just received a new donation.",
+                        "/project/" + project.getId()
+                );
+            }
             System.out.println(p);
         }catch(Exception e){
             System.out.println("Error: " + e.getMessage());

@@ -2,15 +2,35 @@ package fptu.fcharity.controller.manage.project;
 
 import fptu.fcharity.dto.project.SpendingItemDto;
 import fptu.fcharity.dto.project.SpendingPlanDto;
+import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.SpendingItem;
+import fptu.fcharity.entity.SpendingPlan;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.response.project.SpendingItemResponse;
+import fptu.fcharity.response.project.SpendingPlanReaderResponse;
 import fptu.fcharity.response.project.SpendingPlanResponse;
+import fptu.fcharity.service.manage.project.ExcelService;
+import fptu.fcharity.service.manage.project.ProjectService;
 import fptu.fcharity.service.manage.project.SpendingItemService;
 import fptu.fcharity.service.manage.project.SpendingPlanService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,8 +42,38 @@ public class SpendingController {
 
     @Autowired
     private SpendingPlanService spendingPlanService;
+    @Autowired
+    private ExcelService excelService;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private ProjectService projectService;
 
     // ======= SPENDING PLAN CRUD =======
+    @GetMapping("/{projectId}/download-template")
+    public ResponseEntity<Resource> downloadTemplate(@PathVariable UUID projectId) throws IOException {
+        ByteArrayInputStream in = excelService.generateNewSpendingPlanTemplate( projectId);
+        InputStreamResource file = new InputStreamResource(in);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=spending_template.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(file);
+    }
+
+    @PostMapping("/{projectId}/save-items-from-template")
+    public ResponseEntity<?> saveSpendingItems(@RequestParam MultipartFile file,@PathVariable UUID projectId) throws IOException {
+       SpendingPlanReaderResponse l = excelService.parseNewSpendingPlanExcel(file);
+       if(!l.getErrors().isEmpty()){
+              return ResponseEntity.badRequest().body(l.getErrors());
+       }
+       SpendingPlanResponse p = spendingPlanService.saveFromExcel(l.getSpendingPlan(),projectId);
+       List<SpendingItemResponse> res =  spendingItemService.saveFromExcel(l.getSpendingItems(),p.getId());
+        Map<String, Object> response = new HashMap<>();
+        response.put("plan", p);
+        response.put("items", res);
+       return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/plans")
     public ResponseEntity<?> createPlan(@RequestBody SpendingPlanDto dto) {
@@ -33,7 +83,7 @@ public class SpendingController {
 
     @GetMapping("/{projectId}/plan")
     public ResponseEntity<?> getPlanByProjectId(@PathVariable UUID projectId) {
-        List<SpendingPlanResponse> response = spendingPlanService.getSpendingPlanByProjectId(projectId);
+        SpendingPlanResponse response = spendingPlanService.getSpendingPlanByProjectId(projectId);
         return ResponseEntity.ok(response);
     }
     @GetMapping("/plans/{id}")

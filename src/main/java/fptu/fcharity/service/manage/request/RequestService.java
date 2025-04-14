@@ -78,7 +78,7 @@ public class RequestService {
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
                    requestDTO.getFullAddress(),
-                   requestDTO.isEmergency(), category, requestDTO.getReason());
+                   requestDTO.isEmergency(), category, requestDTO.getReason(),requestDTO.getSupportType());
            requestRepository.save(helpRequest);
            taggableService.addTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
@@ -91,7 +91,6 @@ public class RequestService {
        }catch(Exception e){
            throw new ApiRequestException(e.getMessage());
        }
-
     }
 
     public RequestFinalResponse updateRequest(UUID requestId, RequestDto requestDTO) {

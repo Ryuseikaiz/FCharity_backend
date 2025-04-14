@@ -16,14 +16,14 @@ public class SpendingPlanDto {
     private UUID projectId;
     private String planName;
     private String description;
-    private BigDecimal minRequiredDonationAmount;
+    private BigDecimal maxExtraCostPercentage;
     private BigDecimal estimatedTotalCost;
     private String approvalStatus;
-    public SpendingPlanDto(UUID projectId, String planName, String description, BigDecimal minRequiredDonationAmount, BigDecimal estimatedTotalCost, String approvalStatus) {
+    public SpendingPlanDto(UUID projectId, String planName, String description, BigDecimal maxExtraCostPercentage, BigDecimal estimatedTotalCost, String approvalStatus) {
         this.projectId = projectId;
         this.planName = planName;
         this.description = description;
-        this.minRequiredDonationAmount = minRequiredDonationAmount;
+        this.maxExtraCostPercentage = maxExtraCostPercentage;
         this.estimatedTotalCost = estimatedTotalCost;
         this.approvalStatus = approvalStatus;
     }

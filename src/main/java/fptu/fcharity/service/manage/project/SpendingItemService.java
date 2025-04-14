@@ -36,6 +36,15 @@ public class SpendingItemService {
 
         return toResponse(spendingItemRepository.save(item));
     }
+    public List<SpendingItemResponse> saveFromExcel(List<SpendingItem> l, UUID planId){
+        for (SpendingItem item : l) {
+            SpendingItemDto spendingItemDto = new SpendingItemDto(item);
+            spendingItemDto.setSpendingPlanId(planId);
+            createSpendingItem(spendingItemDto);
+        }
+       List<SpendingItem> res =  spendingItemRepository.findBySpendingPlanId(planId);
+        return res.stream().map(this::toResponse).toList();
+    }
 
     public SpendingItemResponse getSpendingItemById(UUID id) {
         SpendingItem item = spendingItemRepository.findById(id)
