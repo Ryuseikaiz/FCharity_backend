@@ -13,6 +13,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.utils.constants.OrganizationStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    @Autowired
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
 
     @Autowired
@@ -39,7 +42,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationImageRepository organizationImageRepository,
             UserRepository userRepository,
             OrganizationMemberRepository organizationMemberRepository,
-            WalletRepository walletRepository
+            WalletRepository walletRepository,
+            SimpMessagingTemplate simpMessagingTemplate
     )
     {
         this.organizationRepository = organizationRepository;
@@ -47,6 +51,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.userRepository = userRepository;
         this.organizationMemberRepository = organizationMemberRepository;
         this.walletRepository = walletRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
     @Override
@@ -111,7 +116,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organizationMemberRepository.save(organizationMember);
 
         organizationDTO.setOrganizationId(organizationSaved.getOrganizationId());
-
+        simpMessagingTemplate.convertAndSend("/topic/organization-notifications", "User " + ceo.getEmail() + " has created a new organization.");
         return organizationDTO;
     }
 
