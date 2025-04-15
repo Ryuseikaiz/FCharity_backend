@@ -118,19 +118,7 @@ public class PaymentController {
                     transactionDateTime,
                    DonationStatus.COMPLETED
             );
-            UUID projectId = p.getProjectId();
-            Project project = projectRepository.findWithEssentialById(projectId);
-            User leader = project.getLeader();
 
-            if (leader != null) {
-                notificationService.notifyUser(
-                        leader,
-                        null,
-                        "New donation received",
-                        "Your project \"" + project.getProjectName() + "\" has just received a new donation.",
-                        "/project/" + project.getId()
-                );
-            }
             System.out.println(p);
         }catch(Exception e){
             System.out.println("Error: " + e.getMessage());

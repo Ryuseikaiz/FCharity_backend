@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,15 +42,6 @@ public class SpendingPlanService {
         plan.setApprovalStatus(SpendingPlanStatus.PREPARING);
         plan.setCreatedDate(Instant.now());
 
-        User ceo = project.getOrganization().getCeo();// hoặc tương tự tuỳ theo model của bạn
-        notificationService.notifyUser(
-                ceo,
-                null,
-                "New spending plan created",
-                "A new spending plan has been submitted for approval in project: " + project.getProjectName(),
-                "/admin/spending-plan/" + plan.getId()
-        );
-
         return toResponse(spendingPlanRepository.save(plan));
     }
 
@@ -70,8 +62,19 @@ public class SpendingPlanService {
         if (dto.getApprovalStatus() != null) plan.setApprovalStatus(dto.getApprovalStatus());
 
         plan.setUpdatedDate(Instant.now());
-
-        return toResponse(spendingPlanRepository.save(plan));
+        SpendingPlan spendingPlan = spendingPlanRepository.save(plan);
+        if(Objects.equals(spendingPlan.getApprovalStatus(), "SUBMITED")){
+            Project project = projectRepository.findWithEssentialById(dto.getProjectId());
+            User ceo = project.getOrganization().getCeo();// hoặc tương tự tuỳ theo model của bạn
+            notificationService.notifyUser(
+                    ceo,
+                    "New spending plan created",
+                    null,
+                    "A new spending plan has been submitted for approval in project: " + project.getProjectName(),
+                    "/admin/spending-plan/" + plan.getId()
+            );
+        }
+        return toResponse(spendingPlan);
     }
 
     public void deleteSpendingPlan(UUID id) {
@@ -96,7 +99,10 @@ public class SpendingPlanService {
 
     public SpendingPlanResponse getSpendingPlanByProjectId(UUID projectId) {
         SpendingPlan p= spendingPlanRepository.findByProjectId(projectId);
-        return  toResponse(p); // Return the first plan or handle as needed
+        if (p == null) {
+          return null;
+        }
+        return  toResponse(p);
     }
     public SpendingPlanResponse approvePlan(UUID id,UUID projectId){
         SpendingPlan plan = spendingPlanRepository.findById(id)
