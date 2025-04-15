@@ -56,7 +56,7 @@ public class CommentService {
                     "New comment on your post",
                     null,
                     "User \"" + currentUser.getFullName() + "\" has just commented on your post.",
-                    "/post/" + post.getId()
+                    "/posts/" + post.getId()
             );
         }
         return commentResponse;

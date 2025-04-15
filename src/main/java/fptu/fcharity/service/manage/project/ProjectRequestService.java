@@ -121,18 +121,18 @@ public class ProjectRequestService {
                 notificationService.notifyUser(
                         pr.getUser(),
                         "Your invitation request has been " + formattedDecision.toLowerCase(),
-                        "USER",
+                        null,
                         "Your invitation request to join the project \"" + pr.getProject().getProjectName() + "\" has been " + formattedDecision.toLowerCase() + ".",
-                        "/manage-project"
+                        "/manage-project/" + pr.getProject().getId() + "/home"
                 );
             } else {
                 // Nếu người dùng hiện tại là user và thực hiện quyết định, thông báo cho leader
                 notificationService.notifyUser(
                         pr.getProject().getLeader(),
                         "User has responded to your invitation",
-                        "LEADER",
+                        null,
                         "User \"" + pr.getUser().getFullName() + "\" has " + formattedDecision.toLowerCase() + " your invitation to join the project \"" + pr.getProject().getProjectName() + "\".",
-                        "/manage-project"
+                        "/manage-project/" + pr.getProject().getId() + "/home"
                 );
             }
         } else {
@@ -206,7 +206,7 @@ public class ProjectRequestService {
                 "New join request for your project",
                 null,
                 "User \"" + currentUser.getFullName() + "\" has requested to join your project \"" + project.getProjectName() + "\".",
-                "/manage-project"
+                "/manage-project/" + project.getId() + "/members"
         );
        return new ProjectRequestResponse(p);
     }
@@ -238,9 +238,9 @@ public class ProjectRequestService {
 
         notificationService.notifyUser(
                 invitedUser,
-                "Loi moi tham gia du an",
+                "Invitation to Join Project",
                 null,
-                "Bạn đã được mời tham gia vào project \"" + project.getProjectName() + "\".",
+                "You have received an invitation to join the project \"" + project.getProjectName() + "\".",
                 "/user/manage-profile/invitations"
         );
         return new ProjectRequestResponse(p);
