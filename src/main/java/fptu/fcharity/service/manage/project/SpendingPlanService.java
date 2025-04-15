@@ -86,7 +86,8 @@ public class SpendingPlanService {
 
     public SpendingPlanResponse getSpendingPlanByProjectId(UUID projectId) {
         SpendingPlan p= spendingPlanRepository.findByProjectId(projectId);
-        return  toResponse(p); // Return the first plan or handle as needed
+        if(p== null) return null;
+        return  toResponse(p);
     }
     public SpendingPlanResponse approvePlan(UUID id){
         SpendingPlan plan = spendingPlanRepository.findById(id)

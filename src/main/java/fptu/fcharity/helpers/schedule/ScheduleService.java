@@ -26,7 +26,9 @@ public class ScheduleService {
                         .startAt(Date.from(plannedStartTime))
                         .withSchedule(SimpleScheduleBuilder.simpleSchedule())
                         .build();
-
+                System.out.println("Scheduling job for project: " + projectId + " at " + plannedStartTime);
+                System.out.println("Job detail: " + jobDetail);
+                System.out.println("Trigger: " + trigger);
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (SchedulerException e) {
                 e.printStackTrace();

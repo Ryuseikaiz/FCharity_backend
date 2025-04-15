@@ -18,7 +18,7 @@ public class StartProjectJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap dataMap = context.getMergedJobDataMap();
         UUID projectId = UUID.fromString(dataMap.getString("projectId"));
-        // Gọi service xử lý logic khi đến plannedStartTime
+
         System.out.println("Running StartProjectJob for project: " + projectId);
         projectService.handleCreateProjectJob(projectId);
     }
