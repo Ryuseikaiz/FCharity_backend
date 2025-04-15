@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -96,6 +97,7 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(APPROVED);
+        organization.setStartTime(Instant.now());
         organizationRepository.save(organization);
         notificationService.notifyUser(
                 organization.getCeo(), // giả định Organization có quan hệ với User tạo tổ chức
