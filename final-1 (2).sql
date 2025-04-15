@@ -203,6 +203,21 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+-- Table help_notifications
+CREATE TABLE help_notifications (
+                               notification_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+                               user_id UNIQUEIDENTIFIER NOT NULL,
+                               title NVARCHAR(100),                     -- Optional: tiêu đề ngắn
+                               content NVARCHAR(255) NOT NULL,          -- Nội dung chính
+                               created_at DATETIME DEFAULT GETDATE(),   -- Thời gian tạo
+                               is_read BIT DEFAULT 0,                   -- Đã đọc hay chưa
+                               link NVARCHAR(255),                      -- Link để redirect (nếu có)
+
+                               FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+ALTER TABLE help_notifications
+    ADD target_role NVARCHAR(50) NULL;
 -- Table: helpRequests--edited
 
 --ALTER TABLE helpRequests ALTER COLUMN content NVARCHAR(MAX);

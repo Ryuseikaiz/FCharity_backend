@@ -8,6 +8,7 @@ import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.ToProjectDonationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ToProjectDonationResponse;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.utils.constants.TransactionType;
 import fptu.fcharity.utils.constants.project.DonationStatus;
@@ -33,6 +34,8 @@ public class ToProjectDonationService {
     private WalletRepository walletRepository;
     @Autowired
     private ToProjectDonationRepository toProjectDonationRepository;
+    @Autowired
+    private HelpNotificationService notificationService;
     @Transactional
 //    public void takeObject(ToProjectDonation t, ToProjectDonationDto dto){
 //        if(dto.getProjectId()!=null){
@@ -81,6 +84,7 @@ public class ToProjectDonationService {
         donation.setDonationStatus(donationDto.getDonationStatus());
         donation.setOrderCode(donationDto.getOrderCode());
         ToProjectDonation t = toProjectDonationRepository.save(donation);
+
         return new ToProjectDonationResponse(t);
     }
     public ToProjectDonationResponse updateDonation(int orderCode,Instant transactionTime, String decision) {
@@ -90,7 +94,22 @@ public class ToProjectDonationService {
            donation.setDonationTime(transactionTime);
            toProjectDonationRepository.save(donation);
            updateWalletBalanceDonate(donation);
+
+           UUID projectId = donation.getProject().getId();
+           Project project = projectRepository.findWithEssentialById(projectId);
+           User leader = project.getLeader();
+
+           if (leader != null) {
+               notificationService.notifyUser(
+                       leader,
+                       null,
+                       "New donation received",
+                       "Your project \"" + project.getProjectName() + "\" has just received a new donation.",
+                       "/projects/" + project.getId() +"/details"
+               );
+           }
        }
+
         return new ToProjectDonationResponse(donation);
     }
     private void updateWalletBalanceDonate(ToProjectDonation t){

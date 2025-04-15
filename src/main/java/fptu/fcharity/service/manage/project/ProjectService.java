@@ -14,6 +14,9 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.response.project.ProjectResponse;
 import fptu.fcharity.response.project.SpendingItemResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
+import fptu.fcharity.service.HelpNotificationService;
+import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.service.WalletService;
 import fptu.fcharity.service.manage.request.RequestService;
@@ -35,25 +38,26 @@ import java.util.Objects;
 import java.util.UUID;
 @Service
 public class ProjectService {
-    private final ProjectRepository projectRepository;
-    private final CategoryRepository categoryRepository;
-    private final ProjectMapper projectMapper;
-    private final UserRepository userRepository;
-    private final WalletRepository walletRepository;
-    private final WalletService walletService;
-    private final OrganizationRepository organizationRepository;
-    private final TaggableService taggableService;
-    private final ProjectImageService projectImageService;
-    private final RequestRepository requestRepository;
-    private final ProjectMemberService projectMemberService;
-    private final ProjectMemberRepository projectMemberRepository;
-    private final ProjectConfirmationRequestRepository projectConfirmationRequestRepository;
-    private final SpendingItemService spendingItemService;
-    private final SpendingPlanRepository spendingPlanRepository;
-    private final SpendingItemRepository spendingItemRepository;
-    private final SpendingDetailRepository spendingDetailRepository;
-    private final OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository;
+    private  ProjectRepository projectRepository;
+    private OrganizationRepository organizationRepository;
+    private CategoryRepository categoryRepository;
+    private ProjectMapper projectMapper;
+    private UserRepository userRepository;
+    private WalletRepository walletRepository;
+    private WalletService walletService;
+    private TaggableService taggableService;
+    private ProjectImageService projectImageService;
+    private RequestRepository requestRepository;
+    private ProjectMemberService projectMemberService;
+    private ProjectMemberRepository projectMemberRepository;
+    private ProjectConfirmationRequestRepository projectConfirmationRequestRepository;
+    private SpendingItemService spendingItemService;
+    private SpendingPlanRepository spendingPlanRepository;
+    private SpendingItemRepository spendingItemRepository;
+    private SpendingDetailRepository spendingDetailRepository;
+    private OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository;
 
+    private HelpNotificationService notificationService;
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
@@ -65,7 +69,15 @@ public class ProjectService {
                           WalletService walletService,
                           RequestRepository requestRepository,
                           ProjectMemberRepository projectMemberRepository,
-                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, ProjectConfirmationRequestRepository projectConfirmationRequestRepository, SpendingItemService spendingItemService, SpendingPlanRepository spendingPlanRepository, SpendingItemRepository spendingItemRepository, SpendingDetailRepository spendingDetailRepository, OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository) {
+                          ProjectImageService projectImageService,
+                          ProjectMemberService projectMemberService,
+                          ProjectConfirmationRequestRepository projectConfirmationRequestRepository,
+                          SpendingItemService spendingItemService,
+                          SpendingPlanRepository spendingPlanRepository,
+                          SpendingItemRepository spendingItemRepository,
+                          SpendingDetailRepository spendingDetailRepository,
+                          OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository,
+        HelpNotificationService notificationService ) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
@@ -84,6 +96,7 @@ public class ProjectService {
         this.spendingItemRepository = spendingItemRepository;
         this.spendingDetailRepository = spendingDetailRepository;
         this.organizationTransactionHistoryRepository = organizationTransactionHistoryRepository;
+        this.notificationService = notificationService;
     }
     public List<ProjectFinalResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAllWithInclude();
@@ -143,6 +156,23 @@ public class ProjectService {
         //save project
         project.setCreatedAt(Instant.now());
         projectRepository.save(project);
+        User requestOwner = project.getRequest().getUser();
+        notificationService.notifyUser(
+                requestOwner,
+                "Project created",
+                null,
+                "Project \"" + project.getProjectName() + "\" has been registered \"",
+                "/requests/" + project.getRequest().getId()
+        );
+
+        User leader = project.getLeader();
+        notificationService.notifyUser(
+                leader,
+                "Project created",
+                null,
+                "Ban duoc moi lam leader cua project: \"" + project.getProjectName(),
+                "/projects/" + project.getId()
+        );
 
         ProjectMemberDto projectMemberDto = new ProjectMemberDto(project.getLeader().getId(),project.getId(),ProjectMemberRole.LEADER);
         projectMemberService.addProjectMember(projectMemberDto);

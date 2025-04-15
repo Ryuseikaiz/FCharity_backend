@@ -17,6 +17,9 @@ import fptu.fcharity.utils.constants.project.ProjectRequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -154,6 +157,19 @@ public class UserService {
         return usersNotInProject.stream().map(UserResponse::new).toList();
 }
 
+    public User getCurrentUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) {
+            String email = userDetails.getUsername();
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ApiRequestException("Cannot find current user by email"));
+        } else {
+            throw new ApiRequestException("Invalid principal type: " + principal.getClass());
+        }
+    }
+    
+
     public List<TransactionHistoryResponse> getTransactionHistory(UUID userId) {
         List<ToProjectDonation> donations = toProjectDonationRepository.findByUserId(userId);
         List<TransactionHistoryResponse> transactionHistory = new java.util.ArrayList<>(donations.stream()
@@ -165,4 +181,5 @@ public class UserService {
                 .toList());
         return transactionHistory;
     }
+
 }

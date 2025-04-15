@@ -4,6 +4,7 @@ import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageRequestService {
     private final RequestRepository requestRepository;
+    private final HelpNotificationService notificationService;
 
     // public List<RequestDto> getAllRequests() {
     // return requestRepository.findAll().stream()
@@ -58,6 +60,13 @@ public class ManageRequestService {
 
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
+        notificationService.notifyUser(
+                helpRequest.getUser(),
+                "Request Approved",
+                null,
+                "Your request \"" + helpRequest.getTitle() + "\" has been approved.",
+                "/requests/" + requestId
+        );
     }
 
     @Transactional
@@ -72,6 +81,14 @@ public class ManageRequestService {
         request.setStatus(RequestStatus.REJECTED);
         request.setReason(reasonDTO.getReason());
         requestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getUser(),
+                "Yeu cau bi tu choi",
+                null,
+                "Yeu Cau \"" + request.getTitle() + "\" da bi tu choi voi li do: " + reasonDTO.getReason(),
+                "/user/manage-profile/myrequests"
+        );
     }
 
     @Transactional

@@ -4,6 +4,7 @@ import fptu.fcharity.dto.admindashboard.OrganizationDTO;
 import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import static fptu.fcharity.utils.constants.PostStatus.*;
 @RequiredArgsConstructor
 public class ManageOrganizationService {
     private final OrganizationRepository organizationRepository;
+    private final HelpNotificationService notificationService;
 
     public List<OrganizationDTO> getAllOrganizations() {
         return organizationRepository.findAll().stream()
@@ -95,6 +97,13 @@ public class ManageOrganizationService {
 
         organization.setOrganizationStatus(APPROVED);
         organizationRepository.save(organization);
+        notificationService.notifyUser(
+                organization.getCeo(), // giả định Organization có quan hệ với User tạo tổ chức
+                "Organization Approved",
+                null,
+                "Your organization \"" + organization.getOrganizationName() + "\" has been approved and is now active.",
+                "manage-organization"
+        );
     }
 
     @Transactional
@@ -109,6 +118,13 @@ public class ManageOrganizationService {
         organization.setOrganizationStatus(REJECTED);
         organization.setReason(reasonDTO.getReason());
         organizationRepository.save(organization);
+        notificationService.notifyUser(
+                organization.getCeo(), // giả định Organization có trường `User user`
+                "Organization Rejected",
+                null,
+                "Your organization \"" + organization.getOrganizationName() + "\" has been rejected. Reason: " + reasonDTO.getReason(),
+                "/manage-organization"
+        );
     }
 
     private OrganizationDTO convertToDTO(Organization organization) {
