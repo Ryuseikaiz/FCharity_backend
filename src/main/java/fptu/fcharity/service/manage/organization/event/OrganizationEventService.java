@@ -8,7 +8,8 @@ import java.util.UUID;
 
 public interface OrganizationEventService {
     List<OrganizationEventDTO> findByOrganizationId(UUID organizationId);
-    OrganizationEvent save(OrganizationEvent organizationEvent);
+    OrganizationEvent save(OrganizationEventDTO organizationEventDTO);
+    OrganizationEvent update(OrganizationEventDTO updatedOrganizationEventDTO);
     OrganizationEvent findByOrganizationEventId(UUID organizationEventId);
     boolean existsByOrganizationEventId(UUID organizationEventId);
     void deleteByOrganizationEventId(UUID organizationEventId);
