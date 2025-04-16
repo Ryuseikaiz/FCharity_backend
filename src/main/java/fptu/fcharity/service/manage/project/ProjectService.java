@@ -69,8 +69,8 @@ public class ProjectService {
                           WalletService walletService,
                           RequestRepository requestRepository,
                           ProjectMemberRepository projectMemberRepository,
-                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, ProjectConfirmationRequestRepository projectConfirmationRequestRepository, SpendingItemService spendingItemService, SpendingPlanRepository spendingPlanRepository, SpendingItemRepository spendingItemRepository, SpendingDetailRepository spendingDetailRepository, OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository) {
-                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, HelpNotificationService notificationService) {
+                          ProjectImageService projectImageService, ProjectMemberService projectMemberService, ProjectConfirmationRequestRepository projectConfirmationRequestRepository, SpendingItemService spendingItemService, SpendingPlanRepository spendingPlanRepository, SpendingItemRepository spendingItemRepository, SpendingDetailRepository spendingDetailRepository, OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository,
+                          HelpNotificationService notificationService) {
         this.projectRepository = projectRepository;
         this.categoryRepository = categoryRepository;
         this.projectMapper = projectMapper;
