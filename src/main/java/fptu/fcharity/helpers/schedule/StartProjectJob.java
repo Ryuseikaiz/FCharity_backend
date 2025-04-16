@@ -19,8 +19,8 @@ public class StartProjectJob implements Job {
         JobDataMap dataMap = context.getMergedJobDataMap();
         UUID projectId = UUID.fromString(dataMap.getString("projectId"));
 
-        System.out.println("Running StartProjectJob for project: " + projectId);
-        projectService.handleCreateProjectJob(projectId);
+        System.out.println("Running handleActiveProjectJob for project: " + projectId);
+        projectService.handleActiveProjectJob(projectId);
     }
 }
 

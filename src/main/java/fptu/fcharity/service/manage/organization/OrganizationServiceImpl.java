@@ -315,7 +315,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setEmail(DTO.getEmail());
         organization.setPhoneNumber(DTO.getPhoneNumber());
         organization.setAddress(DTO.getAddress());
-        if (DTO.getWalletAddress().getId() != null) {
+        if (DTO.getWalletAddress() != null && DTO.getWalletAddress().getId() != null) {
             organization.setWalletAddress(walletRepository.findById(DTO.getWalletAddress().getId()).orElseThrow(() -> new RuntimeException("Wallet not found")));
         }
         organization.setOrganizationStatus(OrganizationStatus.PENDING);

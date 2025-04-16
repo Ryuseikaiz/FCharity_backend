@@ -3,8 +3,12 @@ package fptu.fcharity.service.manage.request;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.project.ProjectConfirmationRequestRepository;
+import fptu.fcharity.repository.manage.project.TransferRequestRepository;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.response.project.ProjectConfirmationRequestResponse;
+import fptu.fcharity.response.project.TransferRequestResponse;
 import fptu.fcharity.response.request.HelpRequestResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
@@ -30,18 +34,21 @@ public class RequestService {
     private SimpMessagingTemplate simpMessagingTemplate;
     private final TaggableService taggableService;
     private final ObjectAttachmentService objectAttachmentService;
+    private final TransferRequestRepository transferRequestRepository;
 
     public RequestService(
                                                      RequestRepository requestRepository,
                                                      UserRepository userRepository,
                                                      CategoryRepository categoryRepository,
                                                     TaggableService taggableService,
-                                                     ObjectAttachmentService objectAttachmentService) {
+                                                     ObjectAttachmentService objectAttachmentService,
+                                                     TransferRequestRepository transferRequestRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.taggableService = taggableService;
         this.objectAttachmentService = objectAttachmentService;
+        this.transferRequestRepository = transferRequestRepository;
     }
 
     public List<RequestFinalResponse> getAllRequests() {
@@ -157,5 +164,14 @@ public class RequestService {
                         objectAttachmentService.getAttachmentsOfObject(request.getId(), TaggableType.REQUEST)
                 ))
                 .toList();
+    }
+
+    public TransferRequestResponse getTransferRequestByRequestId(UUID id) {
+        TransferRequest transferRequest = transferRequestRepository.findByRequestId(id);
+     if(transferRequest == null) {
+        return null;
+     }
+        return new TransferRequestResponse(transferRequest);
+
     }
 }
