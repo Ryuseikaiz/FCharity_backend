@@ -1,7 +1,10 @@
 package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.dto.project.SpendingPlanDto;
-import fptu.fcharity.entity.*;
+import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.SpendingItem;
+import fptu.fcharity.entity.SpendingPlan;
+import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.SpendingItemRepository;
 import fptu.fcharity.repository.manage.project.SpendingPlanRepository;
@@ -99,18 +102,13 @@ public class SpendingPlanService {
 
     public SpendingPlanResponse getSpendingPlanByProjectId(UUID projectId) {
         SpendingPlan p= spendingPlanRepository.findByProjectId(projectId);
-        if (p == null) {
-          return null;
-        }
+        if(p== null) return null;
         return  toResponse(p);
     }
-    public SpendingPlanResponse approvePlan(UUID id,UUID projectId){
+    public SpendingPlanResponse approvePlan(UUID id){
         SpendingPlan plan = spendingPlanRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestException("Spending plan not found"));
-        Project project = projectRepository.findWithEssentialById(projectId);
-        if (plan.getProject().getId() != project.getId()){
-            throw new ApiRequestException("Spending plan not found");
-        }
+        Project project = plan.getProject();
         BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(id)
                 .stream()
                 .map(SpendingItem::getEstimatedCost)

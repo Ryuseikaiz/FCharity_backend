@@ -147,6 +147,17 @@ CREATE TABLE project_members (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE NO ACTION
 );
+CREATE TABLE project_confirmation_requests (
+    confirmation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    project_id UNIQUEIDENTIFIER,
+    request_id UNIQUEIDENTIFIER,
+    created_at DATETIME DEFAULT GETDATE(),
+    is_confirmed BIT DEFAULT 0,
+    confirmation_link NVARCHAR(500),
+    note NVARCHAR(MAX),
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+    FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
+);
 
 CREATE TABLE spending_plans (
      spending_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -268,17 +279,19 @@ CREATE TABLE task_plan (
 );
 
 
--- Table: to_project_allocations
-CREATE TABLE to_project_allocations (
-    allocation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+-- Table: to_project_allocations extract extra cost/ allocate to project
+CREATE TABLE organization_transaction_history (
+    transaction_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
 	 organization_id UNIQUEIDENTIFIER,
     project_id UNIQUEIDENTIFIER,
-    allocation_status NVARCHAR(50),
+    transaction_status NVARCHAR(50),
     amount DECIMAL(18, 2),
     message NVARCHAR(255),
-    allocation_time DATETIME,
+    transaction_time DATETIME,
+    transaction_type NVARCHAR(50),
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
+alter table organization_transaction_history add constraint fk_organization_transaction_history_organization_id foreign key (organization_id) references organizations(organization_id) on delete no action;
 
 -- Table: to_project_donations
 CREATE TABLE to_project_donations (
@@ -292,19 +305,6 @@ CREATE TABLE to_project_donations (
     order_code int,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION
-);
-alter table to_organization_donations add order_code int;
--- Table: to_organization_donations
-CREATE TABLE to_organization_donations (
-    donation_id UNIQUEIDENTIFIER PRIMARY KEY,
-    user_id UNIQUEIDENTIFIER,
-    organization_id UNIQUEIDENTIFIER,
-    amount DECIMAL(18, 2),
-    donation_status NVARCHAR(50),
-    donation_time DATETIME,
-    message NVARCHAR(255),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE NO ACTION,
-    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
 
 -- Table: posts
