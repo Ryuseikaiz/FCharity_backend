@@ -102,8 +102,8 @@ public class ToProjectDonationService {
            if (leader != null) {
                notificationService.notifyUser(
                        leader,
-                       null,
                        "New donation received",
+                       null,
                        "Your project \"" + project.getProjectName() + "\" has just received a new donation.",
                        "/projects/" + project.getId() +"/details"
                );

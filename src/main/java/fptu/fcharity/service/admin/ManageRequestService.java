@@ -84,9 +84,9 @@ public class ManageRequestService {
 
         notificationService.notifyUser(
                 request.getUser(),
-                "Yeu cau bi tu choi",
+                "Request Rejected",
                 null,
-                "Yeu Cau \"" + request.getTitle() + "\" da bi tu choi voi li do: " + reasonDTO.getReason(),
+                "Your request \"" + request.getTitle() + "\" has been rejected for the following reason: " + reasonDTO.getReason(),
                 "/user/manage-profile/myrequests"
         );
     }

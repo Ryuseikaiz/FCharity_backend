@@ -2,13 +2,12 @@ package fptu.fcharity.service.manage.organization.request;
 
 import fptu.fcharity.dto.organization.OrganizationRequestDTO;
 import fptu.fcharity.dto.request.OrganizationRequestDto;
-import fptu.fcharity.entity.Organization;
-import fptu.fcharity.entity.OrganizationMember;
-import fptu.fcharity.entity.OrganizationRequest;
-import fptu.fcharity.entity.User;
+import fptu.fcharity.entity.*;
 
 import fptu.fcharity.repository.manage.organization.*;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.service.HelpNotificationService;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.organization.OrganizationRequestMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,18 +26,21 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
     private final OrganizationRepository organizationRepository;
     private final OrganizationMemberRepository organizationMemberRepository;
     private final OrganizationRequestMapper organizationRequestMapper;
+    private final HelpNotificationService notificationService;
 
     public OrganizationRequestServiceImpl(
             OrganizationRequestRepository organizationRequestRepository,
             UserRepository userRepository,
             OrganizationRepository organizationRepository,
             OrganizationMemberRepository organizationMemberRepository,
-            OrganizationRequestMapper organizationRequestMapper) {
+            OrganizationRequestMapper organizationRequestMapper,
+            HelpNotificationService notificationService) {
         this.organizationRequestRepository = organizationRequestRepository;
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
         this.organizationMemberRepository = organizationMemberRepository;
         this.organizationRequestMapper = organizationRequestMapper;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -84,6 +86,13 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
         newJoinRequest.setOrganization(organizationRepository.findById(organizationRequestDto.getOrganizationId()).orElseThrow(() -> new IllegalArgumentException("Organization not found with ID: " + organizationRequestDto.getOrganizationId())));
 
         newJoinRequest.setUser(user);
+        notificationService.notifyUser(
+                organization.getCeo(),
+                "New Join Request",
+                null,
+                "User " + user.getFullName() + " has sent a request to join the organization \"" + organization.getOrganizationName() + "\".",
+                "/my-organization/members"
+        );
         return organizationRequestRepository.save(newJoinRequest);
     }
 
@@ -107,6 +116,13 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
         organizationMemberRepository.save(newMember);
 
         organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Approved);
+        notificationService.notifyUser(
+                requestUser,
+                "Join Request Approved",
+                null,
+                "Your request to join the organization \"" + organization.getOrganizationName() + "\" has been approved.",
+                "/my-organization/members"
+        );
         return organizationRequestRepository.save(organizationRequest);
     }
 
@@ -117,6 +133,13 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
                 .findById(joinRequestId).orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + joinRequestId));
 
         organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Rejected);
+        notificationService.notifyUser(
+                organizationRequest.getUser(),
+                "Join Request Rejected",
+                null,
+                "Your request to join the organization \"" + organizationRequest.getOrganization().getOrganizationName() + "\" has been rejected.",
+                "/"
+        );
         return organizationRequestRepository.save(organizationRequest);
     }
 
@@ -166,6 +189,14 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
         organizationRequestRepository.save(organizationRequest);
 
         System.out.println("Invite request created: 🤖🤖🤖🤖" + organizationRequest);
+
+        notificationService.notifyUser(
+                user,
+                "Invitation to Join Organization",
+                null,
+                "You have been invited to join the organization \"" + organization.getOrganizationName() + "\".",
+                "/user/manage-profile/invitations"
+        );
         return organizationRequestMapper.toDTO(organizationRequestRepository.findByUserIdAndOrganizationOrganizationIdAndRequestType(userId, organizationId, fptu.fcharity.entity.OrganizationRequest.OrganizationRequestType.Invitation));
     }
 
@@ -189,6 +220,13 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
         organizationMemberRepository.save(newMember);
 
         organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Approved);
+        notificationService.notifyUser(
+                organization.getCeo(),
+                "User has responded to your invitation",
+                null,
+                "User \"" + requestUser.getFullName() + "\" has accepted your invitation to join the organization \"" + organization.getOrganizationName() + "\".",
+                "/my-organization/members"
+        );
         return organizationRequestRepository.save(organizationRequest);
     }
 
@@ -199,6 +237,13 @@ public class OrganizationRequestServiceImpl implements OrganizationRequestServic
                 .findById(invitationRequestId).orElseThrow(() -> new IllegalArgumentException("Join request not found with ID: " + invitationRequestId));
 
         organizationRequest.setStatus(OrganizationRequest.OrganizationRequestStatus.Rejected);
+        notificationService.notifyUser(
+                organizationRequest.getOrganization().getCeo(),
+                "User has responded to your invitation",
+                null,
+                "User \"" + organizationRequest.getUser().getFullName() + "\" has rejected your invitation to join the organization \"" + organizationRequest.getOrganization().getOrganizationName() + "\".",
+                "/my-organization/members"
+        );
         return organizationRequestRepository.save(organizationRequest);
     }
 

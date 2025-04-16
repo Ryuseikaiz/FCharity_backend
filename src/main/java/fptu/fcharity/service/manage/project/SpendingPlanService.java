@@ -74,7 +74,7 @@ public class SpendingPlanService {
                     "New spending plan created",
                     null,
                     "A new spending plan has been submitted for approval in project: " + project.getProjectName(),
-                    "/admin/spending-plan/" + plan.getId()
+                    "/my-organization/projects"
             );
         }
         return toResponse(spendingPlan);
@@ -122,10 +122,10 @@ public class SpendingPlanService {
         User leader = project.getLeader();
         notificationService.notifyUser(
                 leader,
-                null,
                 "Spending plan approved",
+                null,
                 "The spending plan for project '" + project.getProjectName() + "' has been approved.",
-                "/admin/spending-plan/"
+                "/manage-project/" + project.getId() + "/home"
         );
         return toResponse(spendingPlanRepository.save(plan));
     }
