@@ -84,7 +84,10 @@ public class PostController {
             ));
         }
     }
-
-
+    @GetMapping("/mine")
+    public ResponseEntity<List<PostResponse>> getMyPosts(@RequestParam UUID userId) {
+        List<PostResponse> posts = postService.getPostsByUserId(userId);
+        return ResponseEntity.ok(posts);
+    }
 
 }

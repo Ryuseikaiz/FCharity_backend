@@ -16,4 +16,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @EntityGraph(attributePaths = {"user","user.walletAddress"})
     @Query("SELECT r FROM Post r")
     List<Post> findAllWithInclude();
+
+    List<Post> findByUserId(UUID userId);
 }

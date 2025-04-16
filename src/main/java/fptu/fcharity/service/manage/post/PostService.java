@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -122,9 +123,11 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
-
-
-
-
+    public List<PostResponse> getPostsByUserId(UUID userId) {
+        List<Post> posts = postRepository.findByUserId(userId);
+        return posts.stream()
+                .map(PostResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
 
 }
