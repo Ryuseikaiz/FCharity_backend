@@ -39,7 +39,6 @@ public class ProjectController {
     @PostMapping("/create")
     public ResponseEntity<?> createProject(@RequestBody ProjectDto projectDto) {
         ProjectFinalResponse newProject =  projectService.createProject(projectDto);
-        scheduleService.handleSetJob(newProject.getProject().getId(),newProject.getProject().getPlannedStartTime());
         return ResponseEntity.ok(newProject);
     }
     @PutMapping("/update")
@@ -62,4 +61,5 @@ public class ProjectController {
         ProjectFinalResponse project = projectService.getProjectByWalletId(walletId);
         return ResponseEntity.ok(project);
     }
+
 }

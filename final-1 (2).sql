@@ -147,8 +147,9 @@ CREATE TABLE project_members (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE NO ACTION
 );
+
 CREATE TABLE project_confirmation_requests (
-    confirmation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     project_id UNIQUEIDENTIFIER,
     request_id UNIQUEIDENTIFIER,
     created_at DATETIME DEFAULT GETDATE(),
@@ -157,6 +158,33 @@ CREATE TABLE project_confirmation_requests (
     note NVARCHAR(MAX),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (request_id) REFERENCES help_requests(request_id)
+);
+CREATE TABLE transfer_request (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+
+    project_id UNIQUEIDENTIFIER NOT NULL,
+    request_id UNIQUEIDENTIFIER NOT NULL,
+
+    amount DECIMAL(18, 2) NOT NULL CHECK (amount > 0),
+    reason NVARCHAR(500) NOT NULL,
+    note NVARCHAR(1000),
+
+    bank_account NVARCHAR(100),
+    bank_bin NVARCHAR(100),
+    bank_owner NVARCHAR(100),
+
+    transaction_image NVARCHAR(500),  -- ảnh hóa đơn (nếu có)
+    transaction_code NVARCHAR(100),   -- mã giao dịch (nếu có)
+
+    status NVARCHAR(50) NOT NULL,
+    created_date DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_date DATETIME NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT fk_transfer_request_project FOREIGN KEY (project_id)
+    REFERENCES projects(project_id),
+
+    CONSTRAINT fk_transfer_request_request FOREIGN KEY (request_id)
+    REFERENCES help_requests(request_id) ON DELETE CASCADE
 );
 
 CREATE TABLE spending_plans (
@@ -191,7 +219,8 @@ CREATE TABLE spending_details (
                                   proof_image NVARCHAR(255),
                                   FOREIGN KEY (spending_item_id) REFERENCES spending_items(spending_item_id) ON DELETE CASCADE
 );
-
+alter table spending_details add project_id UNIQUEIDENTIFIER;
+alter table spending_details add FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE NO ACTION;
 -- Table: notifications
 CREATE TABLE notifications (
     notification_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),

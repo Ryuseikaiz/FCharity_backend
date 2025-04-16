@@ -39,15 +39,11 @@ public class ProjectConfirmationRequest {
     private Boolean isConfirmed;
 
     @Nationalized
-    @Column(name = "confirmation_link", length = 500)
-    private String confirmationLink;
-
-    @Nationalized
     @Lob
     @Column(name = "note")
     private String note;
 
-    public ProjectConfirmationRequest(HelpRequest request, Project project,String note) {
+    public ProjectConfirmationRequest(HelpRequest request, Project project, String note) {
         this.request = request;
         this.project = project;
         this.createdAt = Instant.now();

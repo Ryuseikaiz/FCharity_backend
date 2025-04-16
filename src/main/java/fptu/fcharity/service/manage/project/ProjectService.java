@@ -24,6 +24,7 @@ import fptu.fcharity.utils.constants.organization.OrganizationTransactionType;
 import fptu.fcharity.utils.constants.project.ProjectMemberRole;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.TaggableType;
+import fptu.fcharity.utils.constants.project.TransferRequestStatus;
 import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.constants.request.RequestSupportType;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -58,6 +59,8 @@ public class ProjectService {
     private OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository;
 
     private HelpNotificationService notificationService;
+    private TransferRequestRepository transferRequestRepository;
+
     public ProjectService(ProjectMapper projectMapper,
                           ProjectRepository projectRepository,
                           CategoryRepository categoryRepository,
@@ -76,6 +79,7 @@ public class ProjectService {
                           SpendingPlanRepository spendingPlanRepository,
                           SpendingItemRepository spendingItemRepository,
                           SpendingDetailRepository spendingDetailRepository,
+                          TransferRequestRepository transferRequestRepository,
                           OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository,
         HelpNotificationService notificationService ) {
         this.projectRepository = projectRepository;
@@ -95,6 +99,7 @@ public class ProjectService {
         this.spendingPlanRepository = spendingPlanRepository;
         this.spendingItemRepository = spendingItemRepository;
         this.spendingDetailRepository = spendingDetailRepository;
+        this.transferRequestRepository = transferRequestRepository;
         this.organizationTransactionHistoryRepository = organizationTransactionHistoryRepository;
         this.notificationService = notificationService;
     }
@@ -253,57 +258,94 @@ public class ProjectService {
         ).toList();
     }
 
-    public void handleCreateProjectJob(UUID id) {
+    public void handleActiveProjectJob(UUID id) {
         Project p = projectRepository.findWithEssentialById(id);
         SpendingPlan plan = spendingPlanRepository.findByProjectId(p.getId());
         BigDecimal totalDonations = p.getWalletAddress().getBalance();
         //if donations < plan.getEstimatedTotalCost()
         if(totalDonations.compareTo(plan.getEstimatedTotalCost()) < 0){
             //send confirm
-            projectConfirmationRequestRepository.save( new ProjectConfirmationRequest(p.getRequest(),p,
-                    "The project has reached its start time, but the donations are still insufficient. We will return all the donated funds to you so that you may use them for other purposes. Please confirm this action."
+            transferRequestRepository.save(new TransferRequest(
+                    p.getRequest(),
+                    p,
+                    totalDonations,
+                    "The project has reached its start time, but the donations are still insufficient. We will return all the donated funds to you so that you may use them for other purposes. "+
+                            "Please fill the form below to continue the receive money process.","",
+                    TransferRequestStatus.PENDING_USER_CONFIRM
             ));
+            p.setProjectStatus(ProjectStatus.PROCESSING);
+            p.setActualStartTime(Instant.now());
+            projectRepository.save(p);
+            notificationService.notifyUser(
+                    p.getRequest().getUser(),
+                    "Transfer request to your request: " + p.getRequest().getTitle(),
+                    null,
+                    "There is a transfer request from project who help your request: " + p.getProjectName(),
+                    "/user/manage-profile/myrequests"
+            );
         }else{
+            if(p.getRequest().getSupportType() == RequestSupportType.MONEY) {
+                //send confirm
+                transferRequestRepository.save(new TransferRequest(
+                        p.getRequest(),
+                        p,
+                        totalDonations,
+                        "The project has reached its start time, and the donations are sufficient. We will send the donated funds to you. Please fill the form below to continue the receive money process.", "",
+                        TransferRequestStatus.PENDING_USER_CONFIRM
+                ));
+                p.setProjectStatus(ProjectStatus.PROCESSING);
+                p.setActualStartTime(Instant.now());
+                projectRepository.save(p);
+                notificationService.notifyUser(
+                        p.getRequest().getUser(),
+                        "Transfer request to your request: " + p.getRequest().getTitle(),
+                        null,
+                        "There is a transfer request from project who help your request: " + p.getProjectName(),
+                        "/user/manage-profile/myrequests"
+                );
+            }else{
+                BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(plan.getId())
+                        .stream()
+                        .map(SpendingItem::getEstimatedCost)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                SpendingItem item = new SpendingItem();
+                item.setItemName("Extra funds");
+                item.setEstimatedCost(totalDonations.subtract(totalCost));
+                item.setSpendingPlan(plan);
+                item.setNote("Extra funds for project");
+                item.setSpendingPlan(plan);
+                item.setCreatedDate(Instant.now());
+                spendingItemRepository.save(item);
+
+                SpendingDetail spendingDetail = new SpendingDetail();
+                spendingDetail.setSpendingItem(item);
+                spendingDetail.setAmount(item.getEstimatedCost());
+                spendingDetail.setDescription("Extra funds for project");
+                spendingDetail.setTransactionTime(Instant.now());
+                spendingDetailRepository.save(spendingDetail);
+
+                p.getWalletAddress().setBalance(
+                        p.getWalletAddress().getBalance().subtract(spendingDetail.getAmount())
+                );
+                walletRepository.save(p.getWalletAddress());
+
+                //send extra cost to org
+                OrganizationTransactionHistory organizationTransactionHistory = new OrganizationTransactionHistory();
+                organizationTransactionHistory.setOrganization(p.getOrganization());
+                organizationTransactionHistory.setTransactionTime(Instant.now());
+                organizationTransactionHistory.setTransactionType(OrganizationTransactionType.EXTRACT_EXTRA_COST);
+                organizationTransactionHistory.setAmount(spendingDetail.getAmount());
+                organizationTransactionHistory.setProject(p);
+                organizationTransactionHistory.setMessage("Extracted extra funds from project");
+                organizationTransactionHistoryRepository.save(organizationTransactionHistory);
+
+                p.getOrganization().getWalletAddress().setBalance(
+                        p.getOrganization().getWalletAddress().getBalance().add(spendingDetail.getAmount())
+                );
+                walletRepository.save(p.getOrganization().getWalletAddress());
+            }
             //make spending detail for project
-            BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(plan.getId())
-                    .stream()
-                    .map(SpendingItem::getEstimatedCost)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            SpendingItem item = new SpendingItem();
-            item.setItemName("Extra funds");
-            item.setEstimatedCost(totalDonations.subtract(totalCost));
-            item.setSpendingPlan(plan);
-            item.setNote("Extra funds for project");
-            item.setSpendingPlan(plan);
-            item.setCreatedDate(Instant.now());
-            spendingItemRepository.save(item);
 
-            SpendingDetail spendingDetail = new SpendingDetail();
-            spendingDetail.setSpendingItem(item);
-            spendingDetail.setAmount(item.getEstimatedCost());
-            spendingDetail.setDescription("Extra funds for project");
-            spendingDetail.setTransactionTime(Instant.now());
-            spendingDetailRepository.save(spendingDetail);
-
-            p.getWalletAddress().setBalance(
-                    p.getWalletAddress().getBalance().subtract(spendingDetail.getAmount())
-            );
-            walletRepository.save(p.getWalletAddress());
-
-            //send extra cost to org
-            OrganizationTransactionHistory organizationTransactionHistory = new OrganizationTransactionHistory();
-            organizationTransactionHistory.setOrganization(p.getOrganization());
-            organizationTransactionHistory.setTransactionTime(Instant.now());
-            organizationTransactionHistory.setTransactionType(OrganizationTransactionType.EXTRACT_EXTRA_COST);
-            organizationTransactionHistory.setAmount(spendingDetail.getAmount());
-            organizationTransactionHistory.setProject(p);
-            organizationTransactionHistory.setMessage("Extracted extra funds from project");
-            organizationTransactionHistoryRepository.save(organizationTransactionHistory);
-
-            p.getOrganization().getWalletAddress().setBalance(
-                    p.getOrganization().getWalletAddress().getBalance().add(spendingDetail.getAmount())
-            );
-            walletRepository.save(p.getOrganization().getWalletAddress());
         }
     }
 }

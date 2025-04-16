@@ -28,6 +28,11 @@ public class SpendingDetail {
     @JoinColumn(name = "spending_item_id", nullable = false)
     private SpendingItem spendingItem;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
     @Column(name = "amount", precision = 18, scale = 2)
     private BigDecimal amount;
 
