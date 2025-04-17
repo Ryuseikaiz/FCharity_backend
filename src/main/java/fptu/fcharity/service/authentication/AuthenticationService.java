@@ -204,6 +204,29 @@ public class AuthenticationService {
             e.printStackTrace();
         }
     }
+
+    public void sendBanNotificationEmail(User user, String reason) {
+        String subject = "Your FCharity account has been banned";
+        String htmlContent = "<html>" +
+                "<body style=\"font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;\">" +
+                "<div style=\"max-width: 600px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1);\">" +
+                "<h2 style=\"color: #d32f2f;\">Account Banned</h2>" +
+                "<p>Dear <strong>" + user.getFullName() + "</strong>,</p>" +
+                "<p>We regret to inform you that your account has been <strong>banned</strong> due to the following reason:</p>" +
+                "<blockquote style=\"border-left: 4px solid #d32f2f; padding-left: 15px; color: #333;\"><em>" + reason + "</em></blockquote>" +
+                "<p>If you believe this was a mistake or you have any questions, feel free to contact our support team.</p>" +
+                "<p>Thank you for understanding,<br/>FCharity Team</p>" +
+                "<hr style=\"margin-top: 30px;\">" +
+                "<p style=\"font-size: 12px; color: gray;\">This is an automated message, please do not reply to this email.</p>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), subject, htmlContent);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
     private String generateVerificationCode() {
         Random random = new Random();
         int code = random.nextInt(900000) + 100000;
