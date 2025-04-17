@@ -1,18 +1,18 @@
 package fptu.fcharity.controller.manage.project;
 
+import fptu.fcharity.dto.project.SpendingDetailDto;
 import fptu.fcharity.dto.project.SpendingItemDto;
 import fptu.fcharity.dto.project.SpendingPlanDto;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.entity.SpendingItem;
 import fptu.fcharity.entity.SpendingPlan;
+import fptu.fcharity.helpers.schedule.ScheduleService;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.response.project.SpendingItemResponse;
 import fptu.fcharity.response.project.SpendingPlanReaderResponse;
 import fptu.fcharity.response.project.SpendingPlanResponse;
-import fptu.fcharity.service.manage.project.ExcelService;
-import fptu.fcharity.service.manage.project.ProjectService;
-import fptu.fcharity.service.manage.project.SpendingItemService;
-import fptu.fcharity.service.manage.project.SpendingPlanService;
+import fptu.fcharity.service.manage.project.*;
+import fptu.fcharity.utils.constants.project.SpendingDetailResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -45,9 +45,13 @@ public class SpendingController {
     @Autowired
     private ExcelService excelService;
     @Autowired
+    private ScheduleService scheduleService;
+    @Autowired
     private ProjectRepository projectRepository;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private SpendingDetailService spendingDetailService;
 
     // ======= SPENDING PLAN CRUD =======
     @GetMapping("/{projectId}/download-template")
@@ -135,9 +139,37 @@ public class SpendingController {
         List<SpendingItemResponse> response = spendingItemService.getItemsBySpendingPlan(planId);
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/plans/{projectId}/{planId}/approve")
-    public ResponseEntity<?> approvePlan(@PathVariable UUID planId, @PathVariable UUID projectId) {
-        SpendingPlanResponse response = spendingPlanService.approvePlan(planId,projectId);
+    @PostMapping("/plans/{planId}/approve")
+    public ResponseEntity<?> approvePlan(@PathVariable UUID planId) {
+        SpendingPlanResponse response = spendingPlanService.approvePlan(planId);
+        Project project = projectRepository.findWithEssentialById(response.getProjectId());
+        scheduleService.handleSetJob(project.getId(),project.getPlannedStartTime());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{projectId}/details")
+    public ResponseEntity<?> getSpendingDetails(@PathVariable UUID projectId) {
+        List<SpendingDetailResponse> response = spendingDetailService.getSpendingDetailsByProject(projectId);
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/details/create")
+    public ResponseEntity<?> createSpendingDetail(@RequestBody SpendingDetailDto dto) {
+        SpendingDetailResponse response = spendingDetailService.createSpendingDetail(dto);
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/details/{id}")
+    public ResponseEntity<?> getSpendingDetailById(@PathVariable UUID id) {
+        SpendingDetailResponse response = spendingDetailService.getSpendingDetailById(id);
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/details/{id}")
+    public ResponseEntity<?> updateSpendingDetail(@PathVariable UUID id, @RequestBody SpendingDetailDto dto) {
+        SpendingDetailResponse response = spendingDetailService.updateSpendingDetail(id, dto);
+        return ResponseEntity.ok(response);
+    }
+    @DeleteMapping("/details/{id}")
+    public ResponseEntity<?> deleteSpendingDetail(@PathVariable UUID id) {
+        spendingDetailService.deleteSpendingDetail(id);
+        return ResponseEntity.noContent().build();
     }
 }

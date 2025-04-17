@@ -1,6 +1,10 @@
 package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.dto.project.SpendingPlanDto;
+import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.SpendingItem;
+import fptu.fcharity.entity.SpendingPlan;
+import fptu.fcharity.entity.User;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.SpendingItemRepository;
@@ -71,7 +75,7 @@ public class SpendingPlanService {
                     "New spending plan created",
                     null,
                     "A new spending plan has been submitted for approval in project: " + project.getProjectName(),
-                    "/my-organization/projects"
+                    "/admin/spending-plan/" + plan.getId()
             );
         }
         return toResponse(spendingPlan);
@@ -104,13 +108,10 @@ public class SpendingPlanService {
         }
         return  toResponse(p);
     }
-    public SpendingPlanResponse approvePlan(UUID id,UUID projectId){
+    public SpendingPlanResponse approvePlan(UUID id){
         SpendingPlan plan = spendingPlanRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestException("Spending plan not found"));
-        Project project = projectRepository.findWithEssentialById(projectId);
-        if (plan.getProject().getId() != project.getId()){
-            throw new ApiRequestException("Spending plan not found");
-        }
+        Project project = plan.getProject();
         BigDecimal totalCost = spendingItemRepository.findBySpendingPlanId(id)
                 .stream()
                 .map(SpendingItem::getEstimatedCost)
@@ -124,10 +125,10 @@ public class SpendingPlanService {
         User leader = project.getLeader();
         notificationService.notifyUser(
                 leader,
-                "Spending plan approved",
                 null,
+                "Spending plan approved",
                 "The spending plan for project '" + project.getProjectName() + "' has been approved.",
-                "/manage-project/" + project.getId() + "/home"
+                "/admin/spending-plan/"
         );
         return toResponse(spendingPlanRepository.save(plan));
     }

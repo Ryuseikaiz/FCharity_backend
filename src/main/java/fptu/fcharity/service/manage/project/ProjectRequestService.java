@@ -11,6 +11,9 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.utils.constants.project.ProjectMemberRole;
+import fptu.fcharity.service.HelpNotificationService;
+import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.constants.project.ProjectRequestStatus;
 import fptu.fcharity.utils.constants.project.ProjectRequestType;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -111,6 +114,7 @@ public class ProjectRequestService {
             ProjectMemberDto pmDto = new ProjectMemberDto();
             pmDto.setProjectId(pr.getProject().getId());
             pmDto.setUserId(pr.getUser().getId());
+            pmDto.setRole(ProjectMemberRole.MEMBER);
             if(formattedDecision.equals(ProjectRequestStatus.APPROVED)){
                 projectMemberService.addProjectMember(pmDto);
             }

@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.manage.project;
 
 import fptu.fcharity.dto.project.ProjectDto;
+import fptu.fcharity.helpers.schedule.ScheduleService;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.service.manage.project.ProjectService;
 import fptu.fcharity.utils.mapper.ProjectMapper;
@@ -14,9 +15,11 @@ import java.util.UUID;
 @RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ScheduleService scheduleService;
 
-    public ProjectController(ProjectService projectService, ProjectMapper projectMapper) {
+    public ProjectController(ProjectService projectService, ProjectMapper projectMapper, ScheduleService scheduleService) {
         this.projectService = projectService;
+        this.scheduleService = scheduleService;
     }
     @GetMapping
     public ResponseEntity< List<ProjectFinalResponse>> getAllProjects() {
@@ -58,4 +61,5 @@ public class ProjectController {
         ProjectFinalResponse project = projectService.getProjectByWalletId(walletId);
         return ResponseEntity.ok(project);
     }
+
 }

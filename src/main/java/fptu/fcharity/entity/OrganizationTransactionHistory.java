@@ -15,37 +15,38 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "spending_details")
-public class SpendingDetail {
+@Table(name = "organization_transaction_history")
+public class OrganizationTransactionHistory {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
-    @Column(name = "detail_id", nullable = false)
+    @Column(name = "transaction_id", nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "spending_item_id", nullable = false)
-    private SpendingItem spendingItem;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id")
     private Project project;
+
+    @Nationalized
+    @Column(name = "transaction_status", length = 50)
+    private String transactionStatus;
 
     @Column(name = "amount", precision = 18, scale = 2)
     private BigDecimal amount;
 
-    @ColumnDefault("getdate()")
+    @Nationalized
+    @Column(name = "message")
+    private String message;
+
     @Column(name = "transaction_time")
     private Instant transactionTime;
 
     @Nationalized
-    @Column(name = "description")
-    private String description;
-
-    @Nationalized
-    @Column(name = "proof_image")
-    private String proofImage;
+    @Column(name = "transaction_type", length = 50)
+    private String transactionType;
 
 }
