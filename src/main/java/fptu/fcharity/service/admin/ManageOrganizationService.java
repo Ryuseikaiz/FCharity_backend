@@ -104,7 +104,7 @@ public class ManageOrganizationService {
                 "Organization Approved",
                 null,
                 "Your organization \"" + organization.getOrganizationName() + "\" has been approved and is now active.",
-                "manage-organization"
+                "/my-organization"
         );
     }
 
@@ -125,7 +125,7 @@ public class ManageOrganizationService {
                 "Organization Rejected",
                 null,
                 "Your organization \"" + organization.getOrganizationName() + "\" has been rejected. Reason: " + reasonDTO.getReason(),
-                "/manage-organization"
+                "/my-organization"
         );
     }
 
