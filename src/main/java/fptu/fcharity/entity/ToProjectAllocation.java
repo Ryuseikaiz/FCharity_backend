@@ -16,6 +16,7 @@ import java.util.UUID;
 @Table(name = "to_project_allocations")
 public class ToProjectAllocation {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("newid()")
     @Column(name = "allocation_id", nullable = false)
     private UUID id;
