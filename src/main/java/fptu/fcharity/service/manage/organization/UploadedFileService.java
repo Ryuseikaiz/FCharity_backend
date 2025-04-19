@@ -7,6 +7,10 @@ import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.organization.UploadedFileRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.manage.user.UserService;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -111,6 +116,38 @@ public class UploadedFileService {
         return uploadedFileRepository.findUploadedFileByUploadedFileId(id);
     }
 
+    public ResponseEntity<Resource> getFile(String fileName) {
+        try {
+            if (fileName == null || fileName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (fileName.contains("..")) {
+                return ResponseEntity.badRequest().build();
+            }
+            Path uploadPath = Paths.get(getUploadDir()).normalize();
+            Path filePath = uploadPath.resolve(fileName).normalize();
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+
+    }
     public void delete(UUID id) {
         if (findOne(id) == null) {
             return;

@@ -33,40 +33,12 @@ public class FileUploadRestController {
 
     @GetMapping("/{filename}")
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-        String projectRootDir = System.getProperty("user.dir");
-        File projectDir = new File(projectRootDir);
-        String parentDir = projectDir.getParent();
-
-        String uploadDir = parentDir + "/uploads";
-        File directory = new File(uploadDir);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
-
-        File file = new File(uploadDir + filename);
-
-        if (!file.exists() || file.isDirectory()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Resource resource = new FileSystemResource(file);
-
-        String fileExtension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        MediaType mediaType = switch (fileExtension) {
-            case "pdf" -> MediaType.APPLICATION_PDF;
-            case "docx" -> MediaType.APPLICATION_OCTET_STREAM; // Trình duyệt sẽ tải hoặc mở bằng ứng dụng
-            case "xlsx" -> MediaType.APPLICATION_OCTET_STREAM;
-            default -> MediaType.APPLICATION_OCTET_STREAM;
-        };
-
-        return ResponseEntity.ok()
-                .contentType(mediaType)
-                .body(resource);
+        return uploadedFileService.getFile(filename);
     }
 
     @GetMapping("/organizations/{organizationId}")
     public List<UploadedFileDTO> getAllOrganizationDocuments(@PathVariable UUID organizationId) {
-         return uploadedFileService.getAllByOrganizationId(organizationId).stream().map(uploadedFileMapper::toDTO).collect(Collectors.toList());
+        return uploadedFileService.getAllByOrganizationId(organizationId).stream().map(uploadedFileMapper::toDTO).collect(Collectors.toList());
     }
 
     @PostMapping("/organizations/{organizationId}/save")
