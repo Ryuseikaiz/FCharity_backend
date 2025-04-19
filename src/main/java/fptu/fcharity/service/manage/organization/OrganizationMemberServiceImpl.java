@@ -95,11 +95,14 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
     @Transactional(readOnly = true)
     public List<OrganizationMemberDTO> findOrganizationMemberByOrganizationId(UUID organizationId) {
         Organization organization = organizationRepository.findById(organizationId).orElseThrow(() -> new ApiRequestException("organization not found"));
-        return organizationMemberRepository
+        List<OrganizationMemberDTO> result = organizationMemberRepository
                 .findByOrganizationOrganizationId(organizationId)
                 .stream()
                 .map(organizationMemberMapper::toDTO)
                 .collect(Collectors.toList());
+
+        System.out.println("result 🧊🧊" + result);
+        return result;
     }
 
 

@@ -25,14 +25,14 @@ public class OrganizationEventRestController {
         return organizationEventService.findByOrganizationId(organizationId);
     }
 
-    @PostMapping
-    public OrganizationEvent addOrganizationEvent(@RequestBody OrganizationEventDTO organizationEventDTO) {
+    @PostMapping("/{organizationId}")
+    public OrganizationEventDTO addOrganizationEvent(@RequestBody OrganizationEventDTO organizationEventDTO, @PathVariable("organizationId") UUID organizationId) {
         System.out.println("🧊🧊creating organization event: " + organizationEventDTO);
-        return organizationEventService.save(organizationEventDTO);
+        return organizationEventService.save(organizationEventDTO, organizationId);
     }
 
     @PutMapping
-    public OrganizationEvent updateOrganizationEvent(@RequestBody OrganizationEventDTO updatedOrganizationEventDTO) {
+    public OrganizationEventDTO updateOrganizationEvent(@RequestBody OrganizationEventDTO updatedOrganizationEventDTO) {
         System.out.println("update organization event 🛡️🛡️" + updatedOrganizationEventDTO);
         return organizationEventService.update(updatedOrganizationEventDTO);
     }

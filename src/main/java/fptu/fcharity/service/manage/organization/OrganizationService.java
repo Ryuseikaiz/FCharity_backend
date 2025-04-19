@@ -2,6 +2,8 @@ package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDTO;
 import fptu.fcharity.entity.*;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ public interface OrganizationService {
     OrganizationDTO findById(UUID id);
     Organization findEntityById(UUID id);
     OrganizationDTO createOrganization(OrganizationDTO organizationDTO);
+
     OrganizationDTO updateOrganization(OrganizationDTO organizationDTO);
 
     void deleteOrganizationByCeo(UUID organizationId);

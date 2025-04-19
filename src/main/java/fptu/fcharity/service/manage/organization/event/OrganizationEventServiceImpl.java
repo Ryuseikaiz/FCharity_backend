@@ -1,6 +1,5 @@
 package fptu.fcharity.service.manage.organization.event;
 
-import ch.qos.logback.classic.spi.IThrowableProxy;
 import fptu.fcharity.dto.organization.OrganizationEventDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationEvent;
@@ -40,33 +39,20 @@ public class OrganizationEventServiceImpl implements OrganizationEventService {
 
     @Override
     @Transactional
-    public OrganizationEvent save(OrganizationEventDTO organizationEventDTO) {
-
+    public OrganizationEventDTO save(OrganizationEventDTO organizationEventDTO, UUID organizationId) {
+        System.out.println("🤖🤖🤖 Creating organization event: " + organizationEventDTO);
         Organization organizer = organizationRepository
-                .findById(organizationEventDTO.getOrganizer().getOrganizationId())
+                .findById(organizationId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found"));
-        OrganizationEvent event = new OrganizationEvent();
-
-        event.setTitle(organizationEventDTO.getTitle());
-        event.setStartTime(organizationEventDTO.getStartTime());
-        event.setEndTime(organizationEventDTO.getEndTime());
-        event.setBackgroundColor(organizationEventDTO.getBackgroundColor());
-        event.setBorderColor(organizationEventDTO.getBorderColor());
-        event.setTextColor(organizationEventDTO.getTextColor());
-        event.setLocation(organizationEventDTO.getLocation());
-        event.setMeetingLink(organizationEventDTO.getMeetingLink());
-        event.setEventType(organizationEventDTO.getEventType());
+        OrganizationEvent event = organizationEventMapper.toEntity(organizationEventDTO);
         event.setOrganizer(organizer);
-        event.setTargetAudience(organizationEventDTO.getTargetAudience());
-        event.setSummary(organizationEventDTO.getSummary());
-        event.setFullDescription(organizationEventDTO.getFullDescription());
 
-        return organizationEventRepository.save(event);
+        return organizationEventMapper.toDTO(organizationEventRepository.save(event));
     }
 
     @Override
     @Transactional
-    public OrganizationEvent update(OrganizationEventDTO updatedOrganizationEventDTO) {
+    public OrganizationEventDTO update(OrganizationEventDTO updatedOrganizationEventDTO) {
         OrganizationEvent event = organizationEventRepository
                 .findById(updatedOrganizationEventDTO.getOrganizationEventId())
                 .orElseThrow(()-> new ApiRequestException("Event not found"));
@@ -75,26 +61,14 @@ public class OrganizationEventServiceImpl implements OrganizationEventService {
                 .findById(updatedOrganizationEventDTO.getOrganizer().getOrganizationId())
                 .orElseThrow(() -> new ApiRequestException("Organization not found"));
 
-        event.setTitle(updatedOrganizationEventDTO.getTitle());
-        event.setStartTime(updatedOrganizationEventDTO.getStartTime());
-        event.setEndTime(updatedOrganizationEventDTO.getEndTime());
-        event.setBackgroundColor(updatedOrganizationEventDTO.getBackgroundColor());
-        event.setBorderColor(updatedOrganizationEventDTO.getBorderColor());
-        event.setTextColor(updatedOrganizationEventDTO.getTextColor());
-        event.setLocation(updatedOrganizationEventDTO.getLocation());
-        event.setMeetingLink(updatedOrganizationEventDTO.getMeetingLink());
-        event.setEventType(updatedOrganizationEventDTO.getEventType());
-        event.setOrganizer(organizer);
-        event.setTargetAudience(updatedOrganizationEventDTO.getTargetAudience());
-        event.setSummary(updatedOrganizationEventDTO.getSummary());
-        event.setFullDescription(updatedOrganizationEventDTO.getFullDescription());
+        System.out.println("update in service: 🍎🍎 " + updatedOrganizationEventDTO);
 
-        return organizationEventRepository.save(event);
+        return organizationEventMapper.toDTO(organizationEventRepository.save(organizationEventMapper.toEntity(updatedOrganizationEventDTO)));
     }
 
     @Override
-    public OrganizationEvent findByOrganizationEventId(UUID organizationEventId) {
-        return organizationEventRepository.findOrganizationEventsByOrganizationEventId((organizationEventId));
+    public OrganizationEventDTO findByOrganizationEventId(UUID organizationEventId) {
+        return organizationEventMapper.toDTO(organizationEventRepository.findOrganizationEventsByOrganizationEventId((organizationEventId)));
     }
 
     @Override
