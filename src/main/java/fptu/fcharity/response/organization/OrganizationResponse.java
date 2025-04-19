@@ -1,6 +1,7 @@
-package fptu.fcharity.dto.organization;
+package fptu.fcharity.response.organization;
 
-import fptu.fcharity.entity.Organization;
+import fptu.fcharity.dto.organization.UserDTO;
+import fptu.fcharity.dto.organization.WalletDTO;
 import lombok.*;
 
 import java.time.Instant;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class OrganizationDTO {
+public class OrganizationResponse {
     private UUID organizationId;
     private String organizationName;
     private String email;
@@ -22,8 +23,11 @@ public class OrganizationDTO {
     private Instant startTime;
     private Instant shutdownDay;
     private String organizationStatus;
-    private String backgroundUrl;
     private UserDTO ceo;
     private String reason;
     private String advice;
+    private String avatarUrl;
+    private String backgroundUrl;
 }
+
+

@@ -1,8 +1,11 @@
 package fptu.fcharity.service.manage.organization.event;
 
 import fptu.fcharity.dto.organization.OrganizationEventDTO;
+import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationEvent;
 import fptu.fcharity.repository.manage.organization.OrganizationEventRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.organization.OrganizationEventMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,10 +18,12 @@ import java.util.stream.Collectors;
 public class OrganizationEventServiceImpl implements OrganizationEventService {
     private final OrganizationEventRepository organizationEventRepository;
     private final OrganizationEventMapper organizationEventMapper;
+    private final OrganizationRepository organizationRepository;
 
-    public OrganizationEventServiceImpl(OrganizationEventRepository organizationEventRepository, OrganizationEventMapper organizationEventMapper) {
+    public OrganizationEventServiceImpl(OrganizationEventRepository organizationEventRepository, OrganizationEventMapper organizationEventMapper, OrganizationRepository organizationRepository) {
         this.organizationEventRepository = organizationEventRepository;
         this.organizationEventMapper = organizationEventMapper;
+        this.organizationRepository = organizationRepository;
     }
 
     @Override
@@ -34,13 +39,36 @@ public class OrganizationEventServiceImpl implements OrganizationEventService {
 
     @Override
     @Transactional
-    public OrganizationEvent save(OrganizationEvent organizationEvent) {
-        return organizationEventRepository.save(organizationEvent);
+    public OrganizationEventDTO save(OrganizationEventDTO organizationEventDTO, UUID organizationId) {
+        System.out.println("🤖🤖🤖 Creating organization event: " + organizationEventDTO);
+        Organization organizer = organizationRepository
+                .findById(organizationId)
+                .orElseThrow(() -> new ApiRequestException("Organization not found"));
+        OrganizationEvent event = organizationEventMapper.toEntity(organizationEventDTO);
+        event.setOrganizer(organizer);
+
+        return organizationEventMapper.toDTO(organizationEventRepository.save(event));
     }
 
     @Override
-    public OrganizationEvent findByOrganizationEventId(UUID organizationEventId) {
-        return organizationEventRepository.findOrganizationEventsByOrganizationEventId((organizationEventId));
+    @Transactional
+    public OrganizationEventDTO update(OrganizationEventDTO updatedOrganizationEventDTO) {
+        OrganizationEvent event = organizationEventRepository
+                .findById(updatedOrganizationEventDTO.getOrganizationEventId())
+                .orElseThrow(()-> new ApiRequestException("Event not found"));
+
+        Organization organizer = organizationRepository
+                .findById(updatedOrganizationEventDTO.getOrganizer().getOrganizationId())
+                .orElseThrow(() -> new ApiRequestException("Organization not found"));
+
+        System.out.println("update in service: 🍎🍎 " + updatedOrganizationEventDTO);
+
+        return organizationEventMapper.toDTO(organizationEventRepository.save(organizationEventMapper.toEntity(updatedOrganizationEventDTO)));
+    }
+
+    @Override
+    public OrganizationEventDTO findByOrganizationEventId(UUID organizationEventId) {
+        return organizationEventMapper.toDTO(organizationEventRepository.findOrganizationEventsByOrganizationEventId((organizationEventId)));
     }
 
     @Override

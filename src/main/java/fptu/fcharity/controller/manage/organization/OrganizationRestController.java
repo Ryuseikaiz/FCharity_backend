@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -78,7 +79,7 @@ public class OrganizationRestController {
     @PutMapping("/organizations")   // OK
     public OrganizationDTO putOrganization(@RequestBody OrganizationDTO organizationDTO) throws IOException {
         OrganizationDTO result = organizationService.updateOrganization(organizationDTO);
-        System.out.println("🍎🍎Update organization: " + result);
+        System.out.println("Updated organization info: " + organizationDTO);
         return result;
     }
 

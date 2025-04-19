@@ -12,6 +12,7 @@ import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.utils.constants.OrganizationStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
+import fptu.fcharity.utils.mapper.organization.OrganizationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -32,6 +33,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    private final OrganizationMapper organizationMapper;
     @Autowired
     private final SimpMessagingTemplate simpMessagingTemplate;
 
@@ -43,6 +45,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             UserRepository userRepository,
             OrganizationMemberRepository organizationMemberRepository,
             WalletRepository walletRepository,
+            OrganizationMapper organizationMapper,
             SimpMessagingTemplate simpMessagingTemplate
     )
     {
@@ -51,6 +54,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.userRepository = userRepository;
         this.organizationMemberRepository = organizationMemberRepository;
         this.walletRepository = walletRepository;
+        this.organizationMapper = organizationMapper;
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
@@ -59,7 +63,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     public List<OrganizationDTO> findAll() {
         List<Organization> organizations = organizationRepository.findAll();
         return organizations.stream().map(this::convertOrganizationToDTO).toList();
-
     }
 
     @Override
@@ -94,18 +97,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (organizationMemberRepository.findOrganizationMemberByUserId(ceo.getId()).stream().anyMatch(organizationMember -> organizationMember.getMemberRole() == OrganizationMemberRole.CEO)) {
             throw new ApiRequestException("You have already created an organization, cannot create any more organizations!");
         }
-        Organization organization = convertToEntity(organizationDTO);
+        Organization organization = organizationMapper.toEntity(organizationDTO);
         organization.setCeo(ceo);
 
         Wallet wallet = new Wallet();
         wallet.setBalance(BigDecimal.valueOf(0));
         Wallet savedWallet =  walletRepository.save(wallet);
+
         organization.setWalletAddress(savedWallet);
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
         Organization organizationSaved = organizationRepository.save(organization);
-
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getAvatarUrl(), OrganizationImage.OrganizationImageType.Avatar);
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getBackgroundUrl(), OrganizationImage.OrganizationImageType.Background);
 
         OrganizationMember organizationMember = new OrganizationMember();
         organizationMember.setOrganization(organizationSaved);
@@ -125,49 +126,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDTO updateOrganization(OrganizationDTO organizationDTO) {
         User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
 
-        Organization organization = convertToEntity(organizationDTO);
+        Organization organization =  organizationMapper.toEntity(organizationDTO);
 
         Optional<Organization> existingOrg = organizationRepository.findById(organization.getOrganizationId());
         if (existingOrg.isEmpty()) {
             throw new RuntimeException("Organization not found");
         }
 
-
         OrganizationMember.OrganizationMemberRole userRole = checkRole(organization.getOrganizationId(), user.getId());
 
         if (userRole == OrganizationMemberRole.CEO || userRole == OrganizationMemberRole.MANAGER) {
-            if (organizationDTO.getAvatarUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Avatar);
-
-                if (organizationImage != null && !organizationImage.isEmpty()) {
-                    OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
-                    organizationImageRepository.save(image);
-                } else {
-                    OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
-                    image.setImageType(OrganizationImage.OrganizationImageType.Avatar);
-                    organizationImageRepository.save(image);
-                }
-            }
-
-            if (organizationDTO.getBackgroundUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Background);
-
-                if (organizationImage != null && !organizationImage.isEmpty()) {
-                    OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
-                    organizationImageRepository.save(image);
-                } else {
-                    OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
-                    image.setImageType(OrganizationImage.OrganizationImageType.Background);
-                    organizationImageRepository.save(image);
-                }
-            }
-
             if (organizationDTO.getCeo().getId() != null) {
                 User newCeo = userRepository.findById(organizationDTO.getCeo().getId()).orElseThrow(() -> new RuntimeException("Ceo not found"));
                 if (userRole == OrganizationMemberRole.CEO) {
@@ -228,7 +196,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .filter(member ->  member.getMemberRole() == OrganizationMemberRole.CEO)
                 .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
                         .orElseThrow(() -> new RuntimeException("Organization not found")))
-                .map(this::convertOrganizationToDTO)
+                .map(organizationMapper::toDTO)
                 .toList().getFirst();
     }
 
@@ -284,22 +252,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         DTO.setShutdownDay(organization.getShutdownDay());
         DTO.setOrganizationStatus(organization.getOrganizationStatus());
         DTO.setCeo(convertUserToDTO(organization.getCeo()));
-
-        String avatarUrl =
-                organizationImageRepository
-                        .findOrganizationImageByOrganizationIdAndImageType(
-                                organization.getOrganizationId(),
-                                OrganizationImage.OrganizationImageType.Avatar
-                        ).getFirst().getImageUrl();
-        String backgroundUrl =
-                organizationImageRepository
-                        .findOrganizationImageByOrganizationIdAndImageType(
-                                organization.getOrganizationId(),
-                                OrganizationImage.OrganizationImageType.Background
-                        ).getFirst().getImageUrl();
-
-        DTO.setAvatarUrl(avatarUrl);
-        DTO.setBackgroundUrl(backgroundUrl);
         return DTO;
     }
 

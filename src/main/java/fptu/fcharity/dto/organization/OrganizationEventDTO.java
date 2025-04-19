@@ -1,10 +1,7 @@
 package fptu.fcharity.dto.organization;
 
 import fptu.fcharity.entity.OrganizationEvent;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -13,6 +10,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class OrganizationEventDTO {
     private UUID organizationEventId;
     private String title;

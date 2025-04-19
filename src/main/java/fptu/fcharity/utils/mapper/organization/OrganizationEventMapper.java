@@ -7,9 +7,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {OrganizationMapper.class})
 public interface OrganizationEventMapper {
-    @Mapping(source = "organizer", target = "organizer")
     OrganizationEventDTO toDTO(OrganizationEvent entity);
-
-    @Mapping(source = "organizer", target = "organizer")
     OrganizationEvent toEntity(OrganizationEventDTO dto);
 }
