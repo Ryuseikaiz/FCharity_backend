@@ -3,6 +3,7 @@ package fptu.fcharity.controller.manage.post;
 import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.response.post.PostResponse;
+import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.manage.post.PostService;
 import fptu.fcharity.service.manage.post.PostVoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,8 +87,10 @@ public class PostController {
     }
     @GetMapping("/mine")
     public ResponseEntity<List<PostResponse>> getMyPosts(@RequestParam UUID userId) {
+        System.out.println("Fetching posts for userId: " + userId);
         List<PostResponse> posts = postService.getPostsByUserId(userId);
         return ResponseEntity.ok(posts);
     }
+
 
 }

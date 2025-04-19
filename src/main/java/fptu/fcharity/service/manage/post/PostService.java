@@ -129,5 +129,4 @@ public class PostService {
                 .map(PostResponse::fromEntity)
                 .collect(Collectors.toList());
     }
-
 }

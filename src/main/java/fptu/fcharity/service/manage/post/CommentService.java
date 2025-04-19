@@ -47,6 +47,10 @@ public class CommentService {
         return commentResponse;
     }
 
+    public List<CommentResponse> getAllCommentsByPostId(UUID postId){
+        List<Comment> l = commentRepository.findAllCommentByPost_Id(postId);
+        return l.stream().map(this::convertToResponse).toList();
+    }
     public List<CommentFinalResponse> getCommentsByPost(UUID postId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Comment> commentPage = commentRepository.findByPost_Id(postId, pageable);
