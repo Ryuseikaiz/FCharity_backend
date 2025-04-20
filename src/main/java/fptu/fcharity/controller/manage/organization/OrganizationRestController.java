@@ -1,11 +1,9 @@
 package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDTO;
-import fptu.fcharity.dto.organization.VerificationDocumentDTO;
-import fptu.fcharity.entity.OrganizationImage;
 import fptu.fcharity.entity.User;
 
-import fptu.fcharity.service.manage.organization.OrganizationImageService;
+import fptu.fcharity.response.organization.RecommendedOrganizationResponse;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.constants.OrganizationStatus;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,6 +29,12 @@ public class OrganizationRestController {
     public OrganizationRestController(OrganizationService organizationService, UserService userService) {
         this.organizationService = organizationService;
         this.userService = userService;
+    }
+
+    // Lấy danh sách tất cả các tổ chức trên hệ thống mà người dùng chưa tham gia và các thông số của tổ chức để hiển thị lên slideshow
+    @GetMapping("/organizations/recommended")
+    public List<RecommendedOrganizationResponse> getRecommendedOrganizations() {
+        return organizationService.getRecommendedOrganizations();
     }
 
     // Lấy danh sách tất cả các tổ chức triên hệ thống để show cho user và guest xem
