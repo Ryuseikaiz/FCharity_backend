@@ -20,6 +20,4 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     User findWithEssentialById(@Param("id") UUID id);
     @Query("SELECT u FROM User u")
     List<User> findAllWithInclude();
-
-    Optional<Object> getUserById(UUID id);
 }

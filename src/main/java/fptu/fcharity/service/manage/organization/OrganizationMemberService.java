@@ -10,13 +10,13 @@ import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import fptu.fcharity.entity.User;
 
 public interface OrganizationMemberService {
-    List<OrganizationMemberDTO> findAll();
+    List<OrganizationMember> findAll();
     List<UserDTO> getAllUsersNotInOrganization(UUID organizationId);
-    OrganizationMemberDTO findById(UUID id);
+    Optional<OrganizationMember> findById(UUID id);
     OrganizationMemberRole findUserRoleInOrganization(UUID userId, UUID organizationId);
-    List<OrganizationMemberDTO> findOrganizationMemberByOrganization(Organization organization);
+    List<OrganizationMember> findOrganizationMemberByOrganization(Organization organization);
     List<OrganizationMemberDTO> findOrganizationMemberByOrganizationId(UUID organizationId);
-    OrganizationMemberDTO createOrganizationMember(UUID organizationId, UUID userId);
-    OrganizationMemberDTO updateRole(OrganizationMemberDTO organizationMemberDTO);
-    void delete(UUID membershipId);
+    OrganizationMember save(OrganizationMember organizationMember);
+    OrganizationMember update(OrganizationMember organizationMember);
+    void delete(UUID id);
 }

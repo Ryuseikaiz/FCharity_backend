@@ -44,7 +44,7 @@ public class OrganizationMemberRestController {
 
     // chưa dùng (thống kê)
     @GetMapping("/organization-members")
-    public List<OrganizationMemberDTO> getAllMembers() {
+    public List<OrganizationMember> getAllMembers() {
         return organizationMemberService.findAll();
     }
 
@@ -56,20 +56,43 @@ public class OrganizationMemberRestController {
 
     // Tạo thành viên mới cho một tổ chức
     @PostMapping("/organization-members/{organizationId}/{userId}")
-    public OrganizationMemberDTO createOrganizationMember(@PathVariable UUID organizationId, @PathVariable UUID userId) {
-        return organizationMemberService.createOrganizationMember(organizationId, userId);
+    public OrganizationMember createOrganizationMember(@PathVariable UUID organizationId, @PathVariable UUID userId) {
+        OrganizationMember organizationMember = new OrganizationMember();
+        organizationMember.setOrganization(organizationService.findEntityById(organizationId));
+        organizationMember.setUser(userService.getById(userId).orElseThrow(() -> new ApiRequestException("User not found")));
+        System.out.println(organizationMember);
+
+        return organizationMemberService.save(organizationMember);
     }
 
     // Cập nhật thông tin thành viên trong tổ chức
-    @PutMapping("/organization-members/update-role")
-    public OrganizationMemberDTO updateOrganizationMember(@RequestBody OrganizationMemberDTO organizationMemberDTO) {
+    @PutMapping("/organization-members")
+    public ResponseEntity<?> updateOrganizationMember(@RequestBody OrganizationMember organizationMember, Authentication authentication) {
+        OrganizationMember currentOrganizationMemberInfo = organizationMemberService.findById(organizationMember.getMembershipId()).orElseThrow(()-> new ApiRequestException("Member not found"));
+        User authUser  = userService.findUserByEmail(authentication.getName());
 
-        return organizationMemberService.updateRole(organizationMemberDTO);
+        if (!Objects.equals(organizationMember.getMemberRole(), currentOrganizationMemberInfo.getMemberRole())) {
+            OrganizationMemberRole authRole = organizationMemberService.findUserRoleInOrganization(authUser.getId(), organizationMember.getOrganization().getOrganizationId());
+            if (authRole == OrganizationMemberRole.CEO ) {
+                return ResponseEntity.ok(organizationMemberService.update(organizationMember));
+            }
+            else if (authRole == OrganizationMemberRole.MANAGER) {
+                OrganizationMember member = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(organizationMember.getUser().getId(), organizationMember.getOrganization().getOrganizationId());
+                if (member.getMemberRole() == OrganizationMemberRole.CEO || member.getMemberRole() == OrganizationMemberRole.MANAGER) {
+                    return ResponseEntity.badRequest().body("You are not allowed to changed Ceo or Manager role. (Only Ceo is allowed!)");
+                } else
+                    return ResponseEntity.ok(organizationMemberService.update(organizationMember));
+            } else {
+                return ResponseEntity.badRequest().body("Invalid role");
+            }
+        }
+        return ResponseEntity.ok(organizationMemberService.update(organizationMember));
     }
 
-    // Xóa thành viên khỏi tổ chức  - trả về membershipId nếu thành công
-    @DeleteMapping("/organization-members/{membershipId}")
-    public void deleteOrganizationMember(@PathVariable UUID membershipId) {
-        organizationMemberService.delete(membershipId);
+    // Xóa thành viên khỏi tổ chức
+    @DeleteMapping("/organization-members/{organizationMemberId}")
+    public UUID deleteOrganizationMember(@PathVariable UUID organizationMemberId) {
+        organizationMemberService.delete(organizationMemberId);
+        return organizationMemberId;
     }
 }

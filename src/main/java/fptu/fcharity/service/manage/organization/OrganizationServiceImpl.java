@@ -9,12 +9,8 @@ import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationImageRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
-import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
-import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
-import fptu.fcharity.response.organization.RecommendedOrganizationResponse;
 import fptu.fcharity.utils.constants.OrganizationStatus;
-import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.organization.OrganizationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +25,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationServiceImpl implements OrganizationService {
@@ -41,10 +36,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMapper organizationMapper;
     @Autowired
     private final SimpMessagingTemplate simpMessagingTemplate;
-    @Autowired
-    private ProjectRepository projectRepository;
-    @Autowired
-    private OrganizationRequestRepository organizationRequestRepository;
 
 
     @Autowired
@@ -65,44 +56,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.walletRepository = walletRepository;
         this.organizationMapper = organizationMapper;
         this.simpMessagingTemplate = simpMessagingTemplate;
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public List<RecommendedOrganizationResponse> getRecommendedOrganizations (){
-        User requestUser = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new ApiRequestException("User not found"));
-        List<Organization> organizations = organizationRepository.findAll().stream().filter(organization -> {
-            return organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(requestUser.getId(), organization.getOrganizationId()) == null;
-        }).filter(organization -> {
-            OrganizationRequest isExisted = organizationRequestRepository.findByOrganizationOrganizationIdAndUserId( organization.getOrganizationId(), requestUser.getId());
-            if (isExisted != null &&
-                    (isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Pending
-                    || isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Approved)
-            )
-                return false;
-            return true;
-        }).toList();
-
-        List<RecommendedOrganizationResponse> results = organizations.stream().map(organization -> {
-            int totalMembers = organizationMemberRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
-            int totalProjects = projectRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
-            int totalCompletedProjects = projectRepository.findByOrganizationOrganizationIdAndProjectStatus(organization.getOrganizationId(), ProjectStatus.FINISHED).size();
-
-            RecommendedOrganizationResponse recommendedOrganizationResponse = new RecommendedOrganizationResponse();
-            recommendedOrganizationResponse.setOrganizationId(organization.getOrganizationId());
-            recommendedOrganizationResponse.setOrganizationName(organization.getOrganizationName());
-            recommendedOrganizationResponse.setOrganizationDescription(organization.getOrganizationDescription());
-            recommendedOrganizationResponse.setStatus(organization.getOrganizationStatus());
-            recommendedOrganizationResponse.setBackgroundUrl(organization.getBackgroundUrl());
-
-            recommendedOrganizationResponse.setTotalMembers(totalMembers);
-            recommendedOrganizationResponse.setTotalProjects(totalProjects);
-            recommendedOrganizationResponse.setTotalCompletedProjects(totalCompletedProjects);
-
-            return recommendedOrganizationResponse;
-        }).toList();
-        System.out.println("🧊🧊result in recommended organizations: " + results);
-
-        return results;
     }
 
     @Override
@@ -128,7 +81,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional(readOnly = true)   // OK
     public OrganizationDTO findById(UUID id) {
         Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ApiRequestException("Organization not found"));
-        return organizationMapper.toDTO(organization);
+        return convertOrganizationToDTO(organization);
+    }
+
+    @Override
+    @Transactional(readOnly = true)   // OK
+    public Organization findEntityById(UUID id) {
+        return organizationRepository.findById(id).orElseThrow(() -> new ApiRequestException("Organization not found"));
     }
 
     @Override

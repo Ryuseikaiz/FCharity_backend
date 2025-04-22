@@ -13,8 +13,6 @@ public interface OrganizationRequestRepository extends JpaRepository<Organizatio
 
     List<OrganizationRequest> findByUserIdAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestType requestType);
 
-    OrganizationRequest findByOrganizationOrganizationIdAndUserId(UUID organizationId, UUID userId);
-
     List<OrganizationRequest> findByOrganizationOrganizationIdAndStatusAndRequestType(UUID organizationId, OrganizationRequest.OrganizationRequestStatus status, OrganizationRequest.OrganizationRequestType requestType);
 
     List<OrganizationRequest> findByUserIdAndStatusAndRequestType(UUID userId, OrganizationRequest.OrganizationRequestStatus status, OrganizationRequest.OrganizationRequestType requestType);

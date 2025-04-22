@@ -1,6 +1,7 @@
 package fptu.fcharity.service.manage.organization.request;
 
 import fptu.fcharity.dto.organization.OrganizationRequestDTO;
+import fptu.fcharity.dto.request.OrganizationRequestDto;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.OrganizationRequest;
@@ -12,20 +13,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrganizationRequestService {
-    List<OrganizationRequestDTO> getAllJoinInvitationRequests();
+    List<OrganizationRequest> getAllJoinInvitationRequests();
     List<OrganizationRequestDTO> getAllJoinRequestsByOrganizationId(UUID organizationId);
-    List<OrganizationRequestDTO> getAllJoinRequestsByUserId(UUID userId);
-    OrganizationRequestDTO getJoinRequestById(UUID id);
-    OrganizationRequestDTO createJoinRequest(UUID userId, UUID organizationId);
-    OrganizationRequestDTO acceptJoinRequest(UUID joinRequestId);
-    OrganizationRequestDTO rejectJoinRequest(UUID joinRequestId);
+    List<OrganizationRequest> getAllJoinRequestsByUserId(UUID userId);
+    Optional<OrganizationRequest> getJoinRequestById(UUID id);
+    OrganizationRequest createJoinRequest(OrganizationRequestDto organizationRequestDto);
+    OrganizationRequest acceptJoinRequest(UUID joinRequestId);
+    OrganizationRequest rejectJoinRequest(UUID joinRequestId);
     void cancelJoinRequest(UUID joinRequestId);
 
     List<OrganizationRequestDTO> getAllInvitationRequestsByOrganizationId(UUID organizationId);
-    List<OrganizationRequestDTO> getAllInvitationRequestsByUserId(UUID userId);
-    OrganizationRequestDTO getInvitationRequestById(UUID id);
+    List<OrganizationRequest> getAllInvitationRequestsByUserId(UUID userId);
+    Optional<OrganizationRequest> getInvitationRequestById(UUID id);
     OrganizationRequestDTO createInvitationRequest(UUID organizationId, UUID userId);
-    OrganizationRequestDTO acceptInvitationRequest(UUID invitationRequestId);
-    OrganizationRequestDTO rejectInvitationRequest(UUID invitationRequestId);
+    OrganizationRequest acceptInvitationRequest(UUID invitationRequestId);
+    OrganizationRequest rejectInvitationRequest(UUID invitationRequestId);
     void cancelInvitationRequest(UUID invitationRequestId);
 }
