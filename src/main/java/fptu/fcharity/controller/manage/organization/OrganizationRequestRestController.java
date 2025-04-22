@@ -1,17 +1,9 @@
 package fptu.fcharity.controller.manage.organization;
 
-import fptu.fcharity.dto.request.OrganizationRequestDto;
+import fptu.fcharity.dto.organization.OrganizationRequestDTO;
 
-import fptu.fcharity.entity.HelpRequest;
-import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.OrganizationRequest;
-import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
-import fptu.fcharity.service.manage.organization.OrganizationMemberService;
-import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.organization.request.OrganizationRequestService;
-import fptu.fcharity.service.manage.user.UserService;
-import fptu.fcharity.entity.User;
-import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,93 +15,103 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api")
 public class OrganizationRequestRestController {
-    private final OrganizationRequestService OrganizationRequestService;
-    private final OrganizationService organizationService;
-    private final UserService userService;
-    private final OrganizationRequestRepository organizationRequestRepository;
+    private final OrganizationRequestService organizationRequestService;
 
     @Autowired
-    public OrganizationRequestRestController(OrganizationRequestService OrganizationRequestService, OrganizationMemberService organizationMemberService, UserService userService, OrganizationService organizationService, OrganizationRequestRepository organizationRequestRepository) {
-        this.OrganizationRequestService = OrganizationRequestService;
-        this.userService = userService;
-        this.organizationService = organizationService;
-        this.organizationRequestRepository = organizationRequestRepository;
+    public OrganizationRequestRestController(OrganizationRequestService organizationRequestService) {
+        this.organizationRequestService = organizationRequestService;
     }
 
-    @PostMapping("/join-requests")
-    public OrganizationRequest createJoinRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
-        return OrganizationRequestService.createJoinRequest(OrganizationRequestDto);
+    // Lấy tất cả danh sách yêu cầu tham gia lời mời (thống kê)
+    @GetMapping("/join-invitation-requests")
+    public List<OrganizationRequestDTO> getAllJoinInvitationRequests() {
+        return organizationRequestService.getAllJoinInvitationRequests();
     }
 
-    @PutMapping("/join-requests")
-    public OrganizationRequest updateJoinRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
-        return OrganizationRequestService.updateJoinRequest(OrganizationRequestDto);
-    }
-
-    @DeleteMapping("/join-requests/{joinRequestId}")
-    public void deleteJoinRequest(@PathVariable UUID joinRequestId) {
-        OrganizationRequestService.deleteJoinRequest(joinRequestId);
-    }
-
-    @GetMapping("/join-requests")
-    public List<OrganizationRequest> getAllJoinRequests() {
-        return OrganizationRequestService.getAllJoinRequests();
-    }
-
+    // Lấy danh sách yêu cần tham gia tới một tổ chức có Id
     @GetMapping("/join-requests/organizations/{organizationId}")
-    public List<OrganizationRequest> getJoinRequestsByOrganizationId(@PathVariable("organizationId") UUID organizationId) {
-        System.out.println("getJoinRequestsByOrganizationId " + organizationId);
-        return OrganizationRequestService.getAllJoinRequestsByOrganizationId(organizationId);
+    public List<OrganizationRequestDTO> getAllJoinRequestsByOrganizationId(@PathVariable UUID organizationId) {
+        return organizationRequestService.getAllJoinRequestsByOrganizationId(organizationId);
     }
 
-    @GetMapping("/join-requests/{requestId}")
-    public Optional<OrganizationRequest> getJoinRequest(@PathVariable("requestId") UUID requestId) {
-        return OrganizationRequestService.getJoinRequestById(requestId);
-    }
-
+    // Lấy tất cả yêu cầu tham gia mà người Id đã gửi tới các tổ chức
     @GetMapping("/join-requests/users/{userId}")
-    public List<OrganizationRequest> getJoinRequestsByUserId(@PathVariable("userId") UUID userId) {
-        return OrganizationRequestService.getAllJoinRequestsByUserId(userId);
+    public List<OrganizationRequestDTO> getAllJoinRequestsByUserId(@PathVariable UUID userId) {
+        return organizationRequestService.getAllJoinRequestsByUserId(userId);
     }
 
-    @GetMapping("/invite-requests/request-id/{organizationId}/{userId}")
-    public UUID getInviteRequestId(@PathVariable UUID userId, @PathVariable UUID organizationId) {
-        System.out.println("🍎🍎🍎 getInviteRequestId " + userId + " " + organizationId);
-        User user = userService.getById(userId).orElseThrow(() -> new ApiRequestException("user not found"));
-        Organization organization = organizationService.findEntityById(organizationId);
-
-        UUID result = organizationRequestRepository
-                .findByUserIdAndOrganizationOrganizationIdAndRequestType(
-                        user.getId(),
-                        organization.getOrganizationId(),
-                        OrganizationRequest.OrganizationRequestType.Invitation
-                ).getOrganizationRequestId();
-        System.out.println("result 🍎🍎🍎" + result);
-        return result;
+    // Lấy thông tin yêu cầu tham gia của một request có Id
+    @GetMapping("/join-requests/{joinRequestId}")
+    public OrganizationRequestDTO getJoinRequestById(@PathVariable UUID joinRequestId) {
+        return organizationRequestService.getJoinRequestById(joinRequestId);
     }
 
-
-    @GetMapping("/invite-requests/organizations/{organization_id}")
-    public ResponseEntity<List<OrganizationRequest>> getInviteRequestsByOrganizationId(@PathVariable("organization_id") UUID organizationId) {
-        List<OrganizationRequest> r =  OrganizationRequestService.getAllInviteRequestsByOrganizationId(organizationId);
-        return ResponseEntity.ok(r);
+    // Tạo yêu cầu tham gia tới một tổ chức
+    @PostMapping("/join-requests/{userId}/{organizationId}")
+    public OrganizationRequestDTO createJoinRequest( @PathVariable UUID userId, @PathVariable UUID organizationId) {
+        System.out.println("createJoinRequest ⚓⚓⚓");
+        return organizationRequestService.createJoinRequest(userId, organizationId);
     }
 
-    @PostMapping("/invite-requests")  // In progress
-    public ResponseEntity<OrganizationRequest> createInviteRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
-        System.out.println("createInviteRequest 🍎🍎🍎🍎 " + OrganizationRequestDto);
-        OrganizationRequest OrganizationRequest = OrganizationRequestService.createInviteRequest(OrganizationRequestDto);
-        return ResponseEntity.ok(OrganizationRequest);
+    // Chấp nhận yêu cầu tham gia
+    @PutMapping("/join-requests/{joinRequestId}/accept")
+    public OrganizationRequestDTO acceptJoinRequest(@PathVariable UUID joinRequestId) {
+        return organizationRequestService.acceptJoinRequest(joinRequestId);
     }
 
-    @PutMapping("/invite-requests")
-    public ResponseEntity<OrganizationRequest> updateInviteRequest(@RequestBody OrganizationRequestDto OrganizationRequestDto) {
-        return ResponseEntity.ok(OrganizationRequestService.updateInviteRequest(OrganizationRequestDto));
+    // Từ chối yêu cầu tham gia
+    @PutMapping("/join-requests/{joinRequestId}/reject")
+    public OrganizationRequestDTO rejectJoinRequest(@PathVariable UUID joinRequestId) {
+        return organizationRequestService.rejectJoinRequest(joinRequestId);
     }
 
-    @DeleteMapping("/invite-requests/{inviteRequestId}")
-    public void deleteInviteRequest(@PathVariable UUID inviteRequestId) {
-        System.out.println("deleteInviteRequest 🍎🍎🍎" + inviteRequestId);
-        OrganizationRequestService.deleteInviteRequest(inviteRequestId);
+    // Xóa yêu cầu tham gia
+    @DeleteMapping("/join-requests/{joinRequestId}/cancel")
+    public UUID cancelJoinRequest(@PathVariable UUID joinRequestId) {
+        organizationRequestService.cancelJoinRequest(joinRequestId);
+        return joinRequestId;
+    }
+
+    // Lấy tất cả lời mời mà tổ chức đã gửi tới các cá nhân
+    @GetMapping("/invitation-requests/organizations/{organizationId}")
+    public List<OrganizationRequestDTO> getAllInvitationRequestsByOrganizationId(@PathVariable UUID organizationId) {
+        return organizationRequestService.getAllInvitationRequestsByOrganizationId(organizationId);
+    }
+
+    // Lấy tất cả lời mời tới một người dùng Id
+    @GetMapping("/invitation-requests/users/{userId}")
+    public ResponseEntity<List<OrganizationRequestDTO>> getAllInvitationRequestsByUserId(@PathVariable UUID userId) {
+        return ResponseEntity.ok(organizationRequestService.getAllInvitationRequestsByUserId(userId));
+    }
+
+    // Lấy thông tin yêu cầu tham gia có Id
+    @GetMapping("/invitation-requests/{invitationRequestId}")
+    public OrganizationRequestDTO getInvitationRequestById(@PathVariable("invitationRequestId") UUID requestId) {
+        return organizationRequestService.getInvitationRequestById(requestId);
+    }
+
+    // Tạo lời mời tham gia từ tổ chức tới cá nhân
+    @PostMapping("/invitation-requests/{organizationId}/{userId}")  // In progress
+    public OrganizationRequestDTO createInvitationRequest(@PathVariable UUID organizationId, @PathVariable UUID userId) {
+        return organizationRequestService.createInvitationRequest(organizationId, userId);
+    }
+
+    // Chấp nhận lời mời tham gia
+    @PutMapping("/invitation-requests/{invitationRequestId}/accept")
+    public OrganizationRequestDTO acceptInvitationRequest(@PathVariable UUID invitationRequestId) {
+        return organizationRequestService.acceptInvitationRequest(invitationRequestId);
+    }
+
+    // Từ chối lời mời tham gia
+    @PutMapping("/invitation-requests/{invitationRequestId}/reject")
+    public OrganizationRequestDTO rejectInvitationRequest(@PathVariable UUID invitationRequestId) {
+        return organizationRequestService.rejectInvitationRequest(invitationRequestId);
+    }
+
+    // Hủy lời mời tham gia
+    @DeleteMapping("/invitation-requests/{invitationRequestId}/cancel")
+    public UUID cancelInvitationRequest(@PathVariable UUID invitationRequestId) {
+        organizationRequestService.cancelInvitationRequest(invitationRequestId);
+        return invitationRequestId;
     }
 }
