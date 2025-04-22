@@ -4,6 +4,7 @@ import fptu.fcharity.dto.admindashboard.UserDTO;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.entity.User.UserStatus;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.service.authentication.AuthenticationService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageUserService {
     private final UserRepository userRepository;
+    private final AuthenticationService authenticationService;
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -44,6 +46,7 @@ public class ManageUserService {
 
         user.setUserStatus(UserStatus.Banned);
         userRepository.save(user);
+        authenticationService.sendBanNotificationEmail(user, reasonDTO.getReason());
     }
 
     @Transactional

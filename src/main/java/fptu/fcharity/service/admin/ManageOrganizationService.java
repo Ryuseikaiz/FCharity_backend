@@ -1,13 +1,16 @@
 package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
+import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,6 +23,7 @@ import static fptu.fcharity.utils.constants.PostStatus.*;
 @RequiredArgsConstructor
 public class ManageOrganizationService {
     private final OrganizationRepository organizationRepository;
+    private final HelpNotificationService notificationService;
 
     public List<OrganizationDTO> getAllOrganizations() {
         return organizationRepository.findAll().stream()
@@ -40,18 +44,19 @@ public class ManageOrganizationService {
         organizationRepository.delete(organization);
     }
 
-//    @Transactional
-//    public void unHideOrganization(UUID orgId) {
-//        Organization organization = organizationRepository.findById(orgId)
-//                .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
-//
-//        if (organization.getOrganizationStatus().equals(APPROVED)) {
-//            throw new ApiRequestException("Organization is already active.");
-//        }
-//
-//        organization.setOrganizationStatus(APPROVED);
-//        organizationRepository.save(organization);
-//    }
+    // @Transactional
+    // public void unHideOrganization(UUID orgId) {
+    // Organization organization = organizationRepository.findById(orgId)
+    // .orElseThrow(() -> new ApiRequestException("Organization not found with ID: "
+    // + orgId));
+    //
+    // if (organization.getOrganizationStatus().equals(APPROVED)) {
+    // throw new ApiRequestException("Organization is already active.");
+    // }
+    //
+    // organization.setOrganizationStatus(APPROVED);
+    // organizationRepository.save(organization);
+    // }
     @Transactional
     public void banOrganization(UUID orgId) {
         Organization organization = organizationRepository.findById(orgId)
@@ -92,11 +97,19 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(APPROVED);
+        organization.setStartTime(Instant.now());
         organizationRepository.save(organization);
+        notificationService.notifyUser(
+                organization.getCeo(), // giả định Organization có quan hệ với User tạo tổ chức
+                "Organization Approved",
+                null,
+                "Your organization \"" + organization.getOrganizationName() + "\" has been approved and is now active.",
+                "/my-organization"
+        );
     }
 
     @Transactional
-    public void rejectOrganization(UUID orgId) {
+    public void rejectOrganization(UUID orgId, ReasonDTO reasonDTO) {
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new ApiRequestException("Organization not found with ID: " + orgId));
 
@@ -105,7 +118,15 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(REJECTED);
+        organization.setReason(reasonDTO.getReason());
         organizationRepository.save(organization);
+        notificationService.notifyUser(
+                organization.getCeo(), // giả định Organization có trường `User user`
+                "Organization Rejected",
+                null,
+                "Your organization \"" + organization.getOrganizationName() + "\" has been rejected. Reason: " + reasonDTO.getReason(),
+                "/my-organization"
+        );
     }
 
     private OrganizationDTO convertToDTO(Organization organization) {
@@ -119,7 +140,7 @@ public class ManageOrganizationService {
                 organization.getStartTime(),
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
-                organization.getCeo() != null ? organization.getCeo().getId() : null
-        );
+                organization.getCeo() != null ? organization.getCeo().getId() : null,
+                organization.getReason());
     }
 }
