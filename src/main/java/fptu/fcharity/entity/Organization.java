@@ -6,6 +6,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -38,7 +39,7 @@ public class Organization {
     @Column(name="address")
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
 
@@ -56,17 +57,13 @@ public class Organization {
     @Column(name="organization_status", length = 50)
     private String organizationStatus;
 
-    @Column(name="background_url")
-    private String backgroundUrl;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    // TODO: ceo id -> object
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ceo_id")
     private User ceo;
 
     @Column(name = "reason")
     private String reason;
 
-    @Column(name = "advice")
-    private String advice;
 }
 
