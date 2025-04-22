@@ -12,6 +12,10 @@ import java.util.UUID;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
+
+    static void deleteByPostId(UUID postId) {
+    }
+
     List<Comment> findByParentCommentCommentId(UUID parentCommentId);
     @Query("SELECT c FROM Comment c WHERE c.post.id = :postId And c.parentComment.commentId is null")
     Page<Comment> findByPost_Id(@Param("postId") UUID postId, Pageable pageable);
@@ -24,4 +28,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT c FROM Comment c WHERE c.commentId = :commentId")
     Comment findEssentialById(UUID commentId);
+
 }
+

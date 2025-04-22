@@ -6,7 +6,9 @@ import fptu.fcharity.entity.PostVote;
 import fptu.fcharity.entity.PostVoteId;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.dto.post.PostRequestDTO;
+import fptu.fcharity.repository.ObjectAttachmentRepository;
 import fptu.fcharity.repository.TagRepository;
+import fptu.fcharity.repository.manage.post.CommentRepository;
 import fptu.fcharity.repository.manage.post.PostVoteRepository;
 import fptu.fcharity.response.post.PostResponse;
 import fptu.fcharity.repository.manage.post.PostRepository;
@@ -25,10 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import fptu.fcharity.entity.PostReport;
+import fptu.fcharity.repository.manage.post.PostReportRepository;
 
 @Service
 public class PostService {
-
+    @Autowired
+    private CommentRepository commentRepository;
     @Autowired
     private PostRepository postRepository;
 
@@ -114,12 +119,12 @@ public class PostService {
                 objectAttachmentService.getAttachmentsOfObject(updatedPost.getId(),TaggableType.POST));
     }
 
-    // Xóa Post theo ID
+
+    @Transactional
     public void deletePost(UUID postId) {
-        if (!postRepository.existsById(postId)) {
-            throw new RuntimeException("Post not found with id: " + postId);
-        }
-        objectAttachmentService.clearAttachments(postId, TaggableType.POST);
+        // Xóa các comment và attachment liên quan
+        CommentRepository.deleteByPostId(postId);
+        ObjectAttachmentRepository.deleteByPostId(postId);
         postRepository.deleteById(postId);
     }
 
@@ -128,5 +133,34 @@ public class PostService {
         return posts.stream()
                 .map(PostResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+    @Autowired
+    private PostReportRepository postReportRepository;
+
+    // Thêm phương thức reportPost
+    @Transactional
+    public void reportPost(UUID postId, UUID reporterId, String reason) {
+        // Validate post
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Không tìm thấy bài viết"));
+
+        // Validate reporter
+        User reporter = userRepository.findById(reporterId)
+                .orElseThrow(() -> new ApiRequestException("Người dùng không tồn tại"));
+
+        // Tạo báo cáo
+        PostReport report = new PostReport();
+        report.setPost(post);
+        report.setReporter(reporter);
+        report.setReason(reason);
+        report.setReportDate(Instant.now());
+
+        postReportRepository.save(report);
+    }
+    // Trong PostService
+    public boolean isPostOwner(UUID postId, UUID userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Không tìm thấy bài viết"));
+        return post.getUser().getId().equals(userId);
     }
 }
