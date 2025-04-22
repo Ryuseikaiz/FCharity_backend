@@ -1,7 +1,11 @@
 package fptu.fcharity.controller.manage.request;
 
 import fptu.fcharity.dto.request.RequestDto;
+import fptu.fcharity.entity.ProjectConfirmationRequest;
 import fptu.fcharity.entity.Taggable;
+import fptu.fcharity.response.project.ProjectConfirmationRequestResponse;
+import fptu.fcharity.response.project.ProjectFinalResponse;
+import fptu.fcharity.response.project.TransferRequestResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.manage.request.RequestService;
 import fptu.fcharity.service.TaggableService;
@@ -70,5 +74,10 @@ public class RequestController {
     public ResponseEntity<List<RequestFinalResponse>> getRequestsByUserId(@PathVariable UUID userId) {
         List<RequestFinalResponse> userRequests = requestService.getRequestsByUserId(userId);
         return ResponseEntity.ok(userRequests);
+    }
+    @GetMapping("/{id}/transfer-request")
+    public ResponseEntity<TransferRequestResponse> getConfirmRequestByRequestId(@PathVariable UUID id) {
+        TransferRequestResponse requestResponse = requestService.getTransferRequestByRequestId(id);
+        return ResponseEntity.ok(requestResponse);
     }
 }

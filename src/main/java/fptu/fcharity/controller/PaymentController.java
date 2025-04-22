@@ -1,7 +1,16 @@
 package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.payment.PaymentDto;
+import fptu.fcharity.dto.project.ToProjectDonationDto;
+import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.response.project.ToProjectDonationResponse;
+import fptu.fcharity.service.HelpNotificationService;
+import fptu.fcharity.service.manage.project.ProjectService;
+import fptu.fcharity.service.manage.project.ToProjectDonationService;
 import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.utils.constants.project.DonationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +21,14 @@ import vn.payos.type.CheckoutResponseData;
 import vn.payos.type.ItemData;
 import vn.payos.type.PaymentData;
 
-import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,24 +45,42 @@ public class PaymentController {
     private String checksumKey;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ProjectService projectService;
+    @Autowired
+    private ToProjectDonationService toProjectDonationService;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private HelpNotificationService notificationService;
 
-    private String generateRandomLettersAZaz(int length) {
-        String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        return new Random().ints(length, 0, letters.length())
-                .mapToObj(letters::charAt)
-                .map(String::valueOf)
-                .collect(Collectors.joining());
+
+    private int generateRandomOrderCode() {
+        Random random = new Random();
+        int orderCode = random.nextInt(900000000) + 1000000000; // Đảm bảo rằng số là dương và có 10 chữ số
+        return orderCode;
     }
+
+
 
     @PostMapping("/create")
     public ResponseEntity<?> createPaymentLink(@RequestBody PaymentDto paymentDto) throws Exception {
         PayOS payOS = new PayOS(clientId, apiKey, checksumKey);
 
-        String domain = "http://localhost:3001/user/manage-profile/deposit/"+paymentDto.getUserId(); // bạn có thể thay đổi
+        String domain = "http://localhost:3001/" + paymentDto.getReturnUrl();
         long orderCode = System.currentTimeMillis() / 1000;
+        if(paymentDto.getObjectType().equals("PROJECT")) {
+            ToProjectDonationDto donationDto = new ToProjectDonationDto();
+            donationDto.setProjectId(paymentDto.getObjectId());
+            donationDto.setAmount(paymentDto.getAmount());
+            donationDto.setMessage(paymentDto.getPaymentContent());
+            donationDto.setUserId(paymentDto.getUserId());
+            donationDto.setDonationStatus(DonationStatus.PENDING);
+            donationDto.setOrderCode(generateRandomOrderCode());
+            ToProjectDonationResponse res =  toProjectDonationService.createDonation(donationDto);
+            orderCode = res.getOrderCode();
+        }
 
-        String verificationCode = generateRandomLettersAZaz(24);
-        userService.updateVerificationCode(paymentDto.getUserId(), verificationCode);
         ItemData itemData = ItemData.builder()
                 .name(paymentDto.getItemContent())
                 .quantity(1)
@@ -66,7 +90,7 @@ public class PaymentController {
         PaymentData paymentData = PaymentData.builder()
                 .orderCode(orderCode)
                 .amount(paymentDto.getAmount())
-                .description(verificationCode)
+                .description(paymentDto.getPaymentContent())
                 .returnUrl(domain)
                 .cancelUrl(domain)
                 .item(itemData)
@@ -78,27 +102,24 @@ public class PaymentController {
     }
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody Map<String, Object> payload) {
-        // Parse data từ payload
-        // Kiểm tra trạng thái thanh toán
-        // Cập nhật vào database: ví dụ cộng tiền vào tài khoản, cập nhật trạng thái đơn hàng
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         System.out.println("Webhook received: " + payload);
         Map<String, Object> data = (Map<String, Object>) payload.get("data");
         System.out.println("Amount: " + data.get("amount"));
-        System.out.println("Description: " + data.get("description"));
+        System.out.println("orderCode: " + data.get("orderCode"));
         System.out.println("Transaction Status: " + payload.get("desc"));
 
         ZonedDateTime zonedDateTime = ZonedDateTime.parse((String) data.get("transactionDateTime"), formatter.withZone(ZoneId.of("Asia/Ho_Chi_Minh")));
-
         Instant transactionDateTime = zonedDateTime.toInstant();
-//        Instant transactionDateTime = localDateTime.toInstant(ZoneOffset.UTC);
         try{
-            userService.depositToWallet(
-                    (String) data.get("description"),
-                    (int) data.get("amount"),
-                    transactionDateTime
+           ToProjectDonationResponse p =  toProjectDonationService.updateDonation(
+                   (int)data.get("orderCode"),
+                    transactionDateTime,
+                   DonationStatus.COMPLETED
             );
+
+            System.out.println(p);
         }catch(Exception e){
             System.out.println("Error: " + e.getMessage());
         }

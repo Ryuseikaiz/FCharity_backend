@@ -41,4 +41,8 @@ public class ToOrganizationDonation {
     @Column(name = "message")
     private String message;
 
+    @Nationalized
+    @Column(name = "order_code")
+    private int orderCode;
+
 }
