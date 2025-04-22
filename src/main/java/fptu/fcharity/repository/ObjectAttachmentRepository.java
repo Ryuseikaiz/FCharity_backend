@@ -9,7 +9,10 @@ import java.util.UUID;
 
 @Repository
 public interface ObjectAttachmentRepository extends JpaRepository<ObjectAttachment, UUID> {
+    static void deleteByPostId(UUID postId) {
+    }
     List<ObjectAttachment> findByHelpRequestId(UUID helpRequestId);
     List<ObjectAttachment> findByPhaseId(UUID phaseId);
     List<ObjectAttachment> findByPostId(UUID postId);
+
 }
