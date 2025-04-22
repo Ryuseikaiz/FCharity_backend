@@ -3,8 +3,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.admindashboard.ProjectDTO;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
-import fptu.fcharity.utils.constants.ProjectStatus;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -79,7 +78,7 @@ public class ManageProjectService {
         return new ProjectDTO(
                 project.getId(),
                 project.getProjectName(),
-                project.getOrganization() != null ? project.getOrganization().getId() : null,
+                project.getOrganization() != null ? project.getOrganization().getOrganizationId() : null,
                 project.getLeader() != null ? project.getLeader().getId() : null,
                 project.getEmail(),
                 project.getPhoneNumber(),

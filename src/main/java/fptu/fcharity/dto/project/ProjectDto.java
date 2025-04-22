@@ -13,6 +13,8 @@ public class ProjectDto {
     private String projectName;
     private UUID organizationId;
     private UUID leaderId;
+    private UUID requestId;
+
     private String email;
 
     private String phoneNumber;
@@ -41,4 +43,6 @@ public class ProjectDto {
 
     private List<String> imageUrls;
     private List<String> videoUrls;
+
+
 }

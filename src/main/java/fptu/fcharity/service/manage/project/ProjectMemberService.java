@@ -1,7 +1,6 @@
 package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.dto.project.ProjectMemberDto;
-import fptu.fcharity.entity.Category;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.entity.ProjectMember;
 import fptu.fcharity.entity.User;
@@ -9,9 +8,7 @@ import fptu.fcharity.repository.manage.project.ProjectMemberRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.ProjectMemberResponse;
-import fptu.fcharity.utils.constants.ObjectType;
-import fptu.fcharity.utils.constants.ProjectMemberRole;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.project.ProjectMemberRole;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,8 +27,7 @@ public class ProjectMemberService {
 
     public void takeObject(ProjectMember projectMember,ProjectMemberDto projectMemberDto){
         if (projectMemberDto.getUserId() != null) {
-            User user = userRepository.findWithDetailsById(projectMemberDto.getUserId() );
-            user.getPassword();
+            User user = userRepository.findWithEssentialById(projectMemberDto.getUserId() );
             projectMember.setUser(user);
         }
         if (projectMemberDto.getProjectId() != null) {
@@ -43,49 +39,51 @@ public class ProjectMemberService {
     public List<ProjectMemberResponse> getMembersOfProject(UUID projectId) {
         List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(projectId);
         return projectMembers.stream()
-                .filter(pr-> pr.getMemberRole().equals(ProjectMemberRole.MEMBER))
                 .map(ProjectMemberResponse::new)
                 .toList();
     }
-    //để mời/ thêm thành viên vào dự án
-    public ProjectMemberResponse addMemberToProject(ProjectMemberDto projectMemberDto) {
-      List<ProjectMember> membershipHistory = projectMemberRepository.findByProjectIdAndUserId(projectMemberDto.getProjectId(),projectMemberDto.getUserId());
-        ProjectMember pm = membershipHistory.stream().filter(projectMember -> projectMember.getLeaveDate() == null).findFirst().orElse(null);
-      if(pm != null){
-          if(pm.getMemberRole().equals(ProjectMemberRole.MEMBER)){
-              throw new ApiRequestException("Already a member of this project");
-          }else{
-              throw new ApiRequestException("Already sent invitation to this user");
-          }
-      }
-      ProjectMember projectMember = new ProjectMember();
+    public List<ProjectMemberResponse> getActiveMembersOfProject(UUID id) {
+        List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(id);
+        return projectMembers.stream()
+                .filter(pr-> pr.getMemberRole().equals(ProjectMemberRole.MEMBER) && pr.getLeaveDate()==null)
+                .map(ProjectMemberResponse::new)
+                .toList();
+    }
+    public ProjectMemberResponse updateRoleOfProjectMember(ProjectMemberDto projectMemberDto) {
+        ProjectMember projectMember = projectMemberRepository.findWithEssentialById(projectMemberDto.getId());
+        if (projectMember == null) {
+            throw new ApiRequestException("Không tìm thấy thành viên trong dự án");
+        }
         projectMember.setMemberRole(projectMemberDto.getRole());
-        projectMember.setJoinDate(Instant.now());
-        takeObject(projectMember,projectMemberDto);
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);
     }
-    //user đồng ý/ko đồng ý yêu cầu tham gia
-    public void reviewInvitation(UUID memberId,String objectType,String decision) {
-        if(objectType.equals(ObjectType.PROJECT)){
-            ProjectMember member = projectMemberRepository.findById(memberId).orElseThrow(() -> new ApiRequestException("Member not found"));
-            member.setMemberRole(ProjectMemberRole.MEMBER);
-            projectMemberRepository.save(member);
-
-        }
+    //thêm thành viên
+    public ProjectMemberResponse addProjectMember(ProjectMemberDto projectMemberDto) {
+        ProjectMember projectMember = new ProjectMember();
+        projectMember.setJoinDate(Instant.now());
+        projectMember.setMemberRole(projectMemberDto.getRole());
+        takeObject(projectMember, projectMemberDto);
+        projectMemberRepository.save(projectMember);
+        return new ProjectMemberResponse(projectMember);
     }
+
     //rời nhóm
-    public ProjectMemberResponse moveOutFromProject(UUID id) {
+    public void removeProjectMember(ProjectMemberDto projectMemberDto) {
+        ProjectMember projectMember = projectMemberRepository.findByProjectIdAndUserId(projectMemberDto.getProjectId(), projectMemberDto.getUserId());
+        projectMember.setLeaveDate(Instant.now());
+        projectMemberRepository.save(projectMember);
+    }
+    public ProjectMemberResponse removeProjectMemberById(UUID id) {
         ProjectMember projectMember = projectMemberRepository.findWithEssentialById(id);
         projectMember.setLeaveDate(Instant.now());
         projectMemberRepository.save(projectMember);
         return new ProjectMemberResponse(projectMember);
     }
-    //để xóa thành viên khỏi dự án
-    public void removeMemberFromProject(UUID memberId) {
-        ProjectMember projectMember = projectMemberRepository.findById(memberId).orElseThrow(() -> new ApiRequestException("Không tìm thấy thành viên"));
+
+    public ProjectMemberResponse removeProjectMemberCompletely(UUID memberId) {
+        ProjectMember projectMember = projectMemberRepository.findWithEssentialById(memberId);
         projectMemberRepository.delete(projectMember);
+        return new ProjectMemberResponse(projectMember);
     }
-
-
 }

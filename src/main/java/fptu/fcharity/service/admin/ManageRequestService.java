@@ -1,12 +1,16 @@
 package fptu.fcharity.service.admin;
 
-
 import fptu.fcharity.dto.request.RequestDto;
+import fptu.fcharity.dto.admindashboard.ReasonDTO;
 import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.service.HelpNotificationService;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,9 +22,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageRequestService {
     private final RequestRepository requestRepository;
+    private final HelpNotificationService notificationService;
 
+    // public List<RequestDto> getAllRequests() {
+    // return requestRepository.findAll().stream()
+    // .map(this::convertToDTO)
+    // .collect(Collectors.toList());
+    // }
     public List<RequestDto> getAllRequests() {
-        return requestRepository.findAll().stream()
+        Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "creationDate"));
+        return requestRepository.findAll(pageable).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -49,9 +60,17 @@ public class ManageRequestService {
 
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
+        notificationService.notifyUser(
+                helpRequest.getUser(),
+                "Request Approved",
+                null,
+                "Your request \"" + helpRequest.getTitle() + "\" has been approved.",
+                "/requests/" + requestId
+        );
     }
+
     @Transactional
-    public void rejectRequest(UUID requestId) {
+    public void rejectRequest(UUID requestId, ReasonDTO reasonDTO) {
         HelpRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new ApiRequestException("Request not found with ID: " + requestId));
 
@@ -60,7 +79,16 @@ public class ManageRequestService {
         }
 
         request.setStatus(RequestStatus.REJECTED);
+        request.setReason(reasonDTO.getReason());
         requestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getUser(),
+                "Request Rejected",
+                null,
+                "Your request \"" + request.getTitle() + "\" has been rejected for the following reason: " + reasonDTO.getReason(),
+                "/user/manage-profile/myrequests"
+        );
     }
 
     @Transactional
@@ -93,7 +121,7 @@ public class ManageRequestService {
         dto.setTagIds(null);
         dto.setImageUrls(null);
         dto.setVideoUrls(null);
-
+        dto.setReason(helpRequest.getReason());
         return dto;
     }
 }

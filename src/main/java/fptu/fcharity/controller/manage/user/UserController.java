@@ -1,10 +1,17 @@
 package fptu.fcharity.controller.manage.user;
 
 import fptu.fcharity.dto.authentication.ChangePasswordDto;
+import fptu.fcharity.dto.project.ProjectRequestDto;
+import fptu.fcharity.entity.ProjectRequest;
+import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.dto.user.UpdateProfileDto;
 import fptu.fcharity.entity.User;
+import fptu.fcharity.response.authentication.UserResponse;
+import fptu.fcharity.response.project.ProjectRequestResponse;
 import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.UserResponseMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequestMapping("/users")
 @RestController
@@ -56,4 +64,32 @@ public class UserController {
         return ResponseEntity.ok(userResponseMapper.toDTO(updatedUser));
     }
 
+    @GetMapping("/organizations/{organization_id}")
+    public ResponseEntity<?> getUser(@PathVariable UUID organization_id) {
+        List<User> users = userService.getAllUsersNotInOrganization(organization_id);
+        return ResponseEntity.ok(users);
+    }
+    @GetMapping("/{user_id}/invitations")
+    public ResponseEntity<?> getInvitationsOfUser(@PathVariable UUID user_id) {
+        List<ProjectRequestResponse> projectRequests = userService.getInvitationsOfUserId(user_id);
+        return ResponseEntity.ok(projectRequests);
+    }
+    @GetMapping("/{user_id}/task-plans")
+    public ResponseEntity<?> getTaskPlansOfUser(@PathVariable UUID user_id) {
+        return ResponseEntity.ok(userService.getTasksOfUserId(user_id));
+    }
+    @GetMapping("/{userId}/transaction-history")
+    public ResponseEntity<?> getTransactionHistory(@PathVariable UUID userId) {
+        return ResponseEntity.ok(userService.getTransactionHistory(userId));
+    }
+
+    @GetMapping("/{project_id}/task-plans")
+    public ResponseEntity<?> getTaskPlansOfProject(@PathVariable UUID project_id) {
+        return ResponseEntity.ok(userService.getTasksOfProjectId(project_id));
+    }
+    @GetMapping("/not-in-project/{projectId}")
+    public ResponseEntity<?> getUserNotInProject(@PathVariable UUID projectId) {
+        List<UserResponse> users = userService.getUsersNotInProject(projectId);
+        return ResponseEntity.ok(users);
+    }
 }

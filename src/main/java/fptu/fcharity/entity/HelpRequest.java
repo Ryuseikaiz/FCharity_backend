@@ -1,6 +1,6 @@
 package fptu.fcharity.entity;
 
-import fptu.fcharity.utils.constants.RequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +21,7 @@ public class HelpRequest {
     @Column(name = "request_id", nullable = false)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -58,13 +58,20 @@ public class HelpRequest {
     @Nationalized
     @Column(name = "status", length = 50)
     private String status;
+
+    @Column(name = "reason")
+    private String reason;
+    @Column(name = "support_type")
+    private String supportType;
+
     public HelpRequest() {
     }
     public HelpRequest(User user, String title,
                        String content,
                        String phone, String email, String location,
                        Boolean isEmergency,
-                       Category category
+                       Category category,
+                       String reason,String supportType
     ) {
         this.user = user;
         this.title = title;
@@ -76,6 +83,8 @@ public class HelpRequest {
         this.isEmergency = isEmergency;
         this.category = category;
         this.status = RequestStatus.PENDING;
+        this.reason = reason;
+        this.supportType = supportType;
     }
 
 }

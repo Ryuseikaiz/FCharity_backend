@@ -1,7 +1,7 @@
 package fptu.fcharity.entity;
 
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -30,6 +30,10 @@ public class Project {
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id")
+    private HelpRequest request;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "leader_id")
     private User leader;
 
@@ -48,6 +52,10 @@ public class Project {
     @Nationalized
     @Column(name = "project_status", length = 50)
     private String projectStatus;
+
+    @Nationalized
+    @Column(name = "location")
+    private String location;
 
     @Nationalized
     @Column(name = "report_file")
@@ -69,17 +77,21 @@ public class Project {
     @Column(name = "shutdown_reason")
     private String shutdownReason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wallet_address")
     private Wallet walletAddress;
+    @Column(name = "created_at")
+    private Instant createdAt;
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
-    public Project(){}
-    public Project(String projectName, Organization organization, User leader, String email, String phoneNumber, String projectDescription, String projectStatus, String reportFile, Instant plannedStartTime, Instant plannedEndTime, Instant actualStartTime, Instant actualEndTime,
-                   String shutdownReason, Category category, Wallet walletAddress) {
+    public Project( ) {
+    }
+    public Project(String projectName, Organization organization, User leader, String email, String phoneNumber, String projectDescription, String projectStatus, String reportFile, Instant plannedStartTime, Instant plannedEndTime, Instant actualStartTime, Instant actualEndTime, String shutdownReason, Category category, Wallet walletAddress) {
         this.projectName = projectName;
         this.organization = organization;
         this.leader = leader;
@@ -95,5 +107,6 @@ public class Project {
         this.shutdownReason = shutdownReason;
         this.category = category;
         this.walletAddress = walletAddress;
+        this.createdAt = Instant.now();
     }
 }

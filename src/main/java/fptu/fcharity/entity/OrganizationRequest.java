@@ -1,47 +1,53 @@
 package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.Nationalized;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "organization_requests")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Data
 public class OrganizationRequest {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @ColumnDefault("newid()")
-    @Column(name = "organization_request_id", nullable = false)
-    private UUID id;
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "organization_request_id", unique = true, updatable = false, nullable = false)
+    private UUID organizationRequestId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "organization_id", referencedColumnName = "organization_id")
     private Organization organization;
 
-    @Nationalized
-    @Column(name = "request_type", length = 50)
-    private String requestType;
 
-    @Nationalized
-    @Column(name = "status", length = 50)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "request_type")
+    private OrganizationRequestType requestType;
 
-    @ColumnDefault("getdate()")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private OrganizationRequestStatus status;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
-    @ColumnDefault("getdate()")
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    public enum OrganizationRequestType {
+        Join, Invitation
+    }
+
+    public enum OrganizationRequestStatus {
+        Pending, Approved, Rejected
+    }
 }

@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.manage.project;
 
 import fptu.fcharity.dto.project.ProjectDto;
+import fptu.fcharity.helpers.schedule.ScheduleService;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.service.manage.project.ProjectService;
 import fptu.fcharity.utils.mapper.ProjectMapper;
@@ -14,9 +15,11 @@ import java.util.UUID;
 @RequestMapping("/projects")
 public class ProjectController {
     private final ProjectService projectService;
+    private final ScheduleService scheduleService;
 
-    public ProjectController(ProjectService projectService, ProjectMapper projectMapper) {
+    public ProjectController(ProjectService projectService, ProjectMapper projectMapper, ScheduleService scheduleService) {
         this.projectService = projectService;
+        this.scheduleService = scheduleService;
     }
     @GetMapping
     public ResponseEntity< List<ProjectFinalResponse>> getAllProjects() {
@@ -26,6 +29,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectFinalResponse> getProjectById(@PathVariable UUID id) {
         ProjectFinalResponse project = projectService.getProjectById(id);
+        return ResponseEntity.ok(project);
+    }
+    @GetMapping("/my-project/{userId}")
+    public ResponseEntity<List<ProjectFinalResponse>> getMyProject(@PathVariable UUID userId) {
+        List<ProjectFinalResponse> project = projectService.getMyProject(userId);
         return ResponseEntity.ok(project);
     }
     @PostMapping("/create")
@@ -43,4 +51,15 @@ public class ProjectController {
         projectService.deleteProject(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("org/{orgId}")
+    public ResponseEntity<List<ProjectFinalResponse>> getProjectByOrgId(@PathVariable UUID orgId) {
+        List<ProjectFinalResponse> projects = projectService.getProjectByOrgId(orgId);
+        return ResponseEntity.ok(projects);
+    }
+    @GetMapping("/wallet/{walletId}")
+    public ResponseEntity<ProjectFinalResponse> getProjectByWalletId(@PathVariable UUID walletId) {
+        ProjectFinalResponse project = projectService.getProjectByWalletId(walletId);
+        return ResponseEntity.ok(project);
+    }
+
 }

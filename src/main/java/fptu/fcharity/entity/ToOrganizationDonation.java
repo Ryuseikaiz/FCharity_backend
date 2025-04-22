@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -26,6 +27,9 @@ public class ToOrganizationDonation {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
+    @Column(name = "amount", precision = 18, scale = 2)
+    private BigDecimal amount;
+
     @Nationalized
     @Column(name = "donation_status", length = 50)
     private String donationStatus;
@@ -36,5 +40,9 @@ public class ToOrganizationDonation {
     @Nationalized
     @Column(name = "message")
     private String message;
+
+    @Nationalized
+    @Column(name = "order_code")
+    private int orderCode;
 
 }

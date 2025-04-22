@@ -2,6 +2,7 @@ package fptu.fcharity.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "object_attachments")
 public class ObjectAttachment {
     @Id

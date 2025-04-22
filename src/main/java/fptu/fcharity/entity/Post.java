@@ -20,8 +20,13 @@ public class Post {
     @ColumnDefault("newid()")
     @Column(name = "post_id", nullable = false)
     private UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    // Getter và Setter
+    @Setter
+    @Getter
+    @Column(nullable = false)
+    @ColumnDefault("'PENDING'") // Đảm bảo giá trị mặc định trong DB cũng là PENDING
+    private String postStatus = PostStatus.PENDING;
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User user;
 
@@ -42,13 +47,14 @@ public class Post {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @Nationalized
-    @Column(name = "post_status", length = 50)
-    private String postStatus;
+    @Column(name = "reason")
+    private String reason;
+
 
     protected void onCreate() {
         createdAt = Instant.now();
         updatedAt = Instant.now();
+
     }
 
     @PreUpdate
@@ -62,7 +68,9 @@ public class Post {
         this.title = title;
         this.content = content;
         this.vote = 0;
-        this.postStatus = PostStatus.APPROVED;
+        this.postStatus = PostStatus.PENDING; // Đảm bảo khi tạo luôn là PENDING
+        this.createdAt  = Instant.now();
     }
+
 }
 
