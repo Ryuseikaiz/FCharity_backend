@@ -87,7 +87,7 @@ public class ManageRequestService {
                 "Request Rejected",
                 null,
                 "Your request \"" + request.getTitle() + "\" has been rejected for the following reason: " + reasonDTO.getReason(),
-                "/user/manage-profile/myrequests"
+                "/requests/" + requestId
         );
     }
 
