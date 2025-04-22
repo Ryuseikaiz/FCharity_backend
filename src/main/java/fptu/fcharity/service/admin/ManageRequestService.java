@@ -4,6 +4,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.HelpRequest;
 import fptu.fcharity.repository.manage.request.RequestRepository;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManageRequestService {
     private final RequestRepository requestRepository;
+    private final HelpNotificationService notificationService;
 
 //    public List<RequestDto> getAllRequests() {
 //        return requestRepository.findAll().stream()
@@ -58,6 +60,13 @@ public List<RequestDto> getAllRequests() {
 
         helpRequest.setStatus(RequestStatus.APPROVED);
         requestRepository.save(helpRequest);
+        notificationService.notifyUser(
+                helpRequest.getUser(),
+                "Request Approved",
+                null,
+                "Your request \"" + helpRequest.getTitle() + "\" has been approved.",
+                "/requests/" + requestId
+        );
     }
     @Transactional
     public void rejectRequest(UUID requestId) {
@@ -70,6 +79,14 @@ public List<RequestDto> getAllRequests() {
 
         request.setStatus(RequestStatus.REJECTED);
         requestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getUser(),
+                "Request Rejected",
+                null,
+                "Your request \"" + request.getTitle() + "\" has been rejected for the following reason: " + reasonDTO.getReason(),
+                "/user/manage-profile/myrequests"
+        );
     }
 
     @Transactional

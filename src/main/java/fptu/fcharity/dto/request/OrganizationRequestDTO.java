@@ -12,7 +12,7 @@ import java.util.UUID;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationRequestDto {
+public class OrganizationRequestDTO {
     private UUID inviteJoinRequestId;
     private UUID userId;
     private UUID organizationId;

@@ -3,6 +3,7 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.admindashboard.PostDTO;
 import fptu.fcharity.entity.Post;
 import fptu.fcharity.repository.manage.post.PostRepository;
+import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.constants.PostStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ManagePostService {
     private final PostRepository postRepository;
+    private final HelpNotificationService notificationService;
 
     public List<PostDTO> getAllPosts() {
         return postRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -72,6 +74,14 @@ public class ManagePostService {
 
         post.setPostStatus(PostStatus.APPROVED);
         postRepository.save(post);
+
+        notificationService.notifyUser(
+                post.getUser(),
+                "Post Approved",
+                null,
+                "Your post \"" + post.getTitle() + "\" has been approved and is now visible to others.",
+                "/forum"
+        );
     }
 
     @Transactional
@@ -85,6 +95,14 @@ public class ManagePostService {
 
         post.setPostStatus(PostStatus.REJECTED);
         postRepository.save(post);
+
+        notificationService.notifyUser(
+                post.getUser(),
+                "Post Rejected",
+                null,
+                "Your post \"" + post.getTitle() + "\" has been rejected. Reason: " + reasonDTO.getReason(),
+                "/forum"
+        );
     }
 
     private PostDTO convertToDTO(Post post) {

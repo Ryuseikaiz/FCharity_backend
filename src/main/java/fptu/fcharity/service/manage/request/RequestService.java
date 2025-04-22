@@ -3,8 +3,13 @@ package fptu.fcharity.service.manage.request;
 import fptu.fcharity.dto.request.RequestDto;
 import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.*;
+import fptu.fcharity.repository.manage.project.ProjectConfirmationRequestRepository;
+import fptu.fcharity.repository.manage.project.TransferRequestRepository;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.response.project.ProjectConfirmationRequestResponse;
+import fptu.fcharity.response.project.TransferRequestResponse;
+import fptu.fcharity.response.request.HelpRequestResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
@@ -29,24 +34,27 @@ public class RequestService {
     private SimpMessagingTemplate simpMessagingTemplate;
     private final TaggableService taggableService;
     private final ObjectAttachmentService objectAttachmentService;
+    private final TransferRequestRepository transferRequestRepository;
 
     public RequestService(
                                                      RequestRepository requestRepository,
                                                      UserRepository userRepository,
                                                      CategoryRepository categoryRepository,
                                                     TaggableService taggableService,
-                                                     ObjectAttachmentService objectAttachmentService) {
+                                                     ObjectAttachmentService objectAttachmentService,
+                                                     TransferRequestRepository transferRequestRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.taggableService = taggableService;
         this.objectAttachmentService = objectAttachmentService;
+        this.transferRequestRepository = transferRequestRepository;
     }
 
     public List<RequestFinalResponse> getAllRequests() {
         List<HelpRequest> helpRequestList =  requestRepository.findAllWithInclude();
         return  helpRequestList.stream()
-                .map(request -> new RequestFinalResponse(request,
+                .map(request -> new RequestFinalResponse(new HelpRequestResponse(request),
                         taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
                         objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
                 ))
@@ -58,7 +66,7 @@ public class RequestService {
         if(helpRequest == null){
             throw new ApiRequestException("Request not found");
         }
-        return new RequestFinalResponse(helpRequest,
+        return new RequestFinalResponse(new HelpRequestResponse(helpRequest),
                 taggableService.getTagsOfObject(helpRequest.getId(),TaggableType.REQUEST),
                 objectAttachmentService.getAttachmentsOfObject(helpRequest.getId(),TaggableType.REQUEST)
         );
@@ -77,20 +85,19 @@ public class RequestService {
                    user, requestDTO.getTitle(), requestDTO.getContent(),
                    requestDTO.getPhone(), requestDTO.getEmail(),
                    requestDTO.getFullAddress(),
-                   requestDTO.isEmergency(), category);
+                   requestDTO.isEmergency(), category, requestDTO.getReason(),requestDTO.getSupportType());
            requestRepository.save(helpRequest);
            taggableService.addTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getImageUrls(), TaggableType.REQUEST);
            objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
            simpMessagingTemplate.convertAndSend("/topic/notifications", "User " + user.getEmail() + " has created a new request");
 
-           return new RequestFinalResponse(helpRequest,
+           return new RequestFinalResponse(new HelpRequestResponse(helpRequest),
                    taggableService.getTagsOfObject(helpRequest.getId(),TaggableType.REQUEST),
                    objectAttachmentService.getAttachmentsOfObject(helpRequest.getId(),TaggableType.REQUEST));
        }catch(Exception e){
            throw new ApiRequestException(e.getMessage());
        }
-
     }
 
     public RequestFinalResponse updateRequest(UUID requestId, RequestDto requestDTO) {
@@ -122,7 +129,7 @@ public class RequestService {
                 objectAttachmentService.saveAttachments(helpRequest.getId(), requestDTO.getVideoUrls(), TaggableType.REQUEST);
             }
             requestRepository.save(helpRequest);
-            return new RequestFinalResponse(helpRequest,
+            return new RequestFinalResponse(new HelpRequestResponse(helpRequest),
                     taggableService.getTagsOfObject(helpRequest.getId(),TaggableType.REQUEST),
                     objectAttachmentService.getAttachmentsOfObject(helpRequest.getId(), TaggableType.REQUEST));
         }
@@ -141,7 +148,7 @@ public class RequestService {
         List<HelpRequest> helpRequestList =  requestRepository.findAllWithInclude();
         return  helpRequestList.stream()
                 .filter(request -> request.getStatus().equals(RequestStatus.APPROVED))
-                .map(request -> new RequestFinalResponse(request,
+                .map(request -> new RequestFinalResponse(new HelpRequestResponse(request),
                         taggableService.getTagsOfObject(request.getId(),TaggableType.REQUEST),
                         objectAttachmentService.getAttachmentsOfObject(request.getId(),TaggableType.REQUEST)
                 ))
@@ -152,10 +159,19 @@ public class RequestService {
         List<HelpRequest> helpRequests = requestRepository.findByUserId(userId);
         return helpRequests.stream()
                 .map(request -> new RequestFinalResponse(
-                        request,
+                        new HelpRequestResponse(request),
                         taggableService.getTagsOfObject(request.getId(), TaggableType.REQUEST),
                         objectAttachmentService.getAttachmentsOfObject(request.getId(), TaggableType.REQUEST)
                 ))
                 .toList();
+    }
+
+    public TransferRequestResponse getTransferRequestByRequestId(UUID id) {
+        TransferRequest transferRequest = transferRequestRepository.findByRequestId(id);
+     if(transferRequest == null) {
+        return null;
+     }
+        return new TransferRequestResponse(transferRequest);
+
     }
 }
