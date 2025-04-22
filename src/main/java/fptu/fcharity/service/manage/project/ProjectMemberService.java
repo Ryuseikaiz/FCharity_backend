@@ -81,9 +81,6 @@ public class ProjectMemberService {
         return new ProjectMemberResponse(projectMember);
     }
 
-    public ProjectMemberResponse removeProjectMemberCompletely(UUID memberId) {
-        ProjectMember projectMember = projectMemberRepository.findWithEssentialById(memberId);
-        projectMemberRepository.delete(projectMember);
-        return new ProjectMemberResponse(projectMember);
-    }
+
+
 }
