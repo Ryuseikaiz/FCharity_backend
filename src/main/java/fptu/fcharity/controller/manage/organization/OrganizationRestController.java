@@ -1,12 +1,17 @@
 package fptu.fcharity.controller.manage.organization;
 
-import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationDto;
+import fptu.fcharity.entity.Organization;
+import fptu.fcharity.entity.OrganizationImage;
 import fptu.fcharity.entity.User;
 
-import fptu.fcharity.response.organization.RecommendedOrganizationResponse;
+import fptu.fcharity.entity.Wallet;
+import fptu.fcharity.repository.WalletRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.user.UserService;
-import fptu.fcharity.utils.constants.OrganizationStatus;
+import fptu.fcharity.service.organization.OrganizationImageService;
+import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +20,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -31,103 +37,41 @@ public class OrganizationRestController {
         this.userService = userService;
     }
 
-    // Lấy danh sách tất cả các tổ chức trên hệ thống mà người dùng chưa tham gia và các thông số của tổ chức để hiển thị lên slideshow
-    @GetMapping("/organizations/recommended")
-    public List<RecommendedOrganizationResponse> getRecommendedOrganizations() {
-        return organizationService.getRecommendedOrganizations();
-    }
-
-    // Lấy danh sách tất cả các tổ chức triên hệ thống để show cho user và guest xem
     @GetMapping("/organizations")
-    public List<OrganizationDTO> getAllOrganizations() {
+    public List<OrganizationDto> getOrganization() {
         return organizationService.findAll();
     }
 
-
-    // Lấy danh sách các tổ chức mà người đang đăng nhập tham gia với vai trò thành viên
-    @GetMapping("organizations/joined-organizations")
-    public List<OrganizationDTO> getMyOrganizations() {
-        return organizationService.getMyOrganizations();
+    @GetMapping("/organizations/{organization_id}")
+    public OrganizationDto getOrganizationById(@PathVariable("organization_id") UUID organization_id) {
+        System.out.println("Get organization by id: " + organization_id);
+        return organizationService.findById(organization_id);
     }
 
-    // Lấy danh sách các tổ chức chờ xét duyệt để hoạt động
-    @GetMapping("/organizations/admin-review/waiting-for-creation")
-    public List<OrganizationDTO> getOrganizationsWaitingForCreation() {
-        return organizationService.findAll().stream()
-                .filter(organizationDTO -> Objects.equals(organizationDTO.getOrganizationStatus(), OrganizationStatus.PENDING)).toList();
-    }
-
-    // Lấy danh sách các tổ chức chờ xét duyệt để xóa
-    @GetMapping("/organizations/admin-review/waiting-for-deletion")
-    public List<OrganizationDTO> getOrganizationsWaitingForDeletion() {
-        return organizationService.findAll().stream()
-                .filter(organizationDTO -> Objects.equals(organizationDTO.getOrganizationStatus(), OrganizationStatus.WATINGFORDELETION)).toList();
-    }
-
-    // Lấy thông tin của một tổ chức có id nhất định
-    @GetMapping("/organizations/{organizationId}")
-    public OrganizationDTO getOrganizationById(@PathVariable UUID organizationId) {
-        System.out.println("Get organization by id: " + organizationId);
-        return organizationService.findById(organizationId);
-    }
-
-    // Tạo mới tổ chức cho người đang đang nhập
     @PostMapping("/organizations")  // OK
-    public OrganizationDTO postOrganization(@RequestBody OrganizationDTO organizationDTO) throws IOException {
-        System.out.println("🤖🤖🤖creating organization: " + organizationDTO);
-        return organizationService.createOrganization(organizationDTO);
+    public OrganizationDto postOrganization(@RequestBody OrganizationDto organizationDto) throws IOException {
+        System.out.println("🤖🤖🤖creating organization: " + organizationDto);
+        return organizationService.createOrganization(organizationDto);
     }
 
-    // Cập nhật thông tin cho tổ chức
     @PutMapping("/organizations")   // OK
-    public OrganizationDTO putOrganization(@RequestBody OrganizationDTO organizationDTO) throws IOException {
-        OrganizationDTO result = organizationService.updateOrganization(organizationDTO);
-        System.out.println("Updated organization info: " + organizationDTO);
-        return result;
+    public OrganizationDto putOrganization(@RequestBody OrganizationDto organizationDto) throws IOException {
+        return organizationService.updateOrganization(organizationDto);
     }
 
-    // Xóa (vô hiệu hóa) tổ chức và chờ Admin phê duyệt
     @DeleteMapping("/organizations/{organizationId}")
-    public UUID deleteOrganization(@PathVariable UUID organizationId) {
-        organizationService.deleteOrganizationByCeo(organizationId);
-        return organizationId;
+    public void deleteOrganization(@PathVariable UUID organizationId) {
+        organizationService.deleteOrganization(organizationId);
     }
 
-    // Xóa tổ chức do Admin thực hiện
-    @DeleteMapping("/organizations/admin-review/{organizationId}")
-    public UUID deleteOrganizationByAdmin(@PathVariable UUID organizationId) {
-        organizationService.deleteOrganizationByAdmin(organizationId);
-        return organizationId;
-    }
-
-    // Lấy thông tin tổ chức do người đang đăng nhập làm Ceo
-    @GetMapping("/organization/managedByCeo")
-    public ResponseEntity<OrganizationDTO> getManagedOrganizationByCeo() {
+    @GetMapping("/organizations/managed")
+    public ResponseEntity<List<OrganizationDto>> getManagedOrganizations() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser  = userService.findUserByEmail(authentication.getName()); // email
 
         if (currentUser != null) {
             UUID currentUserId = currentUser.getId();
-            OrganizationDTO organization = organizationService.getOrganizationByCeoId(currentUserId);
-            System.out.println("🦔 organizations: " + organization);
-            if (organization == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            return ResponseEntity.ok(organization);
-        }
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
-
-    // Lấy danh sách các tổ chức mà người đang đăng nhập nắm vai trò Manager
-    @GetMapping("/organizations/managedByManager")
-    public ResponseEntity<List<OrganizationDTO>> getManagedOrganizationsByManager() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser  = userService.findUserByEmail(authentication.getName()); // email
-
-        if (currentUser != null) {
-            UUID currentUserId = currentUser.getId();
-            List<OrganizationDTO> organizations = organizationService.getOrganizationsByManagerId(currentUserId);
+            List<OrganizationDto> organizations = organizationService.getOrganizationsByCeoOrManager(currentUserId);
             System.out.println("🦔 organizations: " + organizations);
             if (organizations == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -136,5 +80,11 @@ public class OrganizationRestController {
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @GetMapping("/organizations/my-organization/{userId}")
+    public ResponseEntity<?> getMyOrganization(@PathVariable UUID userId) {
+        OrganizationDto organization = organizationService.getMyOrganization(userId);
+        return ResponseEntity.ok(organization);
     }
 }

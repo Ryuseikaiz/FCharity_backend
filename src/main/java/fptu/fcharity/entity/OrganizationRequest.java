@@ -44,7 +44,7 @@ public class OrganizationRequest {
     private Instant updatedAt;
 
     public enum OrganizationRequestType {
-        Join, Invitation
+        Request, Invitation
     }
 
     public enum OrganizationRequestStatus {

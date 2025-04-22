@@ -3,13 +3,11 @@ package fptu.fcharity.service.admin;
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
-import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,7 +20,6 @@ import static fptu.fcharity.utils.constants.PostStatus.*;
 @RequiredArgsConstructor
 public class ManageOrganizationService {
     private final OrganizationRepository organizationRepository;
-    private final HelpNotificationService notificationService;
 
     public List<OrganizationDTO> getAllOrganizations() {
         return organizationRepository.findAll().stream()
@@ -95,15 +92,7 @@ public class ManageOrganizationService {
         }
 
         organization.setOrganizationStatus(APPROVED);
-        organization.setStartTime(Instant.now());
         organizationRepository.save(organization);
-        notificationService.notifyUser(
-                organization.getCeo(), // giả định Organization có quan hệ với User tạo tổ chức
-                "Organization Approved",
-                null,
-                "Your organization \"" + organization.getOrganizationName() + "\" has been approved and is now active.",
-                "manage-organization"
-        );
     }
 
     @Transactional
@@ -117,13 +106,6 @@ public class ManageOrganizationService {
 
         organization.setOrganizationStatus(REJECTED);
         organizationRepository.save(organization);
-        notificationService.notifyUser(
-                organization.getCeo(), // giả định Organization có trường `User user`
-                "Organization Rejected",
-                null,
-                "Your organization \"" + organization.getOrganizationName() + "\" has been rejected. Reason: " + reasonDTO.getReason(),
-                "/manage-organization"
-        );
     }
 
     private OrganizationDTO convertToDTO(Organization organization) {
