@@ -46,6 +46,7 @@ public class SecurityConfiguration {
                                 "/tags",             // Lấy danh sách tags
                                 "/categories",       // Lấy danh sách categories
                                 "/payment/webhook",  // PayOS webhook (cần công khai)
+                                "/stripe/webhook", // Stripe webhook (cần công khai)
                                 "/topic/**", "/app/**", "/ws/**" // WebSocket endpoints
                         ).permitAll()
                         // Cho phép truy cập công khai MỘT SỐ API GET cụ thể

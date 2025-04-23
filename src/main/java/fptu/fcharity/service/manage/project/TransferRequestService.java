@@ -1,15 +1,14 @@
 package fptu.fcharity.service.manage.project;
 
-import fptu.fcharity.entity.Project;
-import fptu.fcharity.entity.SpendingDetail;
-import fptu.fcharity.entity.SpendingItem;
-import fptu.fcharity.entity.SpendingPlan;
+import fptu.fcharity.entity.*;
 import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.project.*;
+import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.response.project.TransferRequestResponse;
 import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.project.TransferRequestStatus;
+import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +34,9 @@ public class TransferRequestService {
     private WalletRepository walletRepository;
     @Autowired
     private HelpNotificationService notificationService;
+    @Autowired
+    private RequestRepository requestRepository;
+
     public List<TransferRequestResponse> getAllTransferRequests() {
         return transferRequestRepository.findAll().stream()
                 .map(TransferRequestResponse::new)
@@ -54,14 +56,15 @@ public class TransferRequestService {
         transferRequest.setBankOwner(accountHolder);
         transferRequest.setStatus(TransferRequestStatus.PENDING_ADMIN_APPROVAL);
         transferRequest.setUpdatedDate(Instant.now());
-        //send to admin
+        //send to user,admin
         notificationService.notifyUser(
                 transferRequest.getRequest().getUser(),
-                "Updated transfer information from request: " + transferRequest.getRequest().getTitle(),
+                "Bank information submitted for transfer request",
                 null,
-                "Transfer request",
+                "You have submitted your bank account details for the transfer request of request '" + transferRequest.getRequest().getTitle()+ "'. Please wait for admin approval.",
                 "/user/manage-profile/myrequests"
         );
+
         return new TransferRequestResponse(transferRequestRepository.save(transferRequest));
     }
     public TransferRequestResponse updateTransferImage(UUID id,String transactionImage,String note) {
@@ -101,17 +104,23 @@ public class TransferRequestService {
         spendingDetail.setSpendingItem(item);
         spendingDetail.setAmount(item.getEstimatedCost());
         spendingDetail.setDescription("Send money to requester");
+        spendingDetail.setProject(p);
         spendingDetail.setTransactionTime(Instant.now());
+        spendingDetail.setProofImage(transferRequest.getTransactionImage());
         spendingDetailRepository.save(spendingDetail);
 
-        p.getWalletAddress().setBalance(
+        Wallet wallet = p.getWalletAddress();
+        wallet.setBalance(
                 p.getWalletAddress().getBalance().subtract(spendingDetail.getAmount())
         );
-        walletRepository.save(p.getWalletAddress());
+        walletRepository.save(wallet);
 
         p.setProjectStatus(ProjectStatus.FINISHED);
         p.setActualEndTime(Instant.now());
         projectRepository.save(p);
+
+        p.getRequest().setStatus(RequestStatus.COMPLETED);
+        requestRepository.save(p.getRequest());
 
         notificationService.notifyUser(
                 p.getLeader(),

@@ -22,7 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ToProjectDonationService {
@@ -119,7 +121,10 @@ public class ToProjectDonationService {
     }
 
     public List<ToProjectDonationResponse> getAllDonationsOfProject(UUID projectId) {
-        List<ToProjectDonation> l = toProjectDonationRepository.findByProjectId(projectId);
+        List<ToProjectDonation> l = toProjectDonationRepository.findByProjectId(projectId)
+                .stream()
+                .filter(donate -> Objects.equals(donate.getDonationStatus(), DonationStatus.COMPLETED))
+                .collect(Collectors.toList());
         return l.stream().map(ToProjectDonationResponse::new).toList();
     }
 }

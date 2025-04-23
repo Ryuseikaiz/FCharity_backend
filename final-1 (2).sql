@@ -186,7 +186,36 @@ CREATE TABLE transfer_request (
     CONSTRAINT fk_transfer_request_request FOREIGN KEY (request_id)
     REFERENCES help_requests(request_id) ON DELETE CASCADE
 );
-
+CREATE TABLE project_withdraw_requests (
+    id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    project_id UNIQUEIDENTIFIER,
+    amount DECIMAL(18, 2),
+    reason NVARCHAR(500) ,
+    note NVARCHAR(1000),
+     bank_account NVARCHAR(100),
+     bank_bin NVARCHAR(100),
+     bank_owner NVARCHAR(100),
+    transaction_image NVARCHAR(500),
+    status NVARCHAR(50),
+    created_date DATETIME  DEFAULT GETDATE(),
+    updated_date DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+);
+CREATE TABLE project_extra_fund_requests (
+   id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    project_id UNIQUEIDENTIFIER ,
+    amount DECIMAL(18, 2) ,
+    proof_image NVARCHAR(500),
+    reason NVARCHAR(500) ,
+    status NVARCHAR(50) ,
+    created_date DATETIME  DEFAULT GETDATE(),
+    updated_date DATETIME DEFAULT GETDATE(),
+    organization_id UNIQUEIDENTIFIER ,
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(project_id),
+);
+-- drop table project_withdraw_requests
+-- drop table project_extra_fund_requests
 CREATE TABLE spending_plans (
      spending_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
      project_id UNIQUEIDENTIFIER NOT NULL,
@@ -200,6 +229,8 @@ CREATE TABLE spending_plans (
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
 alter table spending_plans add  max_extra_cost_percentage DECIMAL(18,2);
+alter table spending_plans add  reason NVARCHAR(255);
+
 CREATE TABLE spending_items (
     spending_item_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     spending_plan_id UNIQUEIDENTIFIER NOT NULL,

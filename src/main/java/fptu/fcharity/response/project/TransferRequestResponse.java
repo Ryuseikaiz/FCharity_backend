@@ -43,7 +43,6 @@ public class TransferRequestResponse {
 
     private String transactionImage;
 
-    private String transactionCode;
 
     private String status;
 
@@ -64,7 +63,6 @@ public class TransferRequestResponse {
         this.bankBin = transferRequest.getBankBin();
         this.bankOwner = transferRequest.getBankOwner();
         this.transactionImage = transferRequest.getTransactionImage();
-        this.transactionCode = transferRequest.getTransactionCode();
         this.status = transferRequest.getStatus();
         this.createdDate = transferRequest.getCreatedDate();
         this.updatedDate = transferRequest.getUpdatedDate();

@@ -146,6 +146,11 @@ public class SpendingController {
         scheduleService.handleSetJob(project.getId(),project.getPlannedStartTime());
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/plans/{planId}/reject")
+    public ResponseEntity<?> rejectPlan(@PathVariable UUID planId,@RequestParam String reason) {
+        SpendingPlanResponse response = spendingPlanService.rejectPlan(planId,reason);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/{projectId}/details")
     public ResponseEntity<?> getSpendingDetails(@PathVariable UUID projectId) {
