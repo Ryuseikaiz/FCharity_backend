@@ -1,12 +1,17 @@
 package fptu.fcharity.controller.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationRankingDTO;
+import fptu.fcharity.dto.organization.UserDTO;
+import fptu.fcharity.entity.OrganizationMember;
 import fptu.fcharity.entity.User;
 
 import fptu.fcharity.response.organization.RecommendedOrganizationResponse;
+import fptu.fcharity.service.manage.organization.OrganizationMemberService;
 import fptu.fcharity.service.manage.organization.OrganizationService;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.constants.OrganizationStatus;
+import fptu.fcharity.utils.mapper.organization.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,17 +29,27 @@ import java.util.UUID;
 public class OrganizationRestController {
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final OrganizationMemberService organizationMemberService;
+    private final UserMapper userMapper;
 
     @Autowired
-    public OrganizationRestController(OrganizationService organizationService, UserService userService) {
+    public OrganizationRestController(OrganizationService organizationService, UserService userService, OrganizationMemberService organizationMemberService, UserMapper userMapper) {
         this.organizationService = organizationService;
         this.userService = userService;
+        this.organizationMemberService = organizationMemberService;
+        this.userMapper = userMapper;
     }
 
     // Lấy danh sách tất cả các tổ chức trên hệ thống mà người dùng chưa tham gia và các thông số của tổ chức để hiển thị lên slideshow
     @GetMapping("/organizations/recommended")
     public List<RecommendedOrganizationResponse> getRecommendedOrganizations() {
         return organizationService.getRecommendedOrganizations();
+    }
+
+    // Lấy thông tin các tổ chức cho việc xếp hạng
+    @GetMapping("/organizations/ranking")
+    public List<OrganizationRankingDTO> getOrganizationsRanking() {
+        return organizationService.getOrganizationsRanking();
     }
 
     // Lấy danh sách tất cả các tổ chức triên hệ thống để show cho user và guest xem
@@ -136,5 +151,19 @@ public class OrganizationRestController {
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @GetMapping("/organizations/{organizationId}/ceo")
+    public ResponseEntity<UserDTO> getCeoOrganization(@PathVariable UUID organizationId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser  = userService.findUserByEmail(authentication.getName());
+        if (currentUser == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        OrganizationMember.OrganizationMemberRole role = organizationMemberService.findUserRoleInOrganization(currentUser.getId(), organizationId);
+        if (role != OrganizationMember.OrganizationMemberRole.CEO)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        return ResponseEntity.ok(userMapper.toDTO(currentUser));
     }
 }

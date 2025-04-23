@@ -41,6 +41,18 @@ public class FileUploadRestController {
         return uploadedFileService.getAllByOrganizationId(organizationId).stream().map(uploadedFileMapper::toDTO).collect(Collectors.toList());
     }
 
+    @PostMapping("/organizations")
+    public ResponseEntity<UploadedFileDTO> createOrganizationDocument(@RequestBody UploadedFileDTO uploadedFileDTO) {
+        System.out.println("uploadedFileDTO: " + uploadedFileDTO);
+        return ResponseEntity.ok(uploadedFileService.createOrganizationDocument(uploadedFileDTO));
+    }
+
+    @DeleteMapping("/organizations/{uploadedFileId}")
+    public ResponseEntity<Void> deleteOrganizationDocument(@PathVariable UUID uploadedFileId) {
+        uploadedFileService.deleteOrganizationDocument(uploadedFileId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/organizations/{organizationId}/save")
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file, @PathVariable UUID organizationId) throws Exception {
         System.out.println("🕷️🕷️🕷️uploading file: " + file.getOriginalFilename());

@@ -25,16 +25,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 public class OrganizationMemberRestController {
     private final OrganizationMemberService organizationMemberService;
-    private final OrganizationService organizationService;
-    private final UserService userService;
-    private final OrganizationMemberRepository organizationMemberRepository;
-
     @Autowired
-    public OrganizationMemberRestController(OrganizationMemberService organizationMemberService, OrganizationService organizationService, UserService userService, OrganizationMemberRepository organizationMemberRepository) {
+    public OrganizationMemberRestController(OrganizationMemberService organizationMemberService) {
         this.organizationMemberService = organizationMemberService;
-        this.organizationService = organizationService;
-        this.userService = userService;
-        this.organizationMemberRepository = organizationMemberRepository;
     }
 
     @GetMapping("/organization-members/{organizationId}/users-not-in-organization")
