@@ -36,4 +36,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @EntityGraph(attributePaths = {"category", "leader", "organization","request","walletAddress"}) // Thêm EntityGraph nếu cần load quan hệ
     List<Project> findByProjectNameContainingIgnoreCase(String projectName, Pageable pageable);
+
+    List<Project> findByOrganizationOrganizationIdAndProjectStatus(UUID organizationId, String projectStatus);
 }
