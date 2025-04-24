@@ -283,12 +283,18 @@ public class AuthenticationService {
         if (!user.isEnabled()) {
             throw new ApiRequestException("Account not verified. Please verify your account.");
         }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
+
+        if (!"Admin".equalsIgnoreCase(String.valueOf(user.getUserRole()))) {
+            throw new ApiRequestException("Access denied: Not an admin user.");
+        }
+
         return user;
     }
 }
