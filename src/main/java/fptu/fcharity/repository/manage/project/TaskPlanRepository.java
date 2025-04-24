@@ -2,7 +2,6 @@ package fptu.fcharity.repository.manage.project;
 
 import fptu.fcharity.entity.TaskPlan;
 import fptu.fcharity.entity.TaskPlanStatus;
-import fptu.fcharity.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +26,9 @@ public interface TaskPlanRepository extends JpaRepository<TaskPlan, UUID> {
     @EntityGraph(attributePaths = {"phase","status"})
     @Query("SELECT t FROM TaskPlan t where t.parentTask.id= :taskId")
     List<TaskPlan> findByParentTaskId(UUID taskId);
+    @Query("SELECT t FROM TaskPlan t " +
+            "JOIN FETCH t.phase p " +       // Idiomatic join: TaskPlan -> Timeline (p)
+            "JOIN FETCH p.project pr " +    // Idiomatic join: Timeline (p) -> Project (pr)
+            "WHERE pr.id = :projectId")    // Correct WHERE clause: Filter by Project's ID (pr.id)
+    List<TaskPlan> findByProjectId(UUID projectId); // Renamed for clarity
 }

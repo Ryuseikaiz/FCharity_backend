@@ -29,7 +29,12 @@ public class ScheduleService {
                 System.out.println("Scheduling job for project: " + projectId + " at " + plannedStartTime);
                 System.out.println("Job detail: " + jobDetail);
                 System.out.println("Trigger: " + trigger);
-                scheduler.scheduleJob(jobDetail, trigger);
+                Instant now = Instant.now();
+                if (plannedStartTime.isAfter(now)) {
+                    scheduler.scheduleJob(jobDetail, trigger);
+                } else {
+                    System.out.println("❌ Cannot schedule job — startTime is in the past!");
+                }
             } catch (SchedulerException e) {
                 e.printStackTrace();
             }

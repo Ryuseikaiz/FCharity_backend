@@ -18,6 +18,7 @@ import java.util.UUID;
 @Table(name = "organization_transaction_history")
 public class OrganizationTransactionHistory {
     @Id
+    @GeneratedValue(generator = "UUID")
     @ColumnDefault("newid()")
     @Column(name = "transaction_id", nullable = false)
     private UUID id;

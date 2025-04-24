@@ -3,10 +3,10 @@ package fptu.fcharity.controller.manage.project;
 import fptu.fcharity.dto.project.TaskPlanDto;
 import fptu.fcharity.dto.project.TaskPlanStatusDto;
 import fptu.fcharity.dto.project.TimelineDto;
-import fptu.fcharity.entity.TaskPlan;
-import fptu.fcharity.entity.TaskPlanStatus;
-import fptu.fcharity.entity.Timeline;
+import fptu.fcharity.helpers.schedule.StartProjectJob;
 import fptu.fcharity.response.project.TaskPlanResponse;
+import fptu.fcharity.response.project.TaskPlanStatusResponse;
+import fptu.fcharity.response.project.TimelineResponse;
 import fptu.fcharity.service.manage.project.TaskPlanService;
 import fptu.fcharity.service.manage.project.TaskPlanStatusService;
 import fptu.fcharity.service.manage.project.TimelineService;
@@ -27,43 +27,47 @@ public class ProjectTimelineController {
     TaskPlanService taskPlanService;
     @Autowired
     TaskPlanStatusService taskPlanStatusService;
+    @Autowired
+    private StartProjectJob startProjectJob;
+
     //get by id
     @GetMapping("/by-projectId/{project_id}")
     public ResponseEntity<?> getAllPhaseByProject(@PathVariable UUID project_id) {
-        List<Timeline> t = timelineService.getPhaseByProjectId(project_id);
+        List<TimelineResponse> t = timelineService.getPhaseByProjectId(project_id);
         return ResponseEntity.ok(t);
     }
 
     //get by id
     @GetMapping("/by-id/{phase_id}")
     public ResponseEntity<?> getPhase(@PathVariable UUID phase_id) {
-        Timeline t = timelineService.getPhaseById(phase_id);
+        TimelineResponse t = timelineService.getPhaseById(phase_id);
         return ResponseEntity.ok(t);
     }
 
     //tạo phase: cần tên--okay
     @PostMapping("/create")
     public ResponseEntity<?> createPhase(@RequestBody TimelineDto tDto) {
-        Timeline t = timelineService.addPhase(tDto);
+        TimelineResponse t = timelineService.addPhase(tDto);
+        taskPlanStatusService.addDefaultTaskStatus(t.getId());
         return ResponseEntity.ok(t);
     }
     //update phase: chỉ sửa tên thôi
     @PostMapping("/update")
     public ResponseEntity<?> updatePhase(@RequestBody TimelineDto tDto) {
-        Timeline t = timelineService.updatePhase(tDto);
+        TimelineResponse t = timelineService.updatePhase(tDto);
         return ResponseEntity.ok(t);
     }
     //end phase: chỉ sửa content thôi
     @PostMapping("/end")
     public ResponseEntity<?> endPhase(@RequestBody TimelineDto tDto) {
         tDto.setEndTime(Instant.now());
-        Timeline t = timelineService.updatePhase(tDto);
+        TimelineResponse t = timelineService.updatePhase(tDto);
         return ResponseEntity.ok(t);
     }
     //delete phase
     @PostMapping("/{phaseId}/cancel")
     public ResponseEntity<?> cancelPhase(@PathVariable UUID phaseId) {
-        boolean t = timelineService.deletePhase(phaseId);
+        TimelineResponse t = timelineService.deletePhase(phaseId);
         return ResponseEntity.ok(t);
     }
 //*******************TASK PLAN***********************************
@@ -75,6 +79,16 @@ public class ProjectTimelineController {
     @GetMapping("/{phaseId}/tasks")
     public ResponseEntity<?> getTasksOfPhase(@PathVariable UUID phaseId) {
         List<TaskPlanResponse> t = timelineService.getTasksOfPhase(phaseId);
+        return ResponseEntity.ok(t);
+    }
+    @GetMapping("/project/{projectId}/tasks")
+    public ResponseEntity<?> getTasksOfProject(@PathVariable UUID projectId) {
+        List<TaskPlanResponse> t = timelineService.getTaskOfProject(projectId);
+        return ResponseEntity.ok(t);
+    }
+    @GetMapping("/task/{taskId}")
+    public ResponseEntity<?> getTasksById(@PathVariable UUID taskId) {
+        TaskPlanResponse t = timelineService.getTaskById(taskId);
         return ResponseEntity.ok(t);
     }
     //--okay
@@ -99,15 +113,15 @@ public class ProjectTimelineController {
     }
     @PostMapping("/{taskId}/cancel-task")
     public ResponseEntity<?> cancelTaskOfPhase(@PathVariable UUID taskId) {
-        boolean res = taskPlanService.cancelTask(taskId);
+        TaskPlanResponse res = taskPlanService.cancelTask(taskId);
         return ResponseEntity.ok(res);
     }
 
     //*****************TASK PLAN STATUS **************************
     //get all status--okay
-    @GetMapping("/task-status")
-    public ResponseEntity<?> getAllTaskPlanStatus() {
-        List<TaskPlanStatus> t = taskPlanStatusService.getAllStatus();
+    @GetMapping("/task-status/{projectId}")
+    public ResponseEntity<?> getAllTaskPlanStatus(@PathVariable UUID projectId) {
+        List<TaskPlanStatusResponse> t = taskPlanStatusService.getAllStatusByProject(projectId);
         return ResponseEntity.ok(t);
     }
     //add status
@@ -116,21 +130,21 @@ public class ProjectTimelineController {
     // Add status
     @PostMapping("/task-status/add")
     public ResponseEntity<?> addTaskStatus(@RequestBody TaskPlanStatusDto tDto) {
-        TaskPlanStatus t = taskPlanStatusService.addTaskStatus(tDto);
+        TaskPlanStatusResponse t = taskPlanStatusService.addTaskStatus(tDto);
         return ResponseEntity.ok(t);
     }
 
     // Update status--okay
     @PostMapping("/task-status/update")
     public ResponseEntity<?> updateTaskStatus(@RequestBody TaskPlanStatusDto tDto) {
-        TaskPlanStatus t = taskPlanStatusService.updateTaskStatus(tDto);
+        TaskPlanStatusResponse t = taskPlanStatusService.updateTaskStatus(tDto);
         return ResponseEntity.ok(t);
     }
 
     // Delete status--okay
     @DeleteMapping("/{statusId}/delete")
     public ResponseEntity<?> deleteTaskStatus(@PathVariable UUID statusId) {
-        boolean result = taskPlanStatusService.deleteTaskStatus(statusId);
+        TaskPlanStatusResponse result = taskPlanStatusService.deleteTaskStatus(statusId);
         return ResponseEntity.ok(result);
     }
 
