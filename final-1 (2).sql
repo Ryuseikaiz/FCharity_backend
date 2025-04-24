@@ -318,8 +318,12 @@ CREATE TABLE project_images (
 
 CREATE TABLE task_plan_status(
        status_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-       status_name NVARCHAR(255)
+       status_name NVARCHAR(255),
+       phase_id UNIQUEIDENTIFIER,
+    FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE NO ACTION
 )
+-- alter table task_plan_status add phase_id UNIQUEIDENTIFIER;
+-- alter table task_plan_status add FOREIGN KEY (phase_id) REFERENCES timeline(phase_id) ON DELETE NO ACTION;
 CREATE TABLE task_plan (
     task_plan_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     phase_id UNIQUEIDENTIFIER,
