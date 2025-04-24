@@ -64,7 +64,7 @@ public class SecurityConfiguration {
                         // Ví dụ: API chat yêu cầu đăng nhập
                         .requestMatchers("/api/chat/gemini").authenticated()
                         // Ví dụ: API admin yêu cầu quyền Admin
-                        .requestMatchers("/api/admin/**").hasAuthority("Admin") // Hoặc .hasRole("ADMIN") tùy cấu hình UserDetails
+                        .requestMatchers("/api/admin/**").authenticated() // Hoặc .hasRole("ADMIN") tùy cấu hình UserDetails
                         // --- Tất cả các request khác CHƯA được permitAll hoặc quy định cụ thể sẽ yêu cầu xác thực ---
                         .anyRequest().authenticated()
                 )
