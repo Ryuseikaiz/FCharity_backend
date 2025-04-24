@@ -1,6 +1,7 @@
 package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationRankingDTO;
 import fptu.fcharity.dto.organization.UserDTO;
 import fptu.fcharity.dto.organization.WalletDTO;
 import fptu.fcharity.entity.*;
@@ -76,7 +77,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationRequest isExisted = organizationRequestRepository.findByOrganizationOrganizationIdAndUserId( organization.getOrganizationId(), requestUser.getId());
             if (isExisted != null &&
                     (isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Pending
-                    || isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Approved)
+                            || isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Approved)
             )
                 return false;
             return true;
@@ -103,6 +104,35 @@ public class OrganizationServiceImpl implements OrganizationService {
         System.out.println("🧊🧊result in recommended organizations: " + results);
 
         return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganizationRankingDTO> getOrganizationsRanking() {
+        List<Organization> organizations = organizationRepository.findAll();
+
+        List<OrganizationRankingDTO> result = organizations.stream().map(organization -> {
+            int totalMembers = organizationMemberRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
+            int totalProjects = projectRepository.findByOrganizationOrganizationIdAndProjectStatus(organization.getOrganizationId(), "FINISHED").size();
+            Wallet orgWallet = walletRepository.findById(organization.getWalletAddress().getId()).orElseThrow(() -> new ApiRequestException("Cannot find wallet"));
+            BigDecimal orgWalletBalance = orgWallet.getBalance();
+            OrganizationRankingDTO organizationRankingDTO = new OrganizationRankingDTO();
+
+            organizationRankingDTO.setOrganizationId(organization.getOrganizationId());
+            organizationRankingDTO.setOrganizationName(organization.getOrganizationName());
+            organizationRankingDTO.setBackgroundUrl(organization.getBackgroundUrl());
+            organizationRankingDTO.setEmail(organization.getEmail());
+
+            organizationRankingDTO.setNumberOfMembers(totalMembers);
+            organizationRankingDTO.setNumberOfProjects(totalProjects);
+            organizationRankingDTO.setTotalFunding(orgWalletBalance);
+            organizationRankingDTO.setOrganizationStatus(organization.getOrganizationStatus());
+
+            return organizationRankingDTO;
+        }).toList();
+
+        System.out.println("⚓⚓ranking data: " + result);
+        return result;
     }
 
     @Override
@@ -147,6 +177,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setWalletAddress(savedWallet);
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
+        organization.setStartTime(Instant.now());
         Organization organizationSaved = organizationRepository.save(organization);
 
         OrganizationMember organizationMember = new OrganizationMember();

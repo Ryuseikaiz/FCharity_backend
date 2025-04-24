@@ -15,6 +15,13 @@ public interface CommentVoteRepository extends JpaRepository<CommentVote, Commen
 
     // Tìm vote theo comment và user
     Optional<CommentVote> findByCommentCommentIdAndUserId(UUID commentId, UUID userId);
+    @Query("""
+    SELECT COALESCE(SUM(cv.vote), 0)
+    FROM CommentVote cv
+    WHERE cv.comment.commentId = :commentId
+       OR cv.comment.parentComment.commentId = :commentId
+""")
+    int sumVotesIncludingReplies(@Param("commentId") UUID commentId);
 
     @Query("SELECT COALESCE(SUM(cv.vote), 0) FROM CommentVote cv WHERE cv.comment.commentId = :commentId")
     int sumVotesByCommentId(@Param("commentId") UUID commentId);

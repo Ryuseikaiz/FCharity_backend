@@ -1,10 +1,12 @@
 package fptu.fcharity.response.post;
 
+import fptu.fcharity.entity.Comment;
 import fptu.fcharity.entity.User;
 import fptu.fcharity.response.authentication.UserResponse;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -22,4 +24,5 @@ public class CommentResponse {
     private int vote;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private UUID parentCommentId;
 }

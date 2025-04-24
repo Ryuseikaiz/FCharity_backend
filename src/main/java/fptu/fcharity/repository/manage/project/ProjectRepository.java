@@ -1,7 +1,6 @@
 package fptu.fcharity.repository.manage.project;
 
 import fptu.fcharity.entity.Project;
-import fptu.fcharity.utils.constants.project.ProjectStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

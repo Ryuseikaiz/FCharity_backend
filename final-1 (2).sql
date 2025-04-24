@@ -40,7 +40,7 @@ CREATE TABLE organizations (
     phone_number NVARCHAR(15),
     address NVARCHAR(255),
 	wallet_address UNIQUEIDENTIFIER,
-    organization_description NVARCHAR(255),
+    organization_description NVARCHAR(MAX),
     start_time DATETIME,
     shutdown_day DATETIME,
     organization_status NVARCHAR(50),

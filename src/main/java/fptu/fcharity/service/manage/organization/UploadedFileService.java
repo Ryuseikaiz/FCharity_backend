@@ -1,5 +1,6 @@
 package fptu.fcharity.service.manage.organization;
 
+import fptu.fcharity.dto.organization.UploadedFileDTO;
 import fptu.fcharity.entity.Organization;
 import fptu.fcharity.entity.UploadedFile;
 import fptu.fcharity.entity.User;
@@ -7,6 +8,8 @@ import fptu.fcharity.repository.manage.organization.OrganizationRepository;
 import fptu.fcharity.repository.manage.organization.UploadedFileRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.service.manage.user.UserService;
+import fptu.fcharity.utils.mapper.organization.UploadedFileMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -15,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -36,8 +40,10 @@ public class UploadedFileService {
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final List<String> contentTypes = new ArrayList<>();
+    private final UploadedFileMapper uploadedFileMapper;
 
-    public UploadedFileService(UploadedFileRepository uploadedFileRepository, UserRepository userRepository, OrganizationRepository organizationRepository) {
+    @Autowired
+    public UploadedFileService(UploadedFileRepository uploadedFileRepository, UserRepository userRepository, OrganizationRepository organizationRepository, UploadedFileMapper uploadedFileMapper) {
         this.uploadedFileRepository = uploadedFileRepository;
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
@@ -67,6 +73,18 @@ public class UploadedFileService {
         contentTypes.add("audio/mpeg");
 
         contentTypes.add("text/plain");
+        this.uploadedFileMapper = uploadedFileMapper;
+    }
+
+    @Transactional
+    public UploadedFileDTO createOrganizationDocument(UploadedFileDTO uploadedFileDTO) {
+        UploadedFile uploadedFile = uploadedFileMapper.toEntity(uploadedFileDTO);
+        return uploadedFileMapper.toDTO(uploadedFileRepository.save(uploadedFile));
+    }
+
+    @Transactional
+    public void deleteOrganizationDocument(UUID uploadedFileId) {
+        uploadedFileRepository.deleteUploadedFileByUploadedFileId(uploadedFileId);
     }
 
     public UploadedFile save(MultipartFile file, UUID organizationId) throws IOException {
