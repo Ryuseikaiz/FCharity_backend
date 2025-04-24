@@ -14,7 +14,6 @@ import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.organization.OrganizationMemberMapper;
 import fptu.fcharity.utils.mapper.organization.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -143,17 +142,32 @@ public class OrganizationMemberServiceImpl implements OrganizationMemberService 
             OrganizationMemberRole authRole = organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(authUser.getId(), organizationMemberDTO.getOrganization().getOrganizationId()).getMemberRole();
 
             if (authRole == OrganizationMemberRole.CEO ) {
-                currentOrganizationMemberInfo.setMemberRole(organizationMemberDTO.getMemberRole());
-                return organizationMemberMapper.toDTO(organizationMemberRepository.save(currentOrganizationMemberInfo));
-            }
-            else if (authRole == OrganizationMemberRole.MANAGER) {
-                if (currentOrganizationMemberInfo.getMemberRole() == OrganizationMemberRole.CEO || currentOrganizationMemberInfo.getMemberRole() == OrganizationMemberRole.MANAGER) {
-                    throw new ApiRequestException("You are not allowed to update this role");
+                // giới hạn 1 tổ chức
+                if (organizationMemberDTO.getMemberRole() == OrganizationMemberRole.CEO) {
+                    boolean isMemberACeo = organizationMemberRepository.findOrganizationMemberByUserId(organizationMemberDTO.getUser().getId()).stream().anyMatch(member -> member.getMemberRole() == OrganizationMemberRole.CEO);
+                    if (isMemberACeo) {
+                        throw new ApiRequestException("Member is already the CEO of another organization");
+                    } else {
+                        currentOrganizationMemberInfo.setMemberRole(organizationMemberDTO.getMemberRole());
+                        return organizationMemberMapper.toDTO(organizationMemberRepository.save(currentOrganizationMemberInfo));
+                    }
+                } else
+
+                // giới hạn 3 tổ chức
+                if (organizationMemberDTO.getMemberRole() == OrganizationMemberRole.MANAGER) {
+                    int numberOfOrganizationWithManagerRole = organizationMemberRepository.findOrganizationMemberByUserId(organizationMemberDTO.getUser().getId()).stream().filter(member -> member.getMemberRole() == OrganizationMemberRole.MANAGER).toList().size();
+                    if (numberOfOrganizationWithManagerRole < 3) {
+                        currentOrganizationMemberInfo.setMemberRole(organizationMemberDTO.getMemberRole());
+                        return organizationMemberMapper.toDTO(organizationMemberRepository.save(currentOrganizationMemberInfo));
+                    } else {
+                        throw new ApiRequestException("Member has reached the maximum number of organization with manager role");
+                    }
                 } else {
                     currentOrganizationMemberInfo.setMemberRole(organizationMemberDTO.getMemberRole());
                     return organizationMemberMapper.toDTO(organizationMemberRepository.save(currentOrganizationMemberInfo));
                 }
-            } else
+            }
+            else
                 throw new ApiRequestException("You are not allowed to update this role");
         }
         return organizationMemberMapper.toDTO(currentOrganizationMemberInfo);

@@ -177,6 +177,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organization.setWalletAddress(savedWallet);
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
+        organization.setStartTime(Instant.now());
         Organization organizationSaved = organizationRepository.save(organization);
 
         OrganizationMember organizationMember = new OrganizationMember();

@@ -1,25 +1,13 @@
 package fptu.fcharity.controller.manage.organization;
 
-import fptu.fcharity.dto.organization.OrganizationMemberDTO;
 import fptu.fcharity.dto.organization.UserDTO;
-import fptu.fcharity.entity.OrganizationMember;
-import fptu.fcharity.entity.User;
-import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
+import fptu.fcharity.dto.organization.OrganizationMemberDTO;
 import fptu.fcharity.service.manage.organization.OrganizationMemberService;
-import fptu.fcharity.service.manage.organization.OrganizationService;
-import fptu.fcharity.service.manage.user.UserService;
-import fptu.fcharity.utils.exception.ApiRequestException;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import fptu.fcharity.entity.OrganizationMember.OrganizationMemberRole;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
