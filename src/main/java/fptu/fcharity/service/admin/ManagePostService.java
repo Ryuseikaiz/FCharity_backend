@@ -62,6 +62,13 @@ public class ManagePostService {
 
         post.setPostStatus(PostStatus.BANNED);
         postRepository.save(post);
+        notificationService.notifyUser(
+                post.getUser(),
+                "Post Banned",
+                null,
+                "Your post \"" + post.getTitle() + "\" has been banned.",
+                "/forum"
+        );
     }
 
     @Transactional

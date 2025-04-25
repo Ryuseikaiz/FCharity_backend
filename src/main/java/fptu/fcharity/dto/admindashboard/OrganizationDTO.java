@@ -1,9 +1,11 @@
 package fptu.fcharity.dto.admindashboard;
 
+import fptu.fcharity.dto.organization.UploadedFileDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -20,4 +22,5 @@ public class OrganizationDTO {
     private String organizationStatus;
     private UUID ceoId;
     private String reason;
+    private List<UploadedFileDTO> documents;
 }
