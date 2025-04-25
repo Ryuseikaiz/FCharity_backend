@@ -31,4 +31,6 @@ public interface TaskPlanRepository extends JpaRepository<TaskPlan, UUID> {
             "JOIN FETCH p.project pr " +    // Idiomatic join: Timeline (p) -> Project (pr)
             "WHERE pr.id = :projectId")    // Correct WHERE clause: Filter by Project's ID (pr.id)
     List<TaskPlan> findByProjectId(UUID projectId); // Renamed for clarity
+@Query("Select t from TaskPlan t where t.parentTask.id = :t")
+    List<TaskPlan> findTaskPlanByParentTaskId(UUID t);
 }

@@ -1,10 +1,13 @@
 package fptu.fcharity.service.manage.project;
 
 import fptu.fcharity.entity.*;
+import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationTransactionHistoryRepository;
 import fptu.fcharity.repository.manage.project.*;
 import fptu.fcharity.response.project.ExtraFundRequestDto;
 import fptu.fcharity.response.project.ExtraFundRequestResponse;
+import fptu.fcharity.utils.constants.organization.OrganizationTransactionType;
 import fptu.fcharity.utils.constants.request.RequestStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,13 @@ public class ProjectExtraFundRequestService {
     private SpendingItemRepository spendingItemRepository;
     @Autowired
     private ToProjectDonationRepository toProjectDonationRepository;
+    @Autowired
+    private OrganizationTransactionHistoryRepository organizationTransactionHistoryRepository;
+    @Autowired
+    private ToProjectDonationService toProjectDonationService;
+    @Autowired
+    private WalletRepository walletRepository;
+
     public void takeObject(ProjectExtraFundRequest p, ExtraFundRequestDto dto){
         if(dto.getProjectId()!=null){
             p.setProject(projectRepository.findWithEssentialById(dto.getProjectId()));
@@ -65,6 +75,21 @@ public class ProjectExtraFundRequestService {
         request.setProofImage(dto.getProofImage());
         request.setStatus(RequestStatus.APPROVED);
         request.setUpdatedDate(Instant.now());
+        //new transaction history org
+        OrganizationTransactionHistory history = new OrganizationTransactionHistory();
+        history.setOrganization(request.getOrganization());
+        history.setProject(request.getProject());
+        history.setTransactionStatus(RequestStatus.APPROVED);
+        history.setTransactionType(OrganizationTransactionType.ALLOCATE_EXTRA_COST);
+        history.setAmount(request.getAmount());
+        history.setTransactionTime(Instant.now());
+        history.setMessage("Allocated extra fund for project: " + request.getProject().getProjectName());
+        organizationTransactionHistoryRepository.save(history);
+       //update wallet project
+        Project p = request.getProject();
+        Wallet pWallet = p.getWalletAddress();
+        pWallet.setBalance(pWallet.getBalance().add(request.getAmount()));
+        walletRepository.save(pWallet);
         return new ExtraFundRequestResponse(projectExtraFundRequestRepository.save(request));
     }
     public ExtraFundRequestResponse rejectExtraFundRequest(ExtraFundRequestDto dto){

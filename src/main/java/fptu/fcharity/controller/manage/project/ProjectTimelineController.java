@@ -1,11 +1,13 @@
 package fptu.fcharity.controller.manage.project;
 
+import fptu.fcharity.dto.project.FinalTimelineDto;
 import fptu.fcharity.dto.project.TaskPlanDto;
 import fptu.fcharity.dto.project.TaskPlanStatusDto;
 import fptu.fcharity.dto.project.TimelineDto;
 import fptu.fcharity.helpers.schedule.StartProjectJob;
 import fptu.fcharity.response.project.TaskPlanResponse;
 import fptu.fcharity.response.project.TaskPlanStatusResponse;
+import fptu.fcharity.response.project.TimelineFinalResponse;
 import fptu.fcharity.response.project.TimelineResponse;
 import fptu.fcharity.service.manage.project.TaskPlanService;
 import fptu.fcharity.service.manage.project.TaskPlanStatusService;
@@ -33,14 +35,14 @@ public class ProjectTimelineController {
     //get by id
     @GetMapping("/by-projectId/{project_id}")
     public ResponseEntity<?> getAllPhaseByProject(@PathVariable UUID project_id) {
-        List<TimelineResponse> t = timelineService.getPhaseByProjectId(project_id);
+        List<TimelineFinalResponse> t = timelineService.getPhaseByProjectId(project_id);
         return ResponseEntity.ok(t);
     }
 
     //get by id
     @GetMapping("/by-id/{phase_id}")
     public ResponseEntity<?> getPhase(@PathVariable UUID phase_id) {
-        TimelineResponse t = timelineService.getPhaseById(phase_id);
+        TimelineFinalResponse t = timelineService.getPhaseById(phase_id);
         return ResponseEntity.ok(t);
     }
 
@@ -53,15 +55,14 @@ public class ProjectTimelineController {
     }
     //update phase: chỉ sửa tên thôi
     @PostMapping("/update")
-    public ResponseEntity<?> updatePhase(@RequestBody TimelineDto tDto) {
-        TimelineResponse t = timelineService.updatePhase(tDto);
+    public ResponseEntity<?> updatePhase(@RequestBody FinalTimelineDto tDto) {
+        TimelineFinalResponse t = timelineService.updatePhase(tDto);
         return ResponseEntity.ok(t);
     }
     //end phase: chỉ sửa content thôi
     @PostMapping("/end")
-    public ResponseEntity<?> endPhase(@RequestBody TimelineDto tDto) {
-        tDto.setEndTime(Instant.now());
-        TimelineResponse t = timelineService.updatePhase(tDto);
+    public ResponseEntity<?> endPhase(@RequestBody FinalTimelineDto tDto) {
+        TimelineFinalResponse t = timelineService.endPhase(tDto);
         return ResponseEntity.ok(t);
     }
     //delete phase
@@ -119,9 +120,9 @@ public class ProjectTimelineController {
 
     //*****************TASK PLAN STATUS **************************
     //get all status--okay
-    @GetMapping("/task-status/{projectId}")
-    public ResponseEntity<?> getAllTaskPlanStatus(@PathVariable UUID projectId) {
-        List<TaskPlanStatusResponse> t = taskPlanStatusService.getAllStatusByProject(projectId);
+    @GetMapping("/task-status/{phaseId}")
+    public ResponseEntity<?> getAllTaskPlanStatus(@PathVariable UUID phaseId) {
+        List<TaskPlanStatusResponse> t = taskPlanStatusService.getAllStatusByPhase(phaseId);
         return ResponseEntity.ok(t);
     }
     //add status

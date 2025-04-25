@@ -15,6 +15,7 @@ public class TimelineResponse {
     private Instant startTime;
     private Instant endTime;
     private String content;
+    private String status;
 
     public TimelineResponse(Timeline t){
         this.id = t.getId();
@@ -23,5 +24,6 @@ public class TimelineResponse {
         this.startTime = t.getStartTime();
         this.endTime = t.getEndTime();
         this.content = t.getContent();
+        this.status = t.getStatus();
     }
 }
