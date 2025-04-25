@@ -29,7 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import fptu.fcharity.entity.PostReport;
 import fptu.fcharity.repository.manage.post.PostReportRepository;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 public class PostService {
     @Autowired
@@ -44,7 +45,7 @@ public class PostService {
     private TaggableService taggableService;
     @Autowired
     private ObjectAttachmentService objectAttachmentService;
-
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
     // Lấy tất cả các Post có trạng thái ACTIVE
     public List<PostResponse> getAllPosts() {
@@ -99,31 +100,63 @@ public class PostService {
     }
 
 
+    // PostService.java
+
     public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
-        Post post = postRepository.findWithIncludeById(postId);
-        post.setTitle(postUpdateDTO.getTitle());
-        post.setContent(postUpdateDTO.getContent());
-        post.setVote(postUpdateDTO.getVote());
-        post.setUpdatedAt(Instant.now());
-        Post updatedPost = postRepository.save(post);
-        if (postUpdateDTO.getTagIds() != null) {
-            taggableService.updateTaggables(updatedPost.getId(), postUpdateDTO.getTagIds(),TaggableType.POST);
-        } else {
-            taggableService.updateTaggables(updatedPost.getId(), new ArrayList<>(),TaggableType.POST);
+
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new ApiRequestException("Post not found with id: " + postId));
+
+            // Reset status và cập nhật thông tin
+            post.setPostStatus(PostStatus.PENDING);
+            post.setTitle(postUpdateDTO.getTitle());
+            post.setContent(postUpdateDTO.getContent());
+            post.setUpdatedAt(Instant.now());
+
+            // Xử lý tags và attachments
+            processTagsAndAttachments(post, postUpdateDTO);
+
+            Post updatedPost = postRepository.save(post);
+            return buildPostResponse(updatedPost);
+
+        } catch (Exception e) {
+            log.error("Update post error: {}", e.getMessage());
+            throw new ApiRequestException("Update failed: " + e.getMessage());
         }
-        objectAttachmentService.clearAttachments(updatedPost.getId(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(updatedPost.getId(), postUpdateDTO.getImageUrls(), TaggableType.POST);
-        objectAttachmentService.saveAttachments(updatedPost.getId(), postUpdateDTO.getVideoUrls(), TaggableType.POST);
-        return new PostResponse(updatedPost,
-                taggableService.getTagsOfObject(updatedPost.getId(), TaggableType.POST),
-                objectAttachmentService.getAttachmentsOfObject(updatedPost.getId(),TaggableType.POST));
+    }
+
+    private void processTagsAndAttachments(Post post, PostUpdateDto dto) {
+        // Xử lý tags
+        if (dto.getTagIds() != null) {
+            taggableService.updateTaggables(post.getId(), dto.getTagIds(), TaggableType.POST);
+        }
+
+        // Xử lý attachments
+        objectAttachmentService.clearAttachments(post.getId(), TaggableType.POST);
+        if (dto.getImageUrls() != null) {
+            objectAttachmentService.saveAttachments(post.getId(), dto.getImageUrls(), TaggableType.POST);
+        }
+        if (dto.getVideoUrls() != null) {
+            objectAttachmentService.saveAttachments(post.getId(), dto.getVideoUrls(), TaggableType.POST);
+        }
+    }
+
+    private PostResponse buildPostResponse(Post post) {
+        return new PostResponse(
+                post,
+                taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST)
+        );
     }
 
 
     @Transactional
     public void deletePost(UUID postId) {
+        Post post = postRepository.findWithIncludeById(postId);
         // Xóa các comment và attachment liên quan
-        CommentRepository.deleteByPostId(postId);
+        objectAttachmentService.clearAttachments(postId, TaggableType.POST);
+        postRepository.delete(post);
         ObjectAttachmentRepository.deleteByPostId(postId);
         postRepository.deleteById(postId);
     }
@@ -131,13 +164,16 @@ public class PostService {
     public List<PostResponse> getPostsByUserId(UUID userId) {
         List<Post> posts = postRepository.findByUserId(userId);
         return posts.stream()
-                .map(PostResponse::fromEntity)
+                .map(post -> new PostResponse(
+                        post,
+                        taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                        objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST)
+                ))
                 .collect(Collectors.toList());
     }
     @Autowired
     private PostReportRepository postReportRepository;
 
-    // Thêm phương thức reportPost
     @Transactional
     public void reportPost(UUID postId, UUID reporterId, String reason) {
         // Validate post
@@ -147,6 +183,12 @@ public class PostService {
         // Validate reporter
         User reporter = userRepository.findById(reporterId)
                 .orElseThrow(() -> new ApiRequestException("Người dùng không tồn tại"));
+
+        // Kiểm tra user đã report chưa
+        boolean alreadyReported = postReportRepository.existsByPostAndReporter(post, reporter);
+        if (alreadyReported) {
+            throw new ApiRequestException("Bạn đã báo cáo bài viết này trước đó");
+        }
 
         // Tạo báo cáo
         PostReport report = new PostReport();
@@ -163,4 +205,20 @@ public class PostService {
                 .orElseThrow(() -> new ApiRequestException("Không tìm thấy bài viết"));
         return post.getUser().getId().equals(userId);
     }
+    public List<PostResponse> getTopVotedPosts(int limit) {
+        List<Post> topPosts = postRepository.findAll().stream()
+                .filter(p -> PostStatus.APPROVED.equals(p.getPostStatus()))
+                .sorted(Comparator.comparing(Post::getVote, Comparator.nullsFirst(Comparator.reverseOrder())))
+                .limit(limit)
+                .toList();
+
+        return topPosts.stream()
+                .map(post -> new PostResponse(
+                        post,
+                        taggableService.getTagsOfObject(post.getId(), TaggableType.POST),
+                        objectAttachmentService.getAttachmentsOfObject(post.getId(), TaggableType.POST)
+                ))
+                .toList();
+    }
+
 }

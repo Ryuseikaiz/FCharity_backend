@@ -29,4 +29,6 @@ public class CommentVote {
 
     @Column(nullable = false)
     private int vote; // +1 or -1
+
+    
 }

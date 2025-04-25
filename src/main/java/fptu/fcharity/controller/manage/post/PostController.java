@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import fptu.fcharity.dto.post.PostReportRequest;
-
+import fptu.fcharity.controller.manage.post.JwtUtil;
 @RestController
 @RequestMapping("/posts")
 public class PostController {
@@ -49,13 +49,21 @@ public class PostController {
     }
 
     // Cập nhật Post theo ID
+    // PostController.java
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponse> updatePost(@PathVariable("id") UUID id, @RequestBody PostUpdateDto postUpdateDTO) {
+    public ResponseEntity<?> updatePost(@PathVariable UUID id, @RequestBody PostUpdateDto postUpdateDTO) {
         try {
-            PostResponse updatedPostDTO = postService.updatePost(id, postUpdateDTO);
-            return ResponseEntity.ok(updatedPostDTO);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            PostResponse response = postService.updatePost(id, postUpdateDTO);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", response
+            ));
+        } catch (ApiRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "success", false,
+                            "message", e.getMessage()
+                    ));
         }
     }
 
@@ -85,49 +93,33 @@ public class PostController {
         List<PostResponse> posts = postService.getPostsByUserId(userId);
         return ResponseEntity.ok(posts);
     }
-    // PostController.java
     @DeleteMapping("/{id}")
-
-
-    public ResponseEntity<Void> deletePost(
-            @PathVariable("id") UUID id,
-            @RequestHeader("Authorization") String token
-    ) {
+    public ResponseEntity<Void> deletePost(@PathVariable("id") UUID id) {
         try {
-            UUID userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
-            if (!postService.isPostOwner(id, userId)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
             postService.deletePost(id);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/{postId}/report")
     public ResponseEntity<?> reportPost(
             @PathVariable UUID postId,
-            @RequestBody PostReportRequest request,
-            @RequestHeader("Authorization") String token
+            @RequestBody PostReportRequest request // Nhận reporterId từ body
     ) {
         try {
-            // Lấy user ID từ token
-            UUID reporterId = getUserIdFromToken(token.replace("Bearer ", ""));
-
-            postService.reportPost(postId, reporterId, request.getReason());
+            postService.reportPost(postId, request.getReporterId(), request.getReason());
             return ResponseEntity.ok().body(Map.of("success", true));
-
         } catch (ApiRequestException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
-    // Hàm lấy user ID từ token (giả định)
-    private UUID getUserIdFromToken(String token) {
-        // Implement logic thực tế của bạn ở đây
-        // Ví dụ: return jwtUtil.extractUserId(token);
-        return UUID.randomUUID(); // Tạm thời dùng giá trị mẫu
+    @GetMapping("/top-voted")
+    public ResponseEntity<List<PostResponse>> getTopVotedPosts(@RequestParam(defaultValue = "2") int limit) {
+        List<PostResponse> topPosts = postService.getTopVotedPosts(limit);
+        return ResponseEntity.ok(topPosts);
     }
+
 
 }

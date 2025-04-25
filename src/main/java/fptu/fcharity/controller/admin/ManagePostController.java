@@ -22,7 +22,7 @@ public class ManagePostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDTO> getPostById(@PathVariable UUID postId) {
+    public ResponseEntity<PostDTO> getPostById(@PathVariable UUID postId) throws Throwable {
         return ResponseEntity.ok(postService.getPostById(postId));
     }
 

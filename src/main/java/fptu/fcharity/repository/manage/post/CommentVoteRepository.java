@@ -1,4 +1,4 @@
-package fptu.fcharity.repository.manage.post;
+        package fptu.fcharity.repository.manage.post;
 
 import fptu.fcharity.entity.CommentVote;
 import fptu.fcharity.entity.CommentVoteId;
@@ -24,5 +24,4 @@ public interface CommentVoteRepository extends JpaRepository<CommentVote, Commen
     int sumVotesIncludingReplies(@Param("commentId") UUID commentId);
 
     @Query("SELECT COALESCE(SUM(cv.vote), 0) FROM CommentVote cv WHERE cv.comment.commentId = :commentId")
-    int sumVotesByCommentId(@Param("commentId") UUID commentId);
-}
+    int sumVotesByCommentId(@Param("commentId") UUID commentId);}
