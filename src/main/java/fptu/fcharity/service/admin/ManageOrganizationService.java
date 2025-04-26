@@ -2,8 +2,11 @@ package fptu.fcharity.service.admin;
 
 import fptu.fcharity.dto.admindashboard.OrganizationDTO;
 import fptu.fcharity.dto.admindashboard.ReasonDTO;
+import fptu.fcharity.dto.organization.UploadedFileDTO;
 import fptu.fcharity.entity.Organization;
+import fptu.fcharity.entity.UploadedFile;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.organization.UploadedFileRepository;
 import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import static fptu.fcharity.utils.constants.PostStatus.*;
 public class ManageOrganizationService {
     private final OrganizationRepository organizationRepository;
     private final HelpNotificationService notificationService;
+    private final UploadedFileRepository uploadedFileRepository;
 
     public List<OrganizationDTO> getAllOrganizations() {
         return organizationRepository.findAll().stream()
@@ -68,6 +72,13 @@ public class ManageOrganizationService {
 
         organization.setOrganizationStatus(BANNED);
         organizationRepository.save(organization);
+        notificationService.notifyUser(
+                organization.getCeo(),
+                "Organization Banned",
+                null,
+                "Your organization \"" + organization.getOrganizationName() + "\" has been banned.",
+                "/my-organization"
+        );
     }
 
     @Transactional
@@ -130,6 +141,19 @@ public class ManageOrganizationService {
     }
 
     private OrganizationDTO convertToDTO(Organization organization) {
+        List<UploadedFile> uploadedFiles = uploadedFileRepository
+                .findUploadedFileByOrganizationOrganizationId(organization.getOrganizationId());
+
+        List<UploadedFileDTO> documents = uploadedFiles.stream()
+                .map(file -> new UploadedFileDTO(file.getUploadedFileId(),
+                        file.getFileName(),
+                        file.getFilePath(),
+                        file.getFileType(),
+                        file.getUploadDate(),
+                        null,
+                        null,
+                        file.getFileSize()))
+                .collect(Collectors.toList());
         return new OrganizationDTO(
                 organization.getOrganizationId(),
                 organization.getOrganizationName(),
@@ -141,6 +165,8 @@ public class ManageOrganizationService {
                 organization.getShutdownDay(),
                 organization.getOrganizationStatus(),
                 organization.getCeo() != null ? organization.getCeo().getId() : null,
-                organization.getReason());
+                organization.getReason(),
+                documents
+        );
     }
 }
