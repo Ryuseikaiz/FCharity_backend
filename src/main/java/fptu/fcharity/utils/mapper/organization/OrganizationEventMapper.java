@@ -5,8 +5,9 @@ import fptu.fcharity.entity.OrganizationEvent;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {OrganizationMapper.class})
+@Mapper(componentModel = "spring", uses = {})
 public interface OrganizationEventMapper {
     OrganizationEventDTO toDTO(OrganizationEvent entity);
+
     OrganizationEvent toEntity(OrganizationEventDTO dto);
 }

@@ -6,7 +6,6 @@ import fptu.fcharity.dto.organization.UserDTO;
 import fptu.fcharity.entity.UploadedFile;
 import fptu.fcharity.service.manage.organization.UploadedFileService;
 import fptu.fcharity.utils.mapper.organization.UploadedFileMapper;
-import fptu.fcharity.utils.mapper.organization.UploadedFileMapperImpl;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;

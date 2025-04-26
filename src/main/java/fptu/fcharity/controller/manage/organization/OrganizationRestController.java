@@ -103,16 +103,15 @@ public class OrganizationRestController {
 
     // Xóa (vô hiệu hóa) tổ chức và chờ Admin phê duyệt
     @DeleteMapping("/organizations/{organizationId}")
-    public UUID deleteOrganization(@PathVariable UUID organizationId) {
+    public void deleteOrganization(@PathVariable UUID organizationId) {
         organizationService.deleteOrganizationByCeo(organizationId);
-        return organizationId;
+
     }
 
     // Xóa tổ chức do Admin thực hiện
     @DeleteMapping("/organizations/admin-review/{organizationId}")
-    public UUID deleteOrganizationByAdmin(@PathVariable UUID organizationId) {
+    public void deleteOrganizationByAdmin(@PathVariable UUID organizationId) {
         organizationService.deleteOrganizationByAdmin(organizationId);
-        return organizationId;
     }
 
     // Lấy thông tin tổ chức do người đang đăng nhập làm Ceo
