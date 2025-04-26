@@ -25,7 +25,7 @@ public class ManagePostService {
         return postRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public PostDTO getPostById(UUID postId) {
+    public PostDTO getPostById(UUID postId) throws Throwable {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
         return convertToDTO(post);
