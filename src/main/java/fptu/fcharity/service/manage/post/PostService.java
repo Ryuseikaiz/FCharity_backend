@@ -100,26 +100,29 @@ public class PostService {
     }
 
 
-    // PostService.java
+    // Thêm method hidePost
+    @Transactional
+    public void hidePost(UUID postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ApiRequestException("Post not found"));
+
+        post.setPostStatus(PostStatus.HIDDEN);
+        postRepository.save(post);
+    }
 
     public PostResponse updatePost(UUID postId, PostUpdateDto postUpdateDTO) {
-
         try {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new ApiRequestException("Post not found with id: " + postId));
-
-            // Reset status và cập nhật thông tin
             post.setPostStatus(PostStatus.PENDING);
             post.setTitle(postUpdateDTO.getTitle());
             post.setContent(postUpdateDTO.getContent());
             post.setUpdatedAt(Instant.now());
 
-            // Xử lý tags và attachments
             processTagsAndAttachments(post, postUpdateDTO);
 
             Post updatedPost = postRepository.save(post);
             return buildPostResponse(updatedPost);
-
         } catch (Exception e) {
             log.error("Update post error: {}", e.getMessage());
             throw new ApiRequestException("Update failed: " + e.getMessage());

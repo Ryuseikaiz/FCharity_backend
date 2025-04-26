@@ -136,6 +136,8 @@ public class User implements UserDetails {
         return email;
     }
 
+
+
     public enum UserStatus {
         Unverified,
         Verified,

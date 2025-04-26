@@ -3,9 +3,17 @@ package fptu.fcharity.controller.manage.post;
 import fptu.fcharity.dto.post.PostRequestDTO;
 import fptu.fcharity.dto.post.PostUpdateDto;
 import fptu.fcharity.dto.post.PostReportRequest;
+import fptu.fcharity.entity.Post;
+import fptu.fcharity.entity.User;
+import fptu.fcharity.repository.manage.post.PostRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.post.PostResponse;
+import fptu.fcharity.service.ObjectAttachmentService;
+import fptu.fcharity.service.TaggableService;
 import fptu.fcharity.service.manage.post.PostService;
 import fptu.fcharity.service.manage.post.PostVoteService;
+import fptu.fcharity.utils.constants.PostStatus;
+import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +28,17 @@ import fptu.fcharity.controller.manage.post.JwtUtil;
 @RestController
 @RequestMapping("/posts")
 public class PostController {
-    @Autowired // Thêm dòng này
-    private JwtUtil jwtUtil;
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private TaggableService taggableService;
+
+    @Autowired
+    private ObjectAttachmentService objectAttachmentService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private PostService postService;
@@ -120,6 +137,60 @@ public class PostController {
         List<PostResponse> topPosts = postService.getTopVotedPosts(limit);
         return ResponseEntity.ok(topPosts);
     }
+    @PostMapping("/{postId}/hide")
+    public ResponseEntity<?> hidePost(
+            @PathVariable UUID postId,
+            @RequestParam UUID userId
+    ) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ApiRequestException("User not found"));
 
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new ApiRequestException("Post not found"));
 
+            if (!post.getUser().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            post.setPostStatus(PostStatus.HIDDEN);
+            Post updatedPost = postRepository.save(post);
+
+            return ResponseEntity.ok(new PostResponse(
+                    updatedPost,
+                    taggableService.getTagsOfObject(postId, TaggableType.POST),
+                    objectAttachmentService.getAttachmentsOfObject(postId, TaggableType.POST)
+            ));
+        } catch (ApiRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    @PostMapping("/{postId}/unhide")
+    public ResponseEntity<?> unhidePost(
+            @PathVariable UUID postId,
+            @RequestParam UUID userId
+    ) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ApiRequestException("User not found"));
+
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new ApiRequestException("Post not found"));
+
+            if (!post.getUser().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            post.setPostStatus(PostStatus.APPROVED); // Hoặc PENDING tùy logic nghiệp vụ
+            Post updatedPost = postRepository.save(post);
+
+            return ResponseEntity.ok(new PostResponse(
+                    updatedPost,
+                    taggableService.getTagsOfObject(postId, TaggableType.POST),
+                    objectAttachmentService.getAttachmentsOfObject(postId, TaggableType.POST)
+            ));
+        } catch (ApiRequestException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
