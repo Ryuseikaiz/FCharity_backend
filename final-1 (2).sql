@@ -61,6 +61,63 @@ CREATE TABLE organization_members (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id) ON DELETE CASCADE
 );
+
+CREATE TABLE organization_events (
+     organization_event_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+     title NVARCHAR(255) NOT NULL,
+     start_time DATETIME NOT NULL,
+     end_time DATETIME NOT NULL,
+     background_color NVARCHAR(7) NOT NULL,
+     border_color NVARCHAR(7) NOT NULL,
+     text_color NVARCHAR(7) NOT NULL,
+     location NVARCHAR(255) NOT NULL,
+     meeting_link NVARCHAR(255) NULL,
+     event_type NVARCHAR(100) NOT NULL,   -- ['COMMUNITY_SUPPORT', 'SEMINAR', 'VOLUNTEER', 'FUNDRAISING', 'TRAINING']
+     organization_id UNIQUEIDENTIFIER,
+
+     target_audience_groups NVARCHAR(255) NULL,  -- ['ALL', 'MEMBER', 'MANAGER', 'CEO']
+
+     summary NVARCHAR(MAX) NULL,
+     full_description NVARCHAR(MAX) NULL,
+
+     FOREIGN KEY (organization_id) REFERENCES organizations(organization_id)
+);
+
+CREATE TABLE event_email_access (
+    event_email_access_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    organization_event_id UNIQUEIDENTIFIER NOT NULL,
+    email NVARCHAR(255) NOT NULL,
+    access_type NVARCHAR(255) NOT NULL,
+
+    FOREIGN KEY (organization_event_id) REFERENCES organization_events(organization_event_id)
+);
+
+CREATE TABLE articles (
+    article_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    organization_id UNIQUEIDENTIFIER NOT NULL,
+    title NVARCHAR(255) NOT NULL,
+    content NVARCHAR(MAX) NOT NULL, -- Lưu nội dung HTML
+
+    author_id UNIQUEIDENTIFIER NOT NULL,
+
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME,
+    views INT DEFAULT 0, -- Lượt xem
+    likes INT DEFAULT 0, -- Lượt thích
+    FOREIGN KEY (organization_id) REFERENCES organizations(organization_id),
+    FOREIGN KEY (author_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE article_likes (
+    article_like_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    article_id UNIQUEIDENTIFIER NOT NULL,
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (article_id) REFERENCES articles(article_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 --new
 CREATE TABLE organization_requests (
 	organization_request_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),

@@ -49,8 +49,9 @@ public class SecurityConfiguration {
                                 "/projects", "/projects/{id:[0-9a-fA-F\\-]+}", "/projects/org/{orgId:[0-9a-fA-F\\-]+}", "/projects/wallet/{walletId:[0-9a-fA-F\\-]+}",
                                 "/posts", "/posts/{id:[0-9a-fA-F\\-]+}",
                                 "/comments/post/{postId:[0-9a-fA-F\\-]+}",
-                                "/api/files/{filename:.+}",
-                                "/api/organizations", "/api/organizations/{organizationId:[0-9a-fA-F\\-]+}"
+                                "/api/files/{filename:.+}", // Regex cho filename có dấu chấm
+                                "/api/organizations", "/api/organizations/**", "/api/organizations/{organizationId:[0-9a-fA-F\\-]+}",
+                                "/api/finance", "/api/finance/**"
                         ).permitAll()
 
 

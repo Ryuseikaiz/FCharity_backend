@@ -18,6 +18,7 @@ import java.util.UUID;
 public class OrganizationEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "organization_event_id")
     private UUID organizationEventId;
 
     @Column(name = "title", nullable = false)
@@ -53,13 +54,14 @@ public class OrganizationEvent {
     @JoinColumn(name = "organization_id", referencedColumnName = "organization_id", nullable = false)
     private Organization organizer;
 
-    @Column(name = "target_audience", nullable = false)
-    private String targetAudience;
+    // ['ALL', 'MEMBER', 'MANAGER', 'CEO']
+    @Column(name = "target_audience_groups")
+    private String targetAudienceGroups;
 
-    @Column(nullable = false)
+    @Column(name = "summary" , columnDefinition = "NVARCHAR(MAX)")
     private String summary;
 
-    @Column(name = "full_description", nullable = false)
+    @Column(name = "full_description",  columnDefinition = "NVARCHAR(MAX)")
     private String fullDescription;
 
     public enum EventType {

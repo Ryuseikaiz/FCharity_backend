@@ -22,7 +22,11 @@ public class OrganizationEventDTO {
     private String location;
     private String meetingLink;
     private OrganizationEvent.EventType eventType;
-    private String targetAudience;
+//    private String targetAudience;
+
+    // ['ALL', 'MEMBER', 'MANAGER', 'CEO']
+    private String targetAudienceGroups;
+
     private String summary;
     private String fullDescription;
     private OrganizationDTO organizer;

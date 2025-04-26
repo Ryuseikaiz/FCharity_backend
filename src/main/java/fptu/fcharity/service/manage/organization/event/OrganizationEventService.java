@@ -1,5 +1,6 @@
 package fptu.fcharity.service.manage.organization.event;
 
+import fptu.fcharity.dto.organization.IncludesExcludeEventMailAccessDTO;
 import fptu.fcharity.dto.organization.OrganizationEventDTO;
 import fptu.fcharity.entity.OrganizationEvent;
 import fptu.fcharity.entity.User;
@@ -15,5 +16,10 @@ public interface OrganizationEventService {
     boolean existsByOrganizationEventId(UUID organizationEventId);
     void deleteByOrganizationEventId(UUID organizationEventId);
 
-    void sendEventInvitationEmail();
+    IncludesExcludeEventMailAccessDTO getIncludesExcludes(UUID organizationEventId);
+    IncludesExcludeEventMailAccessDTO createIncludesExcludes(IncludesExcludeEventMailAccessDTO includesExcludeEventMailAccessDTO);
+    IncludesExcludeEventMailAccessDTO updateIncludesExcludes(IncludesExcludeEventMailAccessDTO includesExcludeEventMailAccessDTO);
+    void deleteIncludesExcludes(UUID organizationEventId);
+    List<User> getTargetUsersForSendingEventInvitationEmail(IncludesExcludeEventMailAccessDTO includesExcludeEventMailAccessDTO);
+    void sendEventInvitationEmail(User targetUser, OrganizationEventDTO organizationEventDTO);
 }

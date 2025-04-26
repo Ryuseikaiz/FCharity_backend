@@ -19,7 +19,6 @@ public class Organization {
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name="organization_id", unique = true, updatable = false, nullable = false)
-    @ColumnDefault("newid()")
     private UUID organizationId;
 
     @Nationalized
@@ -39,7 +38,7 @@ public class Organization {
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "wallet_address")
+    @JoinColumn(name = "wallet_address", referencedColumnName = "wallet_id", nullable = false)
     private Wallet walletAddress;
 
     @Nationalized
