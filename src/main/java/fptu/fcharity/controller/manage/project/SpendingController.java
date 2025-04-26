@@ -4,6 +4,7 @@ import fptu.fcharity.dto.project.SpendingDetailDto;
 import fptu.fcharity.dto.project.SpendingItemDto;
 import fptu.fcharity.dto.project.SpendingPlanDto;
 import fptu.fcharity.entity.Project;
+import fptu.fcharity.entity.SpendingDetail;
 import fptu.fcharity.entity.SpendingItem;
 import fptu.fcharity.entity.SpendingPlan;
 import fptu.fcharity.helpers.schedule.ScheduleService;
@@ -56,11 +57,21 @@ public class SpendingController {
     // ======= SPENDING PLAN CRUD =======
     @GetMapping("/{projectId}/download-template")
     public ResponseEntity<Resource> downloadTemplate(@PathVariable UUID projectId) throws IOException {
-        ByteArrayInputStream in = excelService.generateNewSpendingPlanTemplate( projectId);
+        ByteArrayInputStream in = excelService.generateSpendingPlanTemplate( projectId);
         InputStreamResource file = new InputStreamResource(in);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=spending_template.xlsx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(file);
+    }
+    @GetMapping("/{projectId}/download-template-expense")
+    public ResponseEntity<Resource> downloadTemplateExpense(@PathVariable UUID projectId) throws IOException {
+        ByteArrayInputStream in = excelService.generateSpendingDetailTemplate( projectId);
+        InputStreamResource file = new InputStreamResource(in);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=expense_template.xlsx")
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(file);
     }
@@ -77,6 +88,14 @@ public class SpendingController {
         response.put("plan", p);
         response.put("items", res);
        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/{projectId}/save-expenses-from-template")
+    public ResponseEntity<?> saveSpendingDetails(@RequestParam MultipartFile file,@PathVariable UUID projectId) throws IOException {
+        spendingDetailService.removeNonExtraFundSpendingDetails(projectId);
+        List<SpendingDetail> l = excelService.importSpendingDetails(projectId,file);
+        List<SpendingDetailResponse> responseList =  spendingDetailService.saveFromExcel(l);
+        List<SpendingDetailResponse> response = spendingDetailService.getSpendingDetailsByProject(projectId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/plans")
@@ -144,6 +163,11 @@ public class SpendingController {
         SpendingPlanResponse response = spendingPlanService.approvePlan(planId);
         Project project = projectRepository.findWithEssentialById(response.getProjectId());
         scheduleService.handleSetJob(project.getId(),project.getPlannedStartTime());
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/plans/{planId}/reject")
+    public ResponseEntity<?> rejectPlan(@PathVariable UUID planId,@RequestParam String reason) {
+        SpendingPlanResponse response = spendingPlanService.rejectPlan(planId,reason);
         return ResponseEntity.ok(response);
     }
 

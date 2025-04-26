@@ -115,6 +115,7 @@ public class RequestService {
             helpRequest.setEmail(requestDTO.getEmail() != null ? requestDTO.getEmail() : helpRequest.getEmail());
             helpRequest.setLocation(requestDTO.getFullAddress() != null ? requestDTO.getFullAddress() : helpRequest.getLocation());
             helpRequest.setIsEmergency(requestDTO.isEmergency());
+            helpRequest.setSupportType(requestDTO.getSupportType() != null ? requestDTO.getSupportType() : helpRequest.getSupportType());
             helpRequest.setStatus(requestDTO.getStatus() != null ? requestDTO.getStatus() : helpRequest.getStatus());
             if (requestDTO.getTagIds() != null) {
                 taggableService.updateTaggables(helpRequest.getId(), requestDTO.getTagIds(),TaggableType.REQUEST);

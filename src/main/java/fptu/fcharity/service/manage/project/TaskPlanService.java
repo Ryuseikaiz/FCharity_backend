@@ -8,6 +8,7 @@ import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanStatusRepository;
 import fptu.fcharity.repository.manage.project.TimelineRepository;
+import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.response.project.TaskPlanResponse;
 import fptu.fcharity.service.manage.user.UserService;
 import fptu.fcharity.utils.mapper.TaskPlanMapper;
@@ -28,7 +29,9 @@ public class TaskPlanService {
     private TimelineRepository timelineRepository;
     @Autowired
     private TaskPlanStatusRepository taskPlanStatusRepository;
-/*
+    @Autowired
+    private UserRepository userRepository;
+    /*
  * private UUID id;
  *     private UUID phaseId;
  *     private UUID userId;
@@ -50,7 +53,7 @@ public class TaskPlanService {
             t.setPhase(timeline);
         }
         if (tDto.getUserId() != null) {
-            User u = userService.getById(tDto.getUserId()).get();
+            User u = userRepository.findWithEssentialById(tDto.getUserId());
             t.setUser(u);
         }
         if(tDto.getParentTaskId() != null){
@@ -79,10 +82,10 @@ public class TaskPlanService {
         t.setUpdatedAt(Instant.now());
         return new TaskPlanResponse(taskPlanRepository.save(t));
     }
-    public boolean cancelTask(UUID task_id){
+    public TaskPlanResponse cancelTask(UUID task_id){
         TaskPlan t = taskPlanRepository.findById(task_id).orElseThrow(null);
         taskPlanRepository.delete(t);
-        return true;
+        return new TaskPlanResponse(t);
     }
 
 }

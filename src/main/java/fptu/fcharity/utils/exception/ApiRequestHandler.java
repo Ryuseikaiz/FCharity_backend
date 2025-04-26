@@ -34,4 +34,14 @@ public class ApiRequestHandler {
         );
         return new ResponseEntity<>(apiException, apiException.getHttpStatus());
     }
+    @ExceptionHandler(value = { Exception.class })
+    public ResponseEntity<Object> handleGenericException(Exception e) {
+        ApiException apiException = new ApiException(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unexpected error: " + e.getMessage(),
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        return new ResponseEntity<>(apiException, apiException.getHttpStatus());
+    }
+
 }

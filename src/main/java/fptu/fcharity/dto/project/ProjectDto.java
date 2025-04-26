@@ -22,6 +22,7 @@ public class ProjectDto {
     private String projectDescription;
 
     private String projectStatus;
+    private String location;
 
     private String reportFile;
 

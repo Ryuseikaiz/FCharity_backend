@@ -16,6 +16,9 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     @EntityGraph(attributePaths = {"category","wallet"})
     Project findWithCategoryWalletById(UUID id);
+    @Query("SELECT p FROM Project p " +
+            "JOIN FETCH p.organization o " +
+            "JOIN FETCH o.walletAddress WHERE p.id = :id")
     @EntityGraph(attributePaths = {"category", "leader", "organization","request","walletAddress"})
     Project findWithEssentialById(@Param("id") UUID id);
 
@@ -36,4 +39,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
 
     @EntityGraph(attributePaths = {"category", "leader", "organization","request","walletAddress"}) // Thêm EntityGraph nếu cần load quan hệ
     List<Project> findByProjectNameContainingIgnoreCase(String projectName, Pageable pageable);
+
+    List<Project> findByOrganizationOrganizationIdAndProjectStatus(UUID organizationId, String projectStatus);
 }

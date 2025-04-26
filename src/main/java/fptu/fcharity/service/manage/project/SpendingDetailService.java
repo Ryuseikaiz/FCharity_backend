@@ -62,4 +62,23 @@ public class SpendingDetailService {
                 .orElseThrow(() -> new ApiRequestException("Spending detail not found"));
         spendingDetailRepository.delete(spendingDetail);
     }
+
+    public List<SpendingDetailResponse> saveFromExcel(List<SpendingDetail> l) {
+        List<SpendingDetail> list =  spendingDetailRepository.saveAll(l);
+        return list.stream().map(SpendingDetailResponse::new).toList();
+    }
+
+    public void removeNonExtraFundSpendingDetails(UUID projectId) {
+        List<SpendingDetail> allDetails = spendingDetailRepository.findByProjectId(projectId);
+        if (allDetails != null && !allDetails.isEmpty()) {
+            List<SpendingDetail> detailsToDelete = allDetails.stream()
+                    .filter(detail -> detail.getDescription() == null || !detail.getDescription().contains("Extra funds for project"))
+                    .toList(); // Hoặc .collect(Collectors.toList()) cho Java cũ hơn
+
+            // Chỉ xóa nếu có detail cần xóa
+            if (!detailsToDelete.isEmpty()) {
+                spendingDetailRepository.deleteAll(detailsToDelete);
+            }
+        }
+    }
 }

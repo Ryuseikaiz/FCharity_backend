@@ -53,5 +53,8 @@ public class SpendingPlan {
     @Nationalized
     @Column(name = "approval_status", length = 50)
     private String approvalStatus;
+    @Nationalized
+    @Column(name = "reason", length = 255)
+    private String reason;
 
 }

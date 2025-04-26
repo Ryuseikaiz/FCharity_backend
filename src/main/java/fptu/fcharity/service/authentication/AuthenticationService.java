@@ -208,6 +208,7 @@ public class AuthenticationService {
     public void sendBanNotificationEmail(User user, String reason) {
         String subject = "Your FCharity account has been banned";
         String htmlContent = "<html>" +
+                "<head><meta charset=\"UTF-8\"></head>" +
                 "<body style=\"font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;\">" +
                 "<div style=\"max-width: 600px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1);\">" +
                 "<h2 style=\"color: #d32f2f;\">Account Banned</h2>" +
@@ -283,12 +284,18 @@ public class AuthenticationService {
         if (!user.isEnabled()) {
             throw new ApiRequestException("Account not verified. Please verify your account.");
         }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
+
+        if (!"Admin".equalsIgnoreCase(String.valueOf(user.getUserRole()))) {
+            throw new ApiRequestException("Access denied: Not an admin user.");
+        }
+
         return user;
     }
 }
