@@ -386,22 +386,35 @@ public class ProjectService {
         if (project == null) {
             throw new ApiRequestException("Project not found");
         }
-        ProjectConfirmationRequest request = new ProjectConfirmationRequest();
-        request.setProject(project);
-        request.setNote("Please confirm receive request for the project: " + project.getProjectName());
-        request.setRequest(project.getRequest());
-        request.setIsConfirmed(false);
-        request.setCreatedAt(Instant.now());
-        ProjectConfirmationRequest savedRequest = projectConfirmationRequestRepository.save(request);
-
-        notificationService.notifyUser(
-                request.getRequest().getUser(),
-                "New confirm receive request for your request: " + request.getRequest().getTitle(),
-                null,
-                "The project '" + request.getProject().getProjectName() + "' has sent you a confirm receive for request '"+request.getRequest().getTitle()+"'. Please send your response.",
-                "/user/manage-profile/myrequests"
-        );
-        return new ProjectConfirmationRequestResponse(savedRequest);
+        ProjectConfirmationRequest finalReq;
+        ProjectConfirmationRequest existingRequest = projectConfirmationRequestRepository.findByProjectId(projectId);
+        if(existingRequest!=null){
+            notificationService.notifyUser(
+                    existingRequest.getRequest().getUser(),
+                    "New confirm receive request for your request: " + existingRequest.getRequest().getTitle(),
+                    null,
+                    "The project '" + existingRequest.getProject().getProjectName() + "' has sent you a confirm receive for request '"+existingRequest.getRequest().getTitle()+"'. Please send your response.",
+                    "/user/manage-profile/myrequests"
+            );
+            finalReq =existingRequest;
+        }else{
+            ProjectConfirmationRequest request = new ProjectConfirmationRequest();
+            request.setProject(project);
+            request.setNote("Please confirm receive request for the project: " + project.getProjectName());
+            request.setRequest(project.getRequest());
+            request.setIsConfirmed(false);
+            request.setCreatedAt(Instant.now());
+            ProjectConfirmationRequest savedRequest = projectConfirmationRequestRepository.save(request);
+            notificationService.notifyUser(
+                    request.getRequest().getUser(),
+                    "New confirm receive request for your request: " + request.getRequest().getTitle(),
+                    null,
+                    "The project '" + request.getProject().getProjectName() + "' has sent you a confirm receive for request '"+request.getRequest().getTitle()+"'. Please send your response.",
+                    "/user/manage-profile/myrequests"
+            );
+            finalReq = savedRequest;
+        }
+        return new ProjectConfirmationRequestResponse(finalReq);
     }
     public ProjectConfirmationRequestResponse getConfirmationRequestOfProject(UUID projectId) {
         ProjectConfirmationRequest request = projectConfirmationRequestRepository.findByProjectId(projectId);

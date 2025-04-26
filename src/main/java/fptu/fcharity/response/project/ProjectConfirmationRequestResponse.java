@@ -20,6 +20,7 @@ public class ProjectConfirmationRequestResponse {
     private UUID id;
     private ProjectResponse project;
     private UUID requestId;
+    private String requestName;
     private Instant createdAt;
     private Boolean isConfirmed;
     private String note;
@@ -28,6 +29,8 @@ public class ProjectConfirmationRequestResponse {
         this.project = new ProjectResponse(projectConfirmationRequest.getProject());
         if(projectConfirmationRequest.getRequest() != null) {
             this.requestId = projectConfirmationRequest.getRequest().getId();
+            this.requestName = projectConfirmationRequest.getRequest().getTitle();
+
         }
         this.createdAt = projectConfirmationRequest.getCreatedAt();
         this.isConfirmed = projectConfirmationRequest.getIsConfirmed();
