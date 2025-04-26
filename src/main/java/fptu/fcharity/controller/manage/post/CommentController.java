@@ -2,6 +2,7 @@ package fptu.fcharity.controller.manage.post;
 
 import fptu.fcharity.dto.post.CommentDTO;
 import fptu.fcharity.entity.Comment;
+import fptu.fcharity.response.post.CommentFinalResponse;
 import fptu.fcharity.response.post.CommentResponse;
 import fptu.fcharity.service.manage.post.CommentService;
 import lombok.RequiredArgsConstructor;
@@ -28,11 +29,12 @@ public class CommentController {
     }
 
     @GetMapping("/post/{postId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByPost(
+    public ResponseEntity<List<CommentFinalResponse>> getCommentsByPost(
             @PathVariable UUID postId,
             @RequestParam(defaultValue = "0") int page, // Mặc định page = 1
             @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(commentService.getCommentsByPost(postId, page, size));
+        List<CommentFinalResponse> l = commentService.getCommentsByPost(postId, page, size);
+        return ResponseEntity.ok(l);
     }
 
 
@@ -59,18 +61,28 @@ public class CommentController {
             @PathVariable UUID commentId,
             @RequestParam UUID userId,
             @RequestParam int vote) {
+        System.out.println("Vote request - commentId: " + commentId + ", userId: " + userId + ", vote: " + vote);
         try {
             commentService.voteComment(commentId, userId, vote);
-            int newTotalVotes = commentService.getCommentById(commentId).getVote();
+            Comment comment = commentService.getCommentById(commentId);
+            int totalVotes = comment.getVote();
+            System.out.println("Vote successful - totalVotes: " + totalVotes);
             return ResponseEntity.ok()
                     .body(Map.of(
                             "success", true,
                             "commentId", commentId,
-                            "newVote", newTotalVotes // Trả về tổng vote mới
+                            "totalVote", totalVotes
                     ));
         } catch (Exception e) {
+            System.out.println("Vote error: " + e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
+
         }
+    }
+    @GetMapping("/post/{postId}/all")
+    public ResponseEntity<List<CommentResponse>> getAllCommentsByPost(@PathVariable UUID postId ) {
+        List<CommentResponse> l = commentService.getAllCommentsByPostId(postId);
+        return ResponseEntity.ok(l);
     }
 }

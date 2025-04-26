@@ -1,6 +1,7 @@
 package fptu.fcharity.service.manage.organization;
 
 import fptu.fcharity.dto.organization.OrganizationDTO;
+import fptu.fcharity.dto.organization.OrganizationRankingDTO;
 import fptu.fcharity.dto.organization.UserDTO;
 import fptu.fcharity.dto.organization.WalletDTO;
 import fptu.fcharity.entity.*;
@@ -9,9 +10,14 @@ import fptu.fcharity.repository.WalletRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationImageRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationMemberRepository;
 import fptu.fcharity.repository.manage.organization.OrganizationRepository;
+import fptu.fcharity.repository.manage.organization.OrganizationRequestRepository;
+import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.response.organization.RecommendedOrganizationResponse;
 import fptu.fcharity.utils.constants.OrganizationStatus;
+import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.exception.ApiRequestException;
+import fptu.fcharity.utils.mapper.organization.OrganizationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
@@ -24,6 +30,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class OrganizationServiceImpl implements OrganizationService {
@@ -32,8 +39,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationMemberRepository organizationMemberRepository;
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    private final OrganizationMapper organizationMapper;
     @Autowired
     private final SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private OrganizationRequestRepository organizationRequestRepository;
 
 
     @Autowired
@@ -43,6 +55,7 @@ public class OrganizationServiceImpl implements OrganizationService {
             UserRepository userRepository,
             OrganizationMemberRepository organizationMemberRepository,
             WalletRepository walletRepository,
+            OrganizationMapper organizationMapper,
             SimpMessagingTemplate simpMessagingTemplate
     )
     {
@@ -51,7 +64,75 @@ public class OrganizationServiceImpl implements OrganizationService {
         this.userRepository = userRepository;
         this.organizationMemberRepository = organizationMemberRepository;
         this.walletRepository = walletRepository;
+        this.organizationMapper = organizationMapper;
         this.simpMessagingTemplate = simpMessagingTemplate;
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<RecommendedOrganizationResponse> getRecommendedOrganizations (){
+        User requestUser = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new ApiRequestException("User not found"));
+        List<Organization> organizations = organizationRepository.findAll().stream().filter(organization -> {
+            return organizationMemberRepository.findOrganizationMemberByUserIdAndOrganizationOrganizationId(requestUser.getId(), organization.getOrganizationId()) == null;
+        }).filter(organization -> {
+            OrganizationRequest isExisted = organizationRequestRepository.findByOrganizationOrganizationIdAndUserId( organization.getOrganizationId(), requestUser.getId());
+            if (isExisted != null &&
+                    (isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Pending
+                            || isExisted.getStatus() == OrganizationRequest.OrganizationRequestStatus.Approved)
+            )
+                return false;
+            return true;
+        }).toList();
+
+        List<RecommendedOrganizationResponse> results = organizations.stream().map(organization -> {
+            int totalMembers = organizationMemberRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
+            int totalProjects = projectRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
+            int totalCompletedProjects = projectRepository.findByOrganizationOrganizationIdAndProjectStatus(organization.getOrganizationId(), ProjectStatus.FINISHED).size();
+
+            RecommendedOrganizationResponse recommendedOrganizationResponse = new RecommendedOrganizationResponse();
+            recommendedOrganizationResponse.setOrganizationId(organization.getOrganizationId());
+            recommendedOrganizationResponse.setOrganizationName(organization.getOrganizationName());
+            recommendedOrganizationResponse.setOrganizationDescription(organization.getOrganizationDescription());
+            recommendedOrganizationResponse.setStatus(organization.getOrganizationStatus());
+            recommendedOrganizationResponse.setBackgroundUrl(organization.getBackgroundUrl());
+
+            recommendedOrganizationResponse.setTotalMembers(totalMembers);
+            recommendedOrganizationResponse.setTotalProjects(totalProjects);
+            recommendedOrganizationResponse.setTotalCompletedProjects(totalCompletedProjects);
+
+            return recommendedOrganizationResponse;
+        }).toList();
+        System.out.println("🧊🧊result in recommended organizations: " + results);
+
+        return results;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrganizationRankingDTO> getOrganizationsRanking() {
+        List<Organization> organizations = organizationRepository.findAll();
+
+        List<OrganizationRankingDTO> result = organizations.stream().map(organization -> {
+            int totalMembers = organizationMemberRepository.findByOrganizationOrganizationId(organization.getOrganizationId()).size();
+            int totalProjects = projectRepository.findByOrganizationOrganizationIdAndProjectStatus(organization.getOrganizationId(), "FINISHED").size();
+            Wallet orgWallet = walletRepository.findById(organization.getWalletAddress().getId()).orElseThrow(() -> new ApiRequestException("Cannot find wallet"));
+            BigDecimal orgWalletBalance = orgWallet.getBalance();
+            OrganizationRankingDTO organizationRankingDTO = new OrganizationRankingDTO();
+
+            organizationRankingDTO.setOrganizationId(organization.getOrganizationId());
+            organizationRankingDTO.setOrganizationName(organization.getOrganizationName());
+            organizationRankingDTO.setBackgroundUrl(organization.getBackgroundUrl());
+            organizationRankingDTO.setEmail(organization.getEmail());
+
+            organizationRankingDTO.setNumberOfMembers(totalMembers);
+            organizationRankingDTO.setNumberOfProjects(totalProjects);
+            organizationRankingDTO.setTotalFunding(orgWalletBalance);
+            organizationRankingDTO.setOrganizationStatus(organization.getOrganizationStatus());
+
+            return organizationRankingDTO;
+        }).toList();
+
+        System.out.println("⚓⚓ranking data: " + result);
+        return result;
     }
 
     @Override
@@ -59,7 +140,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     public List<OrganizationDTO> findAll() {
         List<Organization> organizations = organizationRepository.findAll();
         return organizations.stream().map(this::convertOrganizationToDTO).toList();
-
     }
 
     @Override
@@ -78,13 +158,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Transactional(readOnly = true)   // OK
     public OrganizationDTO findById(UUID id) {
         Organization organization = organizationRepository.findById(id).orElseThrow(() -> new ApiRequestException("Organization not found"));
-        return convertOrganizationToDTO(organization);
-    }
-
-    @Override
-    @Transactional(readOnly = true)   // OK
-    public Organization findEntityById(UUID id) {
-        return organizationRepository.findById(id).orElseThrow(() -> new ApiRequestException("Organization not found"));
+        return organizationMapper.toDTO(organization);
     }
 
     @Override
@@ -94,18 +168,17 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (organizationMemberRepository.findOrganizationMemberByUserId(ceo.getId()).stream().anyMatch(organizationMember -> organizationMember.getMemberRole() == OrganizationMemberRole.CEO)) {
             throw new ApiRequestException("You have already created an organization, cannot create any more organizations!");
         }
-        Organization organization = convertToEntity(organizationDTO);
+        Organization organization = organizationMapper.toEntity(organizationDTO);
         organization.setCeo(ceo);
 
         Wallet wallet = new Wallet();
         wallet.setBalance(BigDecimal.valueOf(0));
         Wallet savedWallet =  walletRepository.save(wallet);
+
         organization.setWalletAddress(savedWallet);
         organization.setOrganizationStatus(OrganizationStatus.PENDING);
+        organization.setStartTime(Instant.now());
         Organization organizationSaved = organizationRepository.save(organization);
-
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getAvatarUrl(), OrganizationImage.OrganizationImageType.Avatar);
-        saveImages(organizationSaved.getOrganizationId(), organizationDTO.getBackgroundUrl(), OrganizationImage.OrganizationImageType.Background);
 
         OrganizationMember organizationMember = new OrganizationMember();
         organizationMember.setOrganization(organizationSaved);
@@ -125,49 +198,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationDTO updateOrganization(OrganizationDTO organizationDTO) {
         User user = userRepository.findByEmail(getAuthentication().getName()).orElseThrow(() -> new RuntimeException("Anonymous user are not allowed to create organization"));
 
-        Organization organization = convertToEntity(organizationDTO);
+        Organization organization =  organizationMapper.toEntity(organizationDTO);
 
         Optional<Organization> existingOrg = organizationRepository.findById(organization.getOrganizationId());
         if (existingOrg.isEmpty()) {
             throw new RuntimeException("Organization not found");
         }
 
-
         OrganizationMember.OrganizationMemberRole userRole = checkRole(organization.getOrganizationId(), user.getId());
 
         if (userRole == OrganizationMemberRole.CEO || userRole == OrganizationMemberRole.MANAGER) {
-            if (organizationDTO.getAvatarUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Avatar);
-
-                if (organizationImage != null && !organizationImage.isEmpty()) {
-                    OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
-                    organizationImageRepository.save(image);
-                } else {
-                    OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getAvatarUrl());
-                    image.setImageType(OrganizationImage.OrganizationImageType.Avatar);
-                    organizationImageRepository.save(image);
-                }
-            }
-
-            if (organizationDTO.getBackgroundUrl() != null) {
-                List<OrganizationImage> organizationImage = organizationImageRepository.findOrganizationImageByOrganizationIdAndImageType(organizationDTO.getOrganizationId(), OrganizationImage.OrganizationImageType.Background);
-
-                if (organizationImage != null && !organizationImage.isEmpty()) {
-                    OrganizationImage image = organizationImage.getFirst();
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
-                    organizationImageRepository.save(image);
-                } else {
-                    OrganizationImage image = new OrganizationImage();
-                    image.setOrganizationId(organizationDTO.getOrganizationId());
-                    image.setImageUrl(organizationDTO.getBackgroundUrl());
-                    image.setImageType(OrganizationImage.OrganizationImageType.Background);
-                    organizationImageRepository.save(image);
-                }
-            }
-
             if (organizationDTO.getCeo().getId() != null) {
                 User newCeo = userRepository.findById(organizationDTO.getCeo().getId()).orElseThrow(() -> new RuntimeException("Ceo not found"));
                 if (userRole == OrganizationMemberRole.CEO) {
@@ -228,7 +268,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 .filter(member ->  member.getMemberRole() == OrganizationMemberRole.CEO)
                 .map(member -> organizationRepository.findById(member.getOrganization().getOrganizationId())
                         .orElseThrow(() -> new RuntimeException("Organization not found")))
-                .map(this::convertOrganizationToDTO)
+                .map(organizationMapper::toDTO)
                 .toList().getFirst();
     }
 
@@ -284,22 +324,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         DTO.setShutdownDay(organization.getShutdownDay());
         DTO.setOrganizationStatus(organization.getOrganizationStatus());
         DTO.setCeo(convertUserToDTO(organization.getCeo()));
-
-        String avatarUrl =
-                organizationImageRepository
-                        .findOrganizationImageByOrganizationIdAndImageType(
-                                organization.getOrganizationId(),
-                                OrganizationImage.OrganizationImageType.Avatar
-                        ).getFirst().getImageUrl();
-        String backgroundUrl =
-                organizationImageRepository
-                        .findOrganizationImageByOrganizationIdAndImageType(
-                                organization.getOrganizationId(),
-                                OrganizationImage.OrganizationImageType.Background
-                        ).getFirst().getImageUrl();
-
-        DTO.setAvatarUrl(avatarUrl);
-        DTO.setBackgroundUrl(backgroundUrl);
         return DTO;
     }
 

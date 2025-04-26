@@ -25,7 +25,7 @@ public class ManagePostService {
         return postRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    public PostDTO getPostById(UUID postId) {
+    public PostDTO getPostById(UUID postId) throws Throwable {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ApiRequestException("Post not found with ID: " + postId));
         return convertToDTO(post);
@@ -62,6 +62,13 @@ public class ManagePostService {
 
         post.setPostStatus(PostStatus.BANNED);
         postRepository.save(post);
+        notificationService.notifyUser(
+                post.getUser(),
+                "Post Banned",
+                null,
+                "Your post \"" + post.getTitle() + "\" has been banned.",
+                "/forum"
+        );
     }
 
     @Transactional

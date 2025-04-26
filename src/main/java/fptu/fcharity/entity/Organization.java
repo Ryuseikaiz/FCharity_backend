@@ -6,7 +6,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -20,7 +19,6 @@ public class Organization {
     @Id
     @GeneratedValue(generator = "UUID")
     @Column(name="organization_id", unique = true, updatable = false, nullable = false)
-    @ColumnDefault("newid()")
     private UUID organizationId;
 
     @Nationalized
@@ -39,8 +37,8 @@ public class Organization {
     @Column(name="address")
     private String address;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "wallet_address")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_address", referencedColumnName = "wallet_id", nullable = false)
     private Wallet walletAddress;
 
     @Nationalized
@@ -57,13 +55,17 @@ public class Organization {
     @Column(name="organization_status", length = 50)
     private String organizationStatus;
 
-    // TODO: ceo id -> object
-    @ManyToOne(fetch = FetchType.EAGER)
+    @Column(name="background_url")
+    private String backgroundUrl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ceo_id")
     private User ceo;
 
     @Column(name = "reason")
     private String reason;
 
+    @Column(name = "advice")
+    private String advice;
 }
 

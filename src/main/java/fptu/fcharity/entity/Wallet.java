@@ -3,6 +3,7 @@ package fptu.fcharity.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
@@ -13,15 +14,15 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "wallets")
+@ToString
 public class Wallet {
     @Id
     @GeneratedValue(generator = "UUID")
-    @ColumnDefault("newid()")
-    @Column(name = "wallet_id", columnDefinition = "UNIQUEIDENTIFIER", updatable = false, nullable = false)
+    @Column(name = "wallet_id", updatable = false, nullable = false)
     private UUID id;
 
     @Nationalized
-    @Column(name = "balance")
+    @Column(name = "balance", precision = 38, scale = 2)
     private BigDecimal balance;
 
 }

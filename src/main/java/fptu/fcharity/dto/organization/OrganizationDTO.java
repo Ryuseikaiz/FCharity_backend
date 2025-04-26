@@ -22,7 +22,8 @@ public class OrganizationDTO {
     private Instant startTime;
     private Instant shutdownDay;
     private String organizationStatus;
-    private UserDTO ceo;
-    private String avatarUrl;
     private String backgroundUrl;
+    private UserDTO ceo;
+    private String reason;
+    private String advice;
 }

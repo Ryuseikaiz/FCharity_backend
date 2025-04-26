@@ -14,4 +14,6 @@ public class PostUpdateDto {
     private List<UUID> tagIds;
     private List<String> imageUrls;
     private List<String> videoUrls;
+    private String status; // Thêm trường status
+
 }
