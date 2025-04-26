@@ -31,6 +31,7 @@ public class TaskPlanStatusService {
     public TaskPlanStatusResponse addTaskStatus(TaskPlanStatusDto tDto){
         Timeline timeline = timelineRepository.findWithEssentialById(tDto.getPhaseId());
         TaskPlanStatus t = taskPlanStatusMapper.toEntity(tDto);
+        t.setStatusName(tDto.getStatusName().toUpperCase(Locale.ROOT));
         t.setPhase(timeline);
         TaskPlanStatus res = taskPlanStatusRepository.save(t);
         return new TaskPlanStatusResponse(res);

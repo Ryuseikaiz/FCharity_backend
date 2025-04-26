@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 @Service
@@ -88,7 +89,11 @@ public class TaskPlanService {
     public TaskPlanResponse cancelTask(UUID task_id){
         TaskPlan t = taskPlanRepository.findById(task_id).orElseThrow(null);
         List<TaskPlan> l = taskPlanRepository.findTaskPlanByParentTaskId(t.getId());
-        taskPlanRepository.deleteAll(l);
+        for(TaskPlan task : l.stream().filter(task -> task.getParentTask() != null).toList()){
+            List<TaskPlan>  l1 = taskPlanRepository.findTaskPlanByParentTaskId(task.getId());
+            if(!l1.isEmpty())taskPlanRepository.deleteAll(l1);
+        }
+        if(!l.isEmpty())taskPlanRepository.deleteAll(l);
         taskPlanRepository.delete(t);
         return new TaskPlanResponse(t);
     }

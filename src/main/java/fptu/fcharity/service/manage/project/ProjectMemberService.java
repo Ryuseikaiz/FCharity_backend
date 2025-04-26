@@ -45,7 +45,7 @@ public class ProjectMemberService {
     public List<ProjectMemberResponse> getActiveMembersOfProject(UUID id) {
         List<ProjectMember> projectMembers = projectMemberRepository.findByProjectId(id);
         return projectMembers.stream()
-                .filter(pr-> pr.getMemberRole().equals(ProjectMemberRole.MEMBER) && pr.getLeaveDate()==null)
+                .filter(pr-> !pr.getMemberRole().equals(ProjectMemberRole.LEADER) && pr.getLeaveDate()==null)
                 .map(ProjectMemberResponse::new)
                 .toList();
     }

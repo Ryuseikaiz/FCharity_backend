@@ -100,6 +100,7 @@ public class TimelineService {
     public List<TimelineFinalResponse> getPhaseByProjectId(UUID projectId) {
         List<Timeline> ts = timelineRepository.findByProjectId(projectId);
         return ts.stream()
+                .sorted(Comparator.comparing(Timeline::getStartTime).reversed())
                 .map(a->new TimelineFinalResponse(new TimelineResponse(a),objectAttachmentService.getAttachmentsOfObject(a.getId(), TaggableType.PHASE)))
                 .toList();
     }
@@ -116,7 +117,7 @@ public class TimelineService {
 
     public List<TaskPlanResponse> getTaskOfProject(UUID projectId) {
         List<TaskPlan> ts = taskPlanRepository.findByProjectId(projectId);
-        return ts.stream().sorted(Comparator.comparing(TaskPlan::getStartTime)).map(TaskPlanResponse::new).toList();
+        return ts.stream().map(TaskPlanResponse::new).toList();
     }
     public TimelineFinalResponse endPhase(FinalTimelineDto dto) {
         Timeline t = timelineRepository.findWithEssentialById(dto.getPhase().getId());

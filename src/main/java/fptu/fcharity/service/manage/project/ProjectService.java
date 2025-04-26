@@ -11,6 +11,7 @@ import fptu.fcharity.repository.manage.organization.OrganizationTransactionHisto
 import fptu.fcharity.repository.manage.project.*;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import fptu.fcharity.repository.manage.user.UserRepository;
+import fptu.fcharity.response.project.ProjectConfirmationRequestResponse;
 import fptu.fcharity.response.project.ProjectFinalResponse;
 import fptu.fcharity.response.project.ProjectResponse;
 import fptu.fcharity.response.request.RequestFinalResponse;
@@ -369,7 +370,6 @@ public class ProjectService {
             }
         }
     }
-
     private static String getMessageBody(Project p) {
         HelpRequest projectRequest = p.getRequest();
         String requestTitle = (projectRequest != null) ? projectRequest.getTitle() : "[Request Title Unavailable]";
@@ -379,5 +379,96 @@ public class ProjectService {
                 requestTitle
         );
         return messageBody;
+    }
+
+    public ProjectConfirmationRequestResponse createProjectConfirmationRequest(UUID projectId) {
+        Project project = projectRepository.findWithEssentialById(projectId);
+        if (project == null) {
+            throw new ApiRequestException("Project not found");
+        }
+        ProjectConfirmationRequest request = new ProjectConfirmationRequest();
+        request.setProject(project);
+        request.setNote("Please confirm receive request for the project: " + project.getProjectName());
+        request.setRequest(project.getRequest());
+        request.setIsConfirmed(false);
+        request.setCreatedAt(Instant.now());
+        ProjectConfirmationRequest savedRequest = projectConfirmationRequestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getRequest().getUser(),
+                "New confirm receive request for your request: " + request.getRequest().getTitle(),
+                null,
+                "The project '" + request.getProject().getProjectName() + "' has sent you a confirm receive for request '"+request.getRequest().getTitle()+"'. Please send your response.",
+                "/user/manage-profile/myrequests"
+        );
+        return new ProjectConfirmationRequestResponse(savedRequest);
+    }
+    public ProjectConfirmationRequestResponse getConfirmationRequestOfProject(UUID projectId) {
+        ProjectConfirmationRequest request = projectConfirmationRequestRepository.findByProjectId(projectId);
+        if(request == null) {
+           return null;
+        }
+        return new ProjectConfirmationRequestResponse(request);
+    }
+    public ProjectConfirmationRequestResponse getConfirmationRequestOfRequest(UUID requestId) {
+        ProjectConfirmationRequest request = projectConfirmationRequestRepository.findByRequestId(requestId);
+        if(request == null) {
+            return null;
+        }
+        return new ProjectConfirmationRequestResponse(request);
+    }
+    public ProjectConfirmationRequestResponse confirmProjectConfirmationRequest(UUID id) {
+        ProjectConfirmationRequest request = projectConfirmationRequestRepository.findById(id)
+                .orElseThrow(() -> new ApiRequestException("Project confirmation request not found"));
+        if(request == null) {
+            return null;
+        }
+        request.setIsConfirmed(true);
+        projectConfirmationRequestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getProject().getLeader(),
+                "Your project '" + request.getProject().getProjectName()+"''s confirmation request has been confirmed",
+                null,
+                "The project '" + request.getProject().getProjectName() + "' confirmation request has been confirmed. Your project is FINISHED now'",
+                "/manage-project/" + request.getProject().getId() + "/tasks"
+        );
+        Project p = request.getProject();
+        p.setProjectStatus(ProjectStatus.FINISHED);
+        projectRepository.save(p);
+
+        HelpRequest r = request.getRequest();
+        r.setStatus(RequestStatus.COMPLETED);
+        requestRepository.save(r);
+        return new ProjectConfirmationRequestResponse(request);
+    }
+
+    public ProjectConfirmationRequestResponse getConfirmationRequestById(UUID id) {
+        ProjectConfirmationRequest request = projectConfirmationRequestRepository.findById(id)
+                .orElseThrow(() -> new ApiRequestException("Project confirmation request not found"));
+        if(request == null) {
+            return null;
+        }
+        return new ProjectConfirmationRequestResponse(request);
+    }
+    public ProjectConfirmationRequestResponse rejectProjectConfirmationRequest(UUID id,String message) {
+        ProjectConfirmationRequest request = projectConfirmationRequestRepository.findById(id)
+                .orElseThrow(() -> new ApiRequestException("Project confirmation request not found"));
+        if(request == null) {
+            return null;
+        }
+        request.setIsConfirmed(false);
+        request.setNote(message);
+        projectConfirmationRequestRepository.save(request);
+
+        notificationService.notifyUser(
+                request.getProject().getLeader(),
+                "Your project '" + request.getProject().getProjectName()+"''s confirmation request has been rejected",
+                null,
+                "Please check your project and make sure to finish it",
+                "/manage-project/" + request.getProject().getId() + "/tasks"
+        );
+
+        return new ProjectConfirmationRequestResponse(request);
     }
 }
