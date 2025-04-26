@@ -63,10 +63,6 @@ public class TransferRequest {
     private String transactionImage;
 
     @Nationalized
-    @Column(name = "transaction_code", length = 100)
-    private String transactionCode;
-
-    @Nationalized
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 

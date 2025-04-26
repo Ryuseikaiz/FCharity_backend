@@ -13,6 +13,7 @@ import fptu.fcharity.response.project.SpendingPlanResponse;
 import fptu.fcharity.service.HelpNotificationService;
 import fptu.fcharity.utils.constants.project.ProjectStatus;
 import fptu.fcharity.utils.constants.project.SpendingPlanStatus;
+import fptu.fcharity.utils.constants.request.RequestSupportType;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,7 +76,7 @@ public class SpendingPlanService {
                     "New spending plan created",
                     null,
                     "A new spending plan has been submitted for approval in project: " + project.getProjectName(),
-                    "/admin/spending-plan/" + plan.getId()
+                    "/my-organization/projects"
             );
         }
         return toResponse(spendingPlan);
@@ -98,6 +99,7 @@ public class SpendingPlanService {
         res.setApprovalStatus(plan.getApprovalStatus());
         res.setCreatedDate(plan.getCreatedDate());
         res.setUpdatedDate(plan.getUpdatedDate());
+        res.setReason(plan.getReason());
         return res;
     }
 
@@ -116,10 +118,12 @@ public class SpendingPlanService {
                 .stream()
                 .map(SpendingItem::getEstimatedCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal extraCost = totalCost.multiply(new BigDecimal("0.1"));
+        BigDecimal percentage = plan.getMaxExtraCostPercentage().divide(new BigDecimal("100"));
+        BigDecimal extraCost = totalCost.multiply(percentage);
+        plan.setEstimatedTotalCost(totalCost.add(extraCost));
+
         project.setProjectStatus(ProjectStatus.DONATING);
         projectRepository.save(project);
-        plan.setEstimatedTotalCost(totalCost.add(extraCost));
         plan.setApprovalStatus(SpendingPlanStatus.APPROVED);
 
         User leader = project.getLeader();
@@ -128,13 +132,35 @@ public class SpendingPlanService {
                 null,
                 "Spending plan approved",
                 "The spending plan for project '" + project.getProjectName() + "' has been approved.",
-                "/admin/spending-plan/"
+                "/manage-project/"+project.getId()+"/finance"
+        );
+        return toResponse(spendingPlanRepository.save(plan));
+    }
+    public SpendingPlanResponse rejectPlan(UUID id,String reason){
+        SpendingPlan plan = spendingPlanRepository.findById(id)
+                .orElseThrow(() -> new ApiRequestException("Spending plan not found"));
+        Project project = plan.getProject();
+        plan.setReason(reason);
+        plan.setApprovalStatus(SpendingPlanStatus.REJECTED);
+
+        User leader = project.getLeader();
+        notificationService.notifyUser(
+                leader,
+                null,
+                "Spending plan rejected",
+                "The spending plan for project '" + project.getProjectName() + "' has been rejected." +
+                        "Please check the reason, modify plan and submit again!",
+                "/manage-project/"+project.getId()+"/finance"
         );
         return toResponse(spendingPlanRepository.save(plan));
     }
 
     public SpendingPlanResponse saveFromExcel(SpendingPlan spendingPlan, UUID projectId) {
         Project project = projectRepository.findWithEssentialById(projectId);
+        SpendingPlan existingPlan = spendingPlanRepository.findByProjectId(projectId);
+        if(existingPlan != null){
+            spendingPlanRepository.delete(existingPlan);
+        }
         spendingPlan.setProject(project);
         spendingPlan.setApprovalStatus(SpendingPlanStatus.PREPARING);
         spendingPlan.setCreatedDate(Instant.now());

@@ -150,6 +150,8 @@ public class ProjectService {
     public ProjectFinalResponse createProject(ProjectDto projectDto) {
         Wallet newWallet = walletService.save();
         Project project = projectMapper.toEntity( projectDto );
+        project.setPhoneNumber(projectDto.getPhoneNumber());
+        project.setLocation(projectDto.getLocation());
         project.setProjectStatus(ProjectStatus.PLANNING);
         project.setWalletAddress(newWallet);
         takeObject(project, projectDto);
@@ -288,7 +290,7 @@ public class ProjectService {
                     "/user/manage-profile/myrequests"
             );
         }else{
-            if(p.getRequest().getSupportType() == RequestSupportType.MONEY) {
+            if(p.getRequest().getSupportType().equals(RequestSupportType.MONEY)) {
                 //send confirm
                 transferRequestRepository.save(new TransferRequest(
                         p.getRequest(),
@@ -326,12 +328,14 @@ public class ProjectService {
                 spendingDetail.setAmount(item.getEstimatedCost());
                 spendingDetail.setDescription("Extra funds for project");
                 spendingDetail.setTransactionTime(Instant.now());
+                spendingDetail.setProject(p);
                 spendingDetailRepository.save(spendingDetail);
-
-                p.getWalletAddress().setBalance(
-                        p.getWalletAddress().getBalance().subtract(spendingDetail.getAmount())
+                //update project wallet
+                Wallet projectWallet = p.getWalletAddress();
+                projectWallet.setBalance(
+                        projectWallet.getBalance().subtract(spendingDetail.getAmount())
                 );
-                walletRepository.save(p.getWalletAddress());
+                walletRepository.save(projectWallet);
 
                 //send extra cost to org
                 OrganizationTransactionHistory organizationTransactionHistory = new OrganizationTransactionHistory();
@@ -340,16 +344,40 @@ public class ProjectService {
                 organizationTransactionHistory.setTransactionType(OrganizationTransactionType.EXTRACT_EXTRA_COST);
                 organizationTransactionHistory.setAmount(spendingDetail.getAmount());
                 organizationTransactionHistory.setProject(p);
-                organizationTransactionHistory.setMessage("Extracted extra funds from project");
+                organizationTransactionHistory.setMessage("Extracted extra funds from project: " + p.getProjectName());
                 organizationTransactionHistoryRepository.save(organizationTransactionHistory);
-
-                p.getOrganization().getWalletAddress().setBalance(
-                        p.getOrganization().getWalletAddress().getBalance().add(spendingDetail.getAmount())
+                //update org wallet
+                Wallet orgWallet = p.getOrganization().getWalletAddress();
+                orgWallet.setBalance(
+                        orgWallet.getBalance().add(spendingDetail.getAmount())
                 );
-                walletRepository.save(p.getOrganization().getWalletAddress());
-            }
-            //make spending detail for project
+                walletRepository.save(orgWallet);
 
+                p.setProjectStatus(ProjectStatus.ACTIVE);
+                p.setActualStartTime(Instant.now());
+                projectRepository.save(p);
+
+                String messageBody = getMessageBody(p);
+
+                notificationService.notifyUser(
+                        p.getLeader(),
+                        "Your project has started: " + p.getProjectName(),
+                        null,
+                        messageBody,
+                        "/manage-project/" + p.getId() + "/finance"
+                );
+            }
         }
+    }
+
+    private static String getMessageBody(Project p) {
+        HelpRequest projectRequest = p.getRequest();
+        String requestTitle = (projectRequest != null) ? projectRequest.getTitle() : "[Request Title Unavailable]";
+        String messageBody = String.format(
+                "The planned start time has arrived. Please check your project's fund (%s) and implement work to help request: %s",
+                p.getProjectName(), // Có thể bạn muốn hiển thị tên dự án ở đây thay vì quỹ? Hoặc thêm thông tin quỹ nếu có.
+                requestTitle
+        );
+        return messageBody;
     }
 }

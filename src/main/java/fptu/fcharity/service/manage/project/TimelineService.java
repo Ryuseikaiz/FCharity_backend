@@ -8,6 +8,7 @@ import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
 import fptu.fcharity.repository.manage.project.TimelineRepository;
 import fptu.fcharity.response.project.TaskPlanResponse;
+import fptu.fcharity.response.project.TimelineResponse;
 import fptu.fcharity.utils.exception.ApiRequestException;
 import fptu.fcharity.utils.mapper.TimelineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class TimelineService {
             t.setProject(project);
         }
     }
-    public Timeline addPhase(TimelineDto timelineDto) {
+    public TimelineResponse addPhase(TimelineDto timelineDto) {
         List<Timeline> ongoingTimeline = timelineRepository.findOngoingPhaseByProjectId(timelineDto.getProjectId());
         if(!ongoingTimeline.isEmpty()){
             throw new ApiRequestException("Cannot create new phase while there is an ongoing phase");
@@ -40,39 +41,49 @@ public class TimelineService {
         Timeline t = timelineMapper.toEntity(timelineDto);
         t.setStartTime(Instant.now());
         takeObject(t, timelineDto);
-        return timelineRepository.save(t);
+        return new TimelineResponse(timelineRepository.save(t));
     }
-    public Timeline updatePhase(TimelineDto timelineDto) {
+    public TimelineResponse updatePhase(TimelineDto timelineDto) {
         Timeline t = timelineRepository.findWithEssentialById(timelineDto.getId());
         timelineMapper.updateEntityFromDto(timelineDto,t);
         takeObject(t, timelineDto);
-        return timelineRepository.save(t);
+        return new TimelineResponse(timelineRepository.save(t));
     }
-    public boolean deletePhase(UUID id) {
+    public TimelineResponse deletePhase(UUID id) {
         Timeline t = timelineRepository.findWithEssentialById(id);
         if(!getTasksOfPhase(t.getId()).isEmpty()){
             throw new ApiRequestException("Cannot delete phase with tasks");
         }
         timelineRepository.delete(t);
-        return true;
+        return new TimelineResponse(t);
     }
     //get phase by id
-    public Timeline getPhaseById(UUID phaseId) {
+    public TimelineResponse getPhaseById(UUID phaseId) {
         Timeline t = timelineRepository.findWithEssentialById(phaseId);
-        return t;
+        return new TimelineResponse(t);
     }
     public List<TaskPlanResponse> getTasksOfPhase(UUID phaseId) {
         List<TaskPlan> ts = taskPlanRepository.findByPhaseId(phaseId);
         return ts.stream().map(TaskPlanResponse::new).toList();
     }
 
-    public List<Timeline> getPhaseByProjectId(UUID projectId) {
+    public List<TimelineResponse> getPhaseByProjectId(UUID projectId) {
         List<Timeline> ts = timelineRepository.findByProjectId(projectId);
-        return ts;
+        return ts.stream().map(TimelineResponse::new).toList();
     }
 
     public List<TaskPlanResponse> getSubtasksOfTask(UUID taskId) {
         List<TaskPlan> ts = taskPlanRepository.findByParentTaskId(taskId);
+        return ts.stream().map(TaskPlanResponse::new).toList();
+    }
+
+    public TaskPlanResponse getTaskById(UUID taskId) {
+        TaskPlan t = taskPlanRepository.findWithEssentialById(taskId);
+        return new TaskPlanResponse(t);
+    }
+
+    public List<TaskPlanResponse> getTaskOfProject(UUID projectId) {
+        List<TaskPlan> ts = taskPlanRepository.findByProjectId(projectId);
         return ts.stream().map(TaskPlanResponse::new).toList();
     }
 }

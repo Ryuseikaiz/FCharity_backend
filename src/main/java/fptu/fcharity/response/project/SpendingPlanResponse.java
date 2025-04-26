@@ -24,6 +24,7 @@ public class SpendingPlanResponse {
     private String approvalStatus;
     private Instant createdDate;
     private Instant updatedDate;
+    private String reason;
     public SpendingPlanResponse(SpendingPlan spendingPlan) {
         this.id = spendingPlan.getId();
         this.projectId = spendingPlan.getProject().getId();
@@ -34,6 +35,7 @@ public class SpendingPlanResponse {
         this.approvalStatus = spendingPlan.getApprovalStatus();
         this.createdDate = spendingPlan.getCreatedDate();
         this.updatedDate = spendingPlan.getUpdatedDate();
+        this.reason = spendingPlan.getReason();
     }
 
 }

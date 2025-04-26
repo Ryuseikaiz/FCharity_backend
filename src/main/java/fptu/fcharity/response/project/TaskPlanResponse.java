@@ -1,6 +1,8 @@
 package fptu.fcharity.response.project;
 
 import fptu.fcharity.entity.TaskPlan;
+import fptu.fcharity.entity.TaskPlanStatus;
+import fptu.fcharity.response.authentication.UserResponse;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,12 +13,12 @@ import java.util.UUID;
 public class TaskPlanResponse {
     private UUID id;
     private UUID phaseId;
-    private UUID userId;
+    private UserResponse user;
     private String taskName;
     private String taskPlanDescription;
     private Instant startTime;
     private Instant endTime;
-    private UUID taskPlanStatusId;
+    private TaskPlanStatusResponse status;
     private Instant createdAt;
     private Instant updatedAt;
     private UUID parentTaskId;
@@ -24,13 +26,13 @@ public class TaskPlanResponse {
         this.id = t.getId();
         this.phaseId = t.getPhase().getId();
         if(t.getUser() != null){
-            this.userId = t.getUser().getId();
+            this.user = new UserResponse(t.getUser());
         }
         this.taskName = t.getTaskName();
         this.taskPlanDescription = t.getTaskPlanDescription();
         this.startTime = t.getStartTime();
         this.endTime = t.getEndTime();
-        this.taskPlanStatusId = t.getStatus().getId();
+        this.status = new TaskPlanStatusResponse(t.getStatus());
         this.createdAt = t.getCreatedAt();
         this.updatedAt = t.getUpdatedAt();
         if(t.getParentTask() != null){

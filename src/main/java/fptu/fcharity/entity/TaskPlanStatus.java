@@ -23,4 +23,8 @@ public class TaskPlanStatus {
     @Column(name = "status_name")
     private String statusName;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "phase_id")
+    private Timeline phase;
+
 }

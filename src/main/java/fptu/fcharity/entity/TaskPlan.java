@@ -45,7 +45,7 @@ public class TaskPlan {
     @Column(name = "end_time")
     private Instant endTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "status_id")
     private TaskPlanStatus status;

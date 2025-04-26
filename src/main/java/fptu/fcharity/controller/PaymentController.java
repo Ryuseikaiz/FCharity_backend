@@ -2,8 +2,6 @@ package fptu.fcharity.controller;
 
 import fptu.fcharity.dto.payment.PaymentDto;
 import fptu.fcharity.dto.project.ToProjectDonationDto;
-import fptu.fcharity.entity.Project;
-import fptu.fcharity.entity.User;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.response.project.ToProjectDonationResponse;
 import fptu.fcharity.service.HelpNotificationService;
@@ -28,8 +26,6 @@ import java.time.format.DateTimeFormatter;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/payment")
@@ -60,8 +56,6 @@ public class PaymentController {
         int orderCode = random.nextInt(900000000) + 1000000000; // Đảm bảo rằng số là dương và có 10 chữ số
         return orderCode;
     }
-
-
 
     @PostMapping("/create")
     public ResponseEntity<?> createPaymentLink(@RequestBody PaymentDto paymentDto) throws Exception {

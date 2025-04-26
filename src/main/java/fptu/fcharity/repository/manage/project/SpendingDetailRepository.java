@@ -13,4 +13,6 @@ public interface SpendingDetailRepository extends JpaRepository<SpendingDetail, 
     // List<SpendingDetail> findBySpendingPlanId(UUID spendingPlanId);
     @EntityGraph(attributePaths = {"spendingItem", "project"})
     List<SpendingDetail> findByProjectId(UUID projectId);
+    @EntityGraph(attributePaths = {"spendingItem", "project"})
+    SpendingDetail findByDescription(String extraFundsForProject);
 }
