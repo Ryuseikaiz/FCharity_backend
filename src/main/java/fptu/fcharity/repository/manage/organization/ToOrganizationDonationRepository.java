@@ -11,5 +11,5 @@ public interface ToOrganizationDonationRepository extends JpaRepository<ToOrgani
 
     List<ToOrganizationDonation> findByUserId(UUID userId);
 
-    ToOrganizationDonation findByOrganizationOrganizationId(UUID organizationId);
+    List<ToOrganizationDonation> findByOrganizationOrganizationId(UUID organizationId);
 }
