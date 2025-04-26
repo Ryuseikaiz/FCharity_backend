@@ -21,7 +21,7 @@ public class TaskPlanResponse {
     private TaskPlanStatusResponse status;
     private Instant createdAt;
     private Instant updatedAt;
-    private UUID parentTaskId;
+    private TaskPlanResponse parentTask;
     public TaskPlanResponse(TaskPlan t){
         this.id = t.getId();
         this.phaseId = t.getPhase().getId();
@@ -32,11 +32,13 @@ public class TaskPlanResponse {
         this.taskPlanDescription = t.getTaskPlanDescription();
         this.startTime = t.getStartTime();
         this.endTime = t.getEndTime();
-        this.status = new TaskPlanStatusResponse(t.getStatus());
+        if(t.getStatus()!=null){
+            this.status = new TaskPlanStatusResponse(t.getStatus());
+        }
         this.createdAt = t.getCreatedAt();
         this.updatedAt = t.getUpdatedAt();
         if(t.getParentTask() != null){
-            this.parentTaskId = t.getParentTask().getId();
+            this.parentTask = new TaskPlanResponse(t.getParentTask());
         }
     }
 }

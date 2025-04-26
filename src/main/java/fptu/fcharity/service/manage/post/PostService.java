@@ -16,6 +16,7 @@ import fptu.fcharity.repository.manage.user.UserRepository;
 import fptu.fcharity.repository.TaggableRepository;
 import fptu.fcharity.service.ObjectAttachmentService;
 import fptu.fcharity.service.TaggableService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import fptu.fcharity.utils.constants.PostStatus;
 import fptu.fcharity.utils.constants.TaggableType;
 import fptu.fcharity.utils.exception.ApiRequestException;
@@ -40,6 +41,8 @@ public class PostService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
     private TaggableService taggableService;
@@ -93,7 +96,7 @@ public class PostService {
         if( postRequestDTO.getVideoUrls() != null){
             objectAttachmentService.saveAttachments(savedPost.getId(), postRequestDTO.getVideoUrls(), TaggableType.POST);
         }
-
+        simpMessagingTemplate.convertAndSend("/topic/post-notifications", "User " + user.getEmail() + " has created a new post.");
         return new PostResponse(savedPost,
                 taggableService.getTagsOfObject(savedPost.getId(), TaggableType.POST),
                 objectAttachmentService.getAttachmentsOfObject(savedPost.getId(), TaggableType.POST));

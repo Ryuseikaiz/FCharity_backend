@@ -31,6 +31,7 @@ public class TaskPlanStatusService {
     public TaskPlanStatusResponse addTaskStatus(TaskPlanStatusDto tDto){
         Timeline timeline = timelineRepository.findWithEssentialById(tDto.getPhaseId());
         TaskPlanStatus t = taskPlanStatusMapper.toEntity(tDto);
+        t.setStatusName(tDto.getStatusName().toUpperCase(Locale.ROOT));
         t.setPhase(timeline);
         TaskPlanStatus res = taskPlanStatusRepository.save(t);
         return new TaskPlanStatusResponse(res);
@@ -51,7 +52,14 @@ public class TaskPlanStatusService {
         taskPlanStatusRepository.save(t);
     }
     public TaskPlanStatusResponse updateTaskStatus(TaskPlanStatusDto tDto){
-        TaskPlanStatus t = taskPlanStatusMapper.toEntity(tDto);
+        TaskPlanStatus t = taskPlanStatusRepository.findWithEssentialById(tDto.getId());
+        if(tDto.getStatusName()!=null) {
+            t.setStatusName(tDto.getStatusName());
+        }
+        if(tDto.getPhaseId()!=null) {
+            Timeline timeline = timelineRepository.findWithEssentialById(tDto.getPhaseId());
+            t.setPhase(timeline);
+        }
         TaskPlanStatus res = taskPlanStatusRepository.save(t);
         return new TaskPlanStatusResponse(res);
     }
@@ -64,8 +72,8 @@ public class TaskPlanStatusService {
       taskPlanStatusRepository.delete(t);
       return new TaskPlanStatusResponse(t);
     }
-    public List<TaskPlanStatusResponse> getAllStatusByProject(UUID projectId){
-        List<TaskPlanStatus> taskPlanStatuses = taskPlanStatusRepository.findAllByProjectId(projectId);
+    public List<TaskPlanStatusResponse> getAllStatusByPhase(UUID phaseId){
+        List<TaskPlanStatus> taskPlanStatuses = taskPlanStatusRepository.findAllByPhaseId((phaseId));
         return taskPlanStatuses.stream().map(TaskPlanStatusResponse::new).toList();
     }
 }

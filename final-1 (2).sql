@@ -292,6 +292,7 @@ CREATE TABLE timeline (
     content NVARCHAR(255),
     FOREIGN KEY (project_id) REFERENCES projects(project_id) ON DELETE CASCADE
 );
+alter table timeline add status NVARCHAR(50);
 
 --new
 CREATE TABLE organization_images (

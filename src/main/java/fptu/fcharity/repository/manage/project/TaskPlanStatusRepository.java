@@ -16,4 +16,8 @@ public interface TaskPlanStatusRepository extends JpaRepository<TaskPlanStatus, 
             "JOIN FETCH p.project pr " +    // Idiomatic join: Timeline (p) -> Project (pr)
             "WHERE pr.id = :projectId")
     List<TaskPlanStatus> findAllByProjectId(UUID projectId);
+    @Query("SELECT t FROM TaskPlanStatus t " +
+            "JOIN FETCH t.phase p " +       // Idiomatic join: TaskPlan -> Timeline (p)
+            "WHERE p.id = :phaseId")
+    List<TaskPlanStatus> findAllByPhaseId(UUID phaseId);
 }

@@ -4,6 +4,7 @@ import fptu.fcharity.entity.ObjectAttachment;
 import fptu.fcharity.repository.ObjectAttachmentRepository;
 import fptu.fcharity.repository.manage.post.PostRepository;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
+import fptu.fcharity.repository.manage.project.TimelineRepository;
 import fptu.fcharity.repository.manage.request.RequestRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -18,16 +19,18 @@ public class ObjectAttachmentService {
 private final RequestRepository requestRepository;
 private final ProjectRepository projectRepository;
     private final PostRepository postRepository;
+    private final TimelineRepository timelineRepository;
 
     public ObjectAttachmentService(
             ObjectAttachmentRepository objectAttachmentRepository,
             RequestRepository requestRepository,
             ProjectRepository projectRepository,
-            PostRepository postRepository) {
+            PostRepository postRepository, TimelineRepository timelineRepository) {
         this.objectAttachmentRepository = objectAttachmentRepository;
         this.requestRepository = requestRepository;
         this.projectRepository = projectRepository;
         this.postRepository = postRepository;
+        this.timelineRepository = timelineRepository;
     }
 
     public void takeObject(ObjectAttachment objectAttachment, UUID objectId, String type) {
@@ -39,7 +42,7 @@ private final ProjectRepository projectRepository;
                 objectAttachment.setPost(postRepository.findById(objectId).orElse(null));
                 break;
             case "PHASE":
-//                objectAttachment.setPhase(requestRepository.findById(objectId).orElse(null));
+                objectAttachment.setPhase(timelineRepository.findById(objectId).orElse(null));
                 break;
             default:
                 throw new IllegalArgumentException("Invalid object type: " + type);

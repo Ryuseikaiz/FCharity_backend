@@ -37,5 +37,8 @@ public class Timeline {
     @Nationalized
     @Column(name = "content")
     private String content;
+    @Nationalized
+    @Column(name = "status")
+    private String status;
 
 }
