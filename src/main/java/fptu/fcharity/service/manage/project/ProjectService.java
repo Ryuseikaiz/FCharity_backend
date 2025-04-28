@@ -1,5 +1,6 @@
 package fptu.fcharity.service.manage.project;
 
+import fptu.fcharity.dto.project.ProjectNeedDonateDto;
 import fptu.fcharity.dto.project.SpendingItemDto;
 import fptu.fcharity.entity.ProjectConfirmationRequest;
 import fptu.fcharity.dto.project.ProjectDto;
@@ -37,10 +38,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
 @Service
 public class ProjectService {
     private  ProjectRepository projectRepository;
@@ -208,7 +208,33 @@ public class ProjectService {
 
     public ProjectFinalResponse updateProject(ProjectDto projectDto) {
         Project project = projectRepository.findWithEssentialById(projectDto.getId());
-        projectMapper.updateEntityFromDto(projectDto, project);
+        if(projectDto.getProjectName()!=null){
+        project.setProjectName(projectDto.getProjectName());
+        }
+        if(projectDto.getPlannedStartTime()!=null){
+            project.setPlannedStartTime(projectDto.getPlannedStartTime());
+        }
+        if(projectDto.getPlannedEndTime()!=null){
+            project.setPlannedEndTime(projectDto.getPlannedEndTime());
+        }
+        if(projectDto.getProjectDescription()!=null){
+            project.setProjectDescription(projectDto.getProjectDescription());
+        }
+        if(projectDto.getProjectStatus()!=null){
+            project.setProjectStatus(projectDto.getProjectStatus());
+        }
+        if(projectDto.getPhoneNumber()!=null){
+            project.setPhoneNumber(projectDto.getPhoneNumber());
+        }
+        if(projectDto.getLocation()!=null){
+            project.setLocation(projectDto.getLocation());
+        }
+        if(projectDto.getActualStartTime()!= null){
+            project.setActualStartTime(projectDto.getActualStartTime());
+        }
+        if(projectDto.getActualEndTime()!=null){
+            project.setActualEndTime(projectDto.getActualEndTime());
+        }
         project.setUpdatedAt(Instant.now());
         takeObject(project, projectDto);
         if (projectDto.getTagIds() != null) {
@@ -389,6 +415,7 @@ public class ProjectService {
         ProjectConfirmationRequest finalReq;
         ProjectConfirmationRequest existingRequest = projectConfirmationRequestRepository.findByProjectId(projectId);
         if(existingRequest!=null){
+            existingRequest.setCreatedAt(Instant.now());
             notificationService.notifyUser(
                     existingRequest.getRequest().getUser(),
                     "New confirm receive request for your request: " + existingRequest.getRequest().getTitle(),
@@ -430,13 +457,14 @@ public class ProjectService {
         }
         return new ProjectConfirmationRequestResponse(request);
     }
-    public ProjectConfirmationRequestResponse confirmProjectConfirmationRequest(UUID id) {
+    public ProjectConfirmationRequestResponse confirmProjectConfirmationRequest(UUID id,String message) {
         ProjectConfirmationRequest request = projectConfirmationRequestRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestException("Project confirmation request not found"));
         if(request == null) {
             return null;
         }
         request.setIsConfirmed(true);
+        request.setNote(message);
         projectConfirmationRequestRepository.save(request);
 
         notificationService.notifyUser(
@@ -448,6 +476,7 @@ public class ProjectService {
         );
         Project p = request.getProject();
         p.setProjectStatus(ProjectStatus.FINISHED);
+        p.setActualEndTime(Instant.now());
         projectRepository.save(p);
 
         HelpRequest r = request.getRequest();
@@ -483,5 +512,37 @@ public class ProjectService {
         );
 
         return new ProjectConfirmationRequestResponse(request);
+    }
+
+    public List<ProjectFinalResponse> getAllProjectsNeedDonating() {
+        List<Project> l = projectRepository.findAllWithInclude().stream()
+                .filter(project -> project.getProjectStatus().equals(ProjectStatus.DONATING)).toList();
+        List<ProjectNeedDonateDto> dtoList = new ArrayList<>();
+        for (Project p : l) {
+            SpendingPlan plan = spendingPlanRepository.findByProjectId(p.getId());
+            BigDecimal totalDonations = p.getWalletAddress().getBalance();
+            BigDecimal estimateCost = spendingPlanRepository.findByProjectId(p.getId()).getEstimatedTotalCost();
+            ProjectNeedDonateDto dto = new ProjectNeedDonateDto(p.getId(), p.getPlannedStartTime(), totalDonations, estimateCost);
+            dtoList.add(dto);
+        }
+        List<ProjectNeedDonateDto> unreachEstimateCostList = dtoList.stream().filter(dto->dto.getTotalDonations().compareTo(dto.getEstimateCost()) < 0).toList();
+        Instant now = Instant.now();
+        Instant next7days = now.plus(7, ChronoUnit.DAYS);
+
+        List<ProjectNeedDonateDto> nearDeadlineList = unreachEstimateCostList.stream()
+                .filter(dto -> {
+                    Instant start = dto.getPlannedStartTime();
+                    return start.isAfter(now) && start.isBefore(next7days);
+                })
+                .sorted(Comparator.comparing(ProjectNeedDonateDto::getPlannedStartTime)).toList();
+       List<ProjectFinalResponse> responseList  = nearDeadlineList.stream()
+                .map(dto -> {
+                    Project project = projectRepository.findWithEssentialById(dto.getProjectId());
+                    return new ProjectFinalResponse(new ProjectResponse(project),
+                            taggableService.getTagsOfObject(project.getId(), TaggableType.PROJECT),
+                            projectImageService.getProjectImages(project.getId()));
+                })
+                .toList();
+        return responseList;
     }
 }

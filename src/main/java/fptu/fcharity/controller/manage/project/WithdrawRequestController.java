@@ -3,6 +3,7 @@ package fptu.fcharity.controller.manage.project;
 import fptu.fcharity.response.project.WithdrawRequestResponse;
 import fptu.fcharity.service.manage.project.ProjectWithdrawRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +21,8 @@ public class WithdrawRequestController {
     }
 
     @GetMapping("/project/{id}")
-    public WithdrawRequestResponse getAllWithdrawProjectId(@PathVariable UUID id) {
-        return withdrawRequestService.getWithdrawRequestByProjectId(id);
+    public ResponseEntity<?> getAllWithdrawProjectId(@PathVariable UUID id) {
+        return ResponseEntity.ok(withdrawRequestService.getWithdrawRequestByProjectId(id));
     }
     @GetMapping("/{id}")
     public WithdrawRequestResponse getWithdrawRequestById(@PathVariable UUID id) {

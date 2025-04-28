@@ -61,7 +61,7 @@ public class PaymentController {
     public ResponseEntity<?> createPaymentLink(@RequestBody PaymentDto paymentDto) throws Exception {
         PayOS payOS = new PayOS(clientId, apiKey, checksumKey);
 
-        String domain = "http://localhost:3001/" + paymentDto.getReturnUrl();
+        String domain =  paymentDto.getReturnUrl();
         long orderCode = System.currentTimeMillis() / 1000;
         if(paymentDto.getObjectType().equals("PROJECT")) {
             ToProjectDonationDto donationDto = new ToProjectDonationDto();

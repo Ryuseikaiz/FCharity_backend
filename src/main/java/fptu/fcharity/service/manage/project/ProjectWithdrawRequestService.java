@@ -40,6 +40,7 @@ public class ProjectWithdrawRequestService {
     public WithdrawRequestResponse getWithdrawRequestById(UUID id) {
         var request = withdrawRequestRepository.findById(id)
                 .orElseThrow(() -> new ApiRequestException("Withdraw request not found"));
+        if(request ==null) return null;
         return new WithdrawRequestResponse(request);
     }
     public WithdrawRequestResponse createWithdrawRequest( UUID projectId, String bankBin, String accountNumber, String accountHolder) {
@@ -129,6 +130,7 @@ public class ProjectWithdrawRequestService {
 
     public WithdrawRequestResponse getWithdrawRequestByProjectId(UUID id) {
        ProjectWithdrawRequest request = withdrawRequestRepository.findByProject_Id(id);
-        return new WithdrawRequestResponse(request);
+       if(request ==null) return null;
+       return new WithdrawRequestResponse(request);
     }
 }
