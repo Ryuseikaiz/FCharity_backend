@@ -4,9 +4,11 @@ import fptu.fcharity.dto.project.FinalTimelineDto;
 import fptu.fcharity.dto.project.TimelineDto;
 import fptu.fcharity.entity.Project;
 import fptu.fcharity.entity.TaskPlan;
+import fptu.fcharity.entity.TaskPlanStatus;
 import fptu.fcharity.entity.Timeline;
 import fptu.fcharity.repository.manage.project.ProjectRepository;
 import fptu.fcharity.repository.manage.project.TaskPlanRepository;
+import fptu.fcharity.repository.manage.project.TaskPlanStatusRepository;
 import fptu.fcharity.repository.manage.project.TimelineRepository;
 import fptu.fcharity.response.project.TaskPlanResponse;
 import fptu.fcharity.response.project.TimelineFinalResponse;
@@ -35,6 +37,9 @@ public class TimelineService {
     private TaskPlanRepository taskPlanRepository;
     @Autowired
     private ObjectAttachmentService objectAttachmentService;
+    @Autowired
+    private TaskPlanStatusRepository taskPlanStatusRepository;
+
     public void takeObject(Timeline t, TimelineDto tDto){
         if (tDto.getProjectId() != null) {
             Project project = projectRepository.findWithEssentialById(tDto.getProjectId());
@@ -78,13 +83,16 @@ public class TimelineService {
         return new TimelineFinalResponse(res,attachments);
     }
 
-    public TimelineResponse deletePhase(UUID id) {
+    public UUID deletePhase(UUID id) {
         Timeline t = timelineRepository.findWithEssentialById(id);
         if(!getTasksOfPhase(t.getId()).isEmpty()){
             throw new ApiRequestException("Cannot delete phase with tasks");
         }
+        List<TaskPlanStatus> taskPlanStatuses = taskPlanStatusRepository.findAllByPhaseId(id);
+        taskPlanStatusRepository.deleteAll(taskPlanStatuses);
+        objectAttachmentService.clearAttachments(id, TaggableType.PHASE);
         timelineRepository.delete(t);
-        return new TimelineResponse(t);
+        return t.getId();
     }
     //get phase by id
     public TimelineFinalResponse getPhaseById(UUID phaseId) {

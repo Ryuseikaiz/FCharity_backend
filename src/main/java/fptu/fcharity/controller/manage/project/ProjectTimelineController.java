@@ -4,6 +4,7 @@ import fptu.fcharity.dto.project.FinalTimelineDto;
 import fptu.fcharity.dto.project.TaskPlanDto;
 import fptu.fcharity.dto.project.TaskPlanStatusDto;
 import fptu.fcharity.dto.project.TimelineDto;
+import fptu.fcharity.entity.Timeline;
 import fptu.fcharity.helpers.schedule.StartProjectJob;
 import fptu.fcharity.response.project.TaskPlanResponse;
 import fptu.fcharity.response.project.TaskPlanStatusResponse;
@@ -68,7 +69,7 @@ public class ProjectTimelineController {
     //delete phase
     @PostMapping("/{phaseId}/cancel")
     public ResponseEntity<?> cancelPhase(@PathVariable UUID phaseId) {
-        TimelineResponse t = timelineService.deletePhase(phaseId);
+        UUID t = timelineService.deletePhase(phaseId);
         return ResponseEntity.ok(t);
     }
 //*******************TASK PLAN***********************************

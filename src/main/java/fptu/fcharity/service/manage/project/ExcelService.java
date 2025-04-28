@@ -568,7 +568,7 @@ public class ExcelService {
 
     private static final String DETAIL_HEADER_ITEM_SELECT = "Spending Item *";
     private static final String DETAIL_HEADER_AMOUNT = "Amount *";
-    private static final String DETAIL_HEADER_TRANS_TIME = "Transaction Time (YYYY-MM-DD)"; // Specify format
+    private static final String DETAIL_HEADER_TRANS_TIME = "Transaction Time (YYYY-MM-DD) *"; // Specify format
     private static final String DETAIL_HEADER_DESCRIPTION = "Description";
     private static final String DETAIL_HEADER_PROOF_URL = "Proof Image URL";
 

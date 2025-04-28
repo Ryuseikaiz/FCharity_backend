@@ -1,6 +1,7 @@
 package fptu.fcharity.controller.manage.project;
 
 import fptu.fcharity.dto.project.ProjectDto;
+import fptu.fcharity.dto.project.ProjectNeedDonateDto;
 import fptu.fcharity.entity.Wallet;
 import fptu.fcharity.helpers.schedule.ScheduleService;
 import fptu.fcharity.response.project.ProjectFinalResponse;
@@ -28,6 +29,11 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity< List<ProjectFinalResponse>> getAllProjects() {
         List<ProjectFinalResponse> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
+    }
+    @GetMapping("/need-donate")
+    public ResponseEntity<?> getAllProjectsNeedDonating() {
+        List<ProjectFinalResponse> projects = projectService.getAllProjectsNeedDonating();
         return ResponseEntity.ok(projects);
     }
     @GetMapping("/{id}")

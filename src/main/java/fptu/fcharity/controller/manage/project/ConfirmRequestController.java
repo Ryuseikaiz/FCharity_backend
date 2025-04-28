@@ -29,9 +29,6 @@ public class ConfirmRequestController {
     @GetMapping("/project/{projectId}")
     public ResponseEntity<ProjectConfirmationRequestResponse> getByProject(@PathVariable UUID projectId) {
         var result = projectService.getConfirmationRequestOfProject(projectId);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(result);
     }
 
@@ -42,8 +39,8 @@ public class ConfirmRequestController {
     }
 
     @PutMapping("/{id}/confirm")
-    public ResponseEntity<ProjectConfirmationRequestResponse> confirmRequest(@PathVariable UUID id) {
-        var result = projectService.confirmProjectConfirmationRequest(id);
+    public ResponseEntity<ProjectConfirmationRequestResponse> confirmRequest(@PathVariable UUID id,@RequestBody Map<String,String> message) {
+        var result = projectService.confirmProjectConfirmationRequest(id,message.get("message"));
         return ResponseEntity.ok(result);
     }
     @PutMapping("/{id}/reject")
