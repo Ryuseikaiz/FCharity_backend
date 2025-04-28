@@ -554,3 +554,8 @@ insert into organization_members (membership_id, user_id, organization_id, join_
 values (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7B', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'CEO'),
 (NEWID(), 'E09BE8D1-BA6D-4178-8BF4-2650E337FE7E', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER'),
 (NEWID(), 'A3F8D2B9-4C6E-43F1-9B27-8D5C6A1E2F78', '4F6B0E2D-8C3E-4A2A-BB60-2D9D5F7A9C16', GETDATE(), null, 'MEMBER');
+SELECT name, collation_name
+FROM sys.databases
+WHERE name = 'fcharity_database';
+ALTER TABLE comments
+    ALTER COLUMN content NVARCHAR(MAX) COLLATE Vietnamese_CI_AS;
