@@ -190,6 +190,12 @@ public class GeminiChatService {
             return getOrganizationMemberCount(orgQuery);
         }
 
+        Pattern listDonatingProjectsPattern = Pattern.compile("^(?:liệt kê|danh sách|cho xem|show|list)?\\s?(?:các )?(?:dự án|project)(?: nào)? (?:đang|hiện) (?:donate|nhận quyên góp|mở quyên góp|quyên góp)(?: nào)?\\??$");
+        if (listDonatingProjectsPattern.matcher(normalizedMessage).find() || normalizedMessage.equals("dự án đang donate")) {
+            log.debug("Intent detected: List donating projects");
+            return listDonatingProjects(); // Call the new handler method
+        }
+
         return null;
     }
 
@@ -282,6 +288,46 @@ public class GeminiChatService {
         if (percentage.compareTo(BigDecimal.valueOf(100)) > 0) percentage = BigDecimal.valueOf(100);
         if (percentage.compareTo(BigDecimal.ZERO) < 0) percentage = BigDecimal.ZERO;
         return new ProjectProgress(project, current, goal, percentage);
+    }
+
+    private String listDonatingProjects() {
+        List<Project> donatingProjects = projectRepository.findAllWithInclude().stream()
+                .filter(p -> ProjectStatus.DONATING.equalsIgnoreCase(p.getProjectStatus()))
+                .sorted(Comparator.comparing(Project::getCreatedAt).reversed()) // Optional: sort by creation date or name
+                .toList();
+
+        if (donatingProjects.isEmpty()) {
+            return "Hiện tại không có dự án nào đang trong giai đoạn nhận quyên góp trên FCharity.";
+        }
+
+        StringBuilder response = new StringBuilder("Dưới đây là danh sách các dự án đang nhận quyên góp:\n\n");
+        for (int i = 0; i < donatingProjects.size(); i++) {
+            Project project = donatingProjects.get(i);
+            String link = formatLink("project", project.getId().toString(), project.getProjectName());
+            String categoryName = project.getCategory() != null ? project.getCategory().getCategoryName() : "Chưa phân loại";
+            ProjectProgress progress = calculateProjectProgress(project); // Reuse existing calculation
+            String progressInfo = "";
+            if (progress != null && progress.goal().compareTo(BigDecimal.ZERO) > 0) {
+                progressInfo = String.format(" - Đã đạt: **%s%%** (%s / %s VND)",
+                        progress.percentage().setScale(1, RoundingMode.HALF_UP),
+                        progress.current().setScale(0, RoundingMode.HALF_UP).toPlainString(),
+                        progress.goal().setScale(0, RoundingMode.HALF_UP).toPlainString()
+                );
+            } else if (progress != null) {
+                progressInfo = String.format(" - Đã quyên góp: %s VND (Không có mục tiêu cụ thể)",
+                        progress.current().setScale(0, RoundingMode.HALF_UP).toPlainString()
+                );
+            }
+
+            response.append(String.format("%d. %s (Danh mục: %s)%s\n",
+                    i + 1,
+                    link,
+                    categoryName,
+                    progressInfo
+            ));
+        }
+        response.append("\nNhấp vào tên dự án để xem chi tiết và ủng hộ nhé!");
+        return response.toString();
     }
 
     private record ProjectProgress(Project project, BigDecimal current, BigDecimal goal, BigDecimal percentage) {}
