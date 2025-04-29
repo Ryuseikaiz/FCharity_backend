@@ -4,4 +4,5 @@ public class TransactionType {
     public static final String DEPOSIT = "DEPOSIT";
     public static final String WITHDRAW = "WITHDRAW";
     public static final String DONATE_PROJECT = "DONATE_PROJECT";
+    public static final String DONATE_ORGANIZATION = "DONATE_ORGANIZATION";
 }
