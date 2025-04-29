@@ -49,26 +49,26 @@ public class ProjectExtraFundRequestService {
     }
     public ExtraFundRequestResponse createExtraFundRequest(ExtraFundRequestDto dto){
         ProjectExtraFundRequest existing = projectExtraFundRequestRepository.findEssentialById(dto.getId());
-      if(existing!=null){
+        if(existing!=null){
           projectExtraFundRequestRepository.delete(existing);
-      }
-    ProjectExtraFundRequest request = new ProjectExtraFundRequest();
-    takeObject(request, dto);
-    Project p = request.getProject();
-    SpendingPlan plan = spendingPlanRepository.findByProjectId(p.getId());
-    BigDecimal totalDonations = toProjectDonationRepository.findByProjectId(p.getId()).stream()
-            .map(ToProjectDonation::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    BigDecimal totalSpending = spendingItemRepository.findBySpendingPlanId(plan.getId()).stream()
-            .map(SpendingItem::getEstimatedCost)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    request.setAmount(totalDonations.subtract(totalSpending));
-    request.setReason(dto.getReason());
-    request.setProofImage(dto.getProofImage());
-    request.setStatus(RequestStatus.PENDING);
-    request.setCreatedDate(Instant.now());
-    return new ExtraFundRequestResponse(projectExtraFundRequestRepository.save(request));
-}
+        }
+        ProjectExtraFundRequest request = new ProjectExtraFundRequest();
+        takeObject(request, dto);
+        Project p = request.getProject();
+        SpendingPlan plan = spendingPlanRepository.findByProjectId(p.getId());
+        BigDecimal totalDonations = toProjectDonationRepository.findByProjectId(p.getId()).stream()
+                .map(ToProjectDonation::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalSpending = spendingItemRepository.findBySpendingPlanId(plan.getId()).stream()
+                .map(SpendingItem::getEstimatedCost)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        request.setAmount(totalDonations.subtract(totalSpending));
+        request.setReason(dto.getReason());
+        request.setProofImage(dto.getProofImage());
+        request.setStatus(RequestStatus.PENDING);
+        request.setCreatedDate(Instant.now());
+        return new ExtraFundRequestResponse(projectExtraFundRequestRepository.save(request));
+    }
     public ExtraFundRequestResponse approveExtraFundRequest(ExtraFundRequestDto dto){
         ProjectExtraFundRequest request = projectExtraFundRequestRepository.findById(dto.getId())
                 .orElseThrow(() -> new ApiRequestException("Extra fund request not found"));

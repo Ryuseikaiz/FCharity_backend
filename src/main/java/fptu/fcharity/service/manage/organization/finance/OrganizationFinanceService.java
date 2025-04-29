@@ -1,6 +1,7 @@
 package fptu.fcharity.service.manage.organization.finance;
 
 import fptu.fcharity.entity.OrganizationTransactionHistory;
+import fptu.fcharity.entity.ProjectExtraFundRequest;
 import fptu.fcharity.entity.ToOrganizationDonation;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -14,4 +15,5 @@ public interface OrganizationFinanceService {
     List<ToOrganizationDonation> getDonatesByOrganizationId(UUID organizationId);
     List<OrganizationTransactionHistory> getTransactionsByOrganizationId(UUID organizationId);
     OrganizationTransactionHistory createTransaction(OrganizationTransactionHistory organizationTransactionHistory);
+    List<ProjectExtraFundRequest> getExtraFundRequestsByOrganizationId(UUID organizationId);
 }
