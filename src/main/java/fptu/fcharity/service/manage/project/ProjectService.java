@@ -535,6 +535,9 @@ public class ProjectService {
                     return start.isAfter(now) && start.isBefore(next7days);
                 })
                 .sorted(Comparator.comparing(ProjectNeedDonateDto::getPlannedStartTime)).toList();
+        if(nearDeadlineList.isEmpty()){
+            return null;
+        }
        List<ProjectFinalResponse> responseList  = nearDeadlineList.stream()
                 .map(dto -> {
                     Project project = projectRepository.findWithEssentialById(dto.getProjectId());

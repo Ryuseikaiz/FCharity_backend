@@ -42,7 +42,7 @@ public class SecurityConfiguration {
                                 "/categories",
                                 "/payment/webhook",
                                 "/stripe/webhook",
-                                "/topic/**", "/app/**", "/ws/**"
+                                "/topic/**", "/app/**", "/ws/**", "/wss/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/requests", "/requests/active", "/requests/{id:[0-9a-fA-F\\-]+}",
